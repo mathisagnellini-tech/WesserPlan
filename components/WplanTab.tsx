@@ -76,7 +76,7 @@ const MultiSelectDropdown: React.FC<{
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
+        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-0 sm:min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
             <div className="p-3 border-b border-[var(--border-subtle)] sticky top-0 bg-white dark:bg-[var(--bg-card-solid)] z-10">
                 <div className="relative group">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"/>
@@ -560,7 +560,9 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
     useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
             const map = L.map(mapContainerRef.current, { zoomControl: false, minZoom: 5, maxZoom: 10 }).setView([46.8, 2.8], 5.5);
-            L.tileLayer.provider('CartoDB.Positron').addTo(map);
+            const isDark = document.documentElement.classList.contains('dark');
+            const tileLayer = L.tileLayer.provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
+            (map as any)._tileLayer = tileLayer;
             L.control.zoom({ position: 'topright' }).addTo(map);
             mapInstanceRef.current = map;
         }
@@ -585,8 +587,8 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             eventData.forEach(event => {
                 const popupContent = `
                     <div>
-                        <h3 style="font-weight: 700; margin: 0 0 8px; color: #1a1a1a; font-size: 15px;">${event.name}</h3>
-                        <p style="margin: 0; color: #5a5a5a; font-size: 13px;"><strong>Lieu:</strong> ${event.location}</p>
+                        <h3 style="font-weight: 700; margin: 0 0 8px; color: var(--text-primary); font-size: 15px;">${event.name}</h3>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 13px;"><strong>Lieu:</strong> ${event.location}</p>
                     </div>
                 `;
                 const marker = L.marker([event.lat, event.lng], { icon: eventIcon })
@@ -627,11 +629,12 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             if (selectedItem?.properties.code === code) return { weight: 3, color: '#FF5B2B', fillOpacity: 0.9, fillColor: baseColor };
             if (comparisonItem?.properties.code === code) return { weight: 3, color: '#3b82f6', fillOpacity: 0.9, fillColor: baseColor };
             
+            const isDark = document.documentElement.classList.contains('dark');
             return {
                 fillColor: baseColor,
                 weight: 1.2,
                 opacity: 1,
-                color: 'rgba(255,255,255,0.8)',
+                color: isDark ? 'rgba(30,33,48,0.8)' : 'rgba(255,255,255,0.8)',
                 dashArray: '',
                 fillOpacity: 0.75
             };
@@ -683,6 +686,20 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             setTimeout(() => mapInstanceRef.current.invalidateSize(), 150);
         }
     }, [isActive]);
+
+    // --- DARK MODE TILE SWAP ---
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const map = mapInstanceRef.current;
+            if (!map) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            const provider = isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron';
+            if ((map as any)._tileLayer) map.removeLayer((map as any)._tileLayer);
+            (map as any)._tileLayer = L.tileLayer.provider(provider).addTo(map);
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
 
     // --- CHARTS LOGIC ---
     useEffect(() => {
@@ -867,7 +884,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                 <div className="lg:col-span-2 glass-card p-4 flex flex-col">
                      <div className="flex flex-col gap-4 mb-3 border-b border-[var(--border-subtle)] pb-3">
                          <div className="flex justify-between items-center">
-                            <h3 className="font-extrabold text-2xl text-[var(--text-primary)] flex items-center gap-2">
+                            <h3 className="font-extrabold text-xl sm:text-2xl text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
                                 {isComparing ? (
                                     <>
                                         <span className={selectedItem ? "text-blue-600" : "text-gray-400"}>
@@ -926,7 +943,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                          </div>
                     </div>
                     
-                    <div className="relative flex-grow min-h-[500px] rounded-xl overflow-hidden border border-border-color z-0">
+                    <div className="relative flex-grow min-h-[350px] sm:min-h-[500px] rounded-xl overflow-hidden border border-border-color z-0">
                         <div id="wplan-map" ref={mapContainerRef} className="absolute inset-0 bg-gray-100 dark:bg-slate-800"></div>
                         {(!regionGeoJSON || !departmentGeoJSON) && <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10 text-[var(--text-primary)]">Chargement de la carte...</div>}
                         

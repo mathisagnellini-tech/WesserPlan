@@ -359,7 +359,7 @@ export const BoardColumn = memo<BoardColumnProps>(({
                                 </div>
                           </div>
                       </div>
-                      <div className={`flex items-center justify-center rounded-full bg-white text-slate-900 shadow-[0_4px_10px_rgba(0,0,0,0.1)] ${density === 'compact' ? 'w-6 h-6 text-xs' : 'w-9 h-9 text-sm'}`}>
+                      <div className={`flex items-center justify-center rounded-full bg-white dark:bg-[var(--bg-card-solid)] text-slate-900 dark:text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] ${density === 'compact' ? 'w-6 h-6 text-xs' : 'w-9 h-9 text-sm'}`}>
                           <span className="font-black">{cards.length}</span>
                       </div>
                   </div>
@@ -370,7 +370,7 @@ export const BoardColumn = memo<BoardColumnProps>(({
           {density === 'tiny' && (
               <div className="relative z-10 flex flex-col items-center justify-center text-white">
                   <span className="text-[10px] font-black uppercase tracking-tight leading-none drop-shadow-md">{shortZone}</span>
-                  <div className="mt-1 w-5 h-5 rounded-full bg-white/90 text-slate-900 text-[10px] font-black flex items-center justify-center shadow-lg border border-white/50">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-[10px] font-black flex items-center justify-center shadow-lg border border-white/50 dark:border-slate-600">
                       {cards.length}
                   </div>
               </div>

@@ -207,7 +207,7 @@ const MultiSelectFilter: React.FC<{
                         <div className="p-2 border-t border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50">
                             <button 
                                 onClick={() => onChange(new Set())}
-                                className="w-full py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                className="w-full py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                             >
                                 Réinitialiser
                             </button>
@@ -256,7 +256,7 @@ const EditableField: React.FC<{
                 <Icon size={16} className="text-[var(--text-muted)]"/>
                 <span className="text-[var(--text-primary)] font-medium truncate">{value || 'Non renseigné'}</span>
              </div>
-             <Edit2 size={12} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+             <Edit2 size={12} className="text-slate-300 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
     );
 };
@@ -324,17 +324,17 @@ const ProspectValidationModal: React.FC<{
                 <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
                     
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
                             <span className="block text-2xl font-black text-blue-700">{stats.count}</span>
                             <span className="text-xs font-bold text-blue-400 uppercase">Communes</span>
                         </div>
-                        <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-center">
+                        <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20 text-center">
                             <span className="block text-2xl font-black text-emerald-700">{(stats.pop / 1000).toFixed(1)}k</span>
                             <span className="text-xs font-bold text-emerald-400 uppercase">Habitants</span>
                         </div>
-                        <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-center">
-                            <span className="block text-2xl font-black text-purple-700">{stats.zones}</span>
+                        <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 dark:border-purple-500/20 text-center">
+                            <span className="block text-2xl font-black text-purple-700 dark:text-purple-400">{stats.zones}</span>
                             <span className="text-xs font-bold text-purple-400 uppercase">Zones Estimées</span>
                         </div>
                     </div>
@@ -343,8 +343,8 @@ const ProspectValidationModal: React.FC<{
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
                         <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={20}/>
                         <div>
-                            <h4 className="font-bold text-amber-800 text-sm uppercase mb-1">Confirmation d'envoi automatique</h4>
-                            <p className="text-sm text-amber-800 leading-relaxed">
+                            <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm uppercase mb-1">Confirmation d'envoi automatique</h4>
+                            <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
                                 En cliquant sur valider, <span className="font-bold underline">dans 15 min un mail s'enverra automatiquement</span> à toutes les mairies sélectionnées ci-dessous pour initier la prise de contact.
                             </p>
                         </div>
@@ -355,7 +355,7 @@ const ProspectValidationModal: React.FC<{
                         <h4 className="font-bold text-[var(--text-primary)] mb-2 text-sm flex items-center gap-2">
                             <ListIcon size={16}/> Liste des communes ciblées
                         </h4>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-[var(--border-subtle)] max-h-48 overflow-y-auto p-2 grid grid-cols-2 gap-2">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-[var(--border-subtle)] max-h-48 overflow-y-auto p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {communes.map((c) => (
                                 <div key={c.properties.code} className="bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] shadow-sm flex justify-between items-center text-xs">
                                     <span className="font-bold text-[var(--text-primary)]">{c.properties.nom}</span>
@@ -372,7 +372,7 @@ const ProspectValidationModal: React.FC<{
                     <button onClick={onClose} className="px-5 py-2.5 text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-sm transition-colors">
                         Annuler
                     </button>
-                    <button onClick={onConfirm} className="px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                    <button onClick={onConfirm} className="px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 dark:shadow-blue-900/50 transition-all flex items-center gap-2">
                         <Send size={16}/> Confirmer & Envoyer
                     </button>
                 </div>
@@ -510,10 +510,11 @@ const ProspectionMap: React.FC<{
         
         if (!mapInstanceRef.current) {
             const map = L.map(mapContainerRef.current, { zoomControl: false }).setView([46.6, 1.8], 6);
-            L.tileLayer.provider('CartoDB.Positron').addTo(map);
+            const isDark = document.documentElement.classList.contains('dark');
+            L.tileLayer.provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
             L.control.zoom({ position: 'topright' }).addTo(map);
             mapInstanceRef.current = map;
-            
+
             // Global mouse listeners for brushing
             map.on('mousedown', () => setIsMouseDown(true));
             map.on('mouseup', () => setIsMouseDown(false));
@@ -657,14 +658,14 @@ const ProspectionMap: React.FC<{
     return (
         <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)]">
             {isLoading && (
-                 <div className="absolute inset-0 z-[50] bg-white/80 dark:bg-[var(--bg-card-solid)]/80 backdrop-blur-sm flex items-center justify-center flex-col">
+                 <div className="absolute inset-0 z-[50] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center flex-col">
                      <Loader2 size={48} className="text-blue-600 animate-spin mb-4"/>
                      <p className="font-bold text-[var(--text-primary)]">Chargement de la topographie...</p>
                  </div>
             )}
             
             {/* Toolbar - Top Left (Brush Tools) */}
-            <div className="absolute top-4 left-4 z-[40] bg-white dark:bg-[var(--bg-card-solid)] p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] flex flex-col gap-4 w-64">
+            <div className="absolute top-4 left-4 z-[40] bg-white dark:bg-[var(--bg-card-solid)] p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] flex flex-col gap-4 w-52 md:w-64">
                 <h4 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
                     <Filter size={14}/> Critères de Cinglage
                 </h4>
@@ -750,7 +751,7 @@ const ProspectionMap: React.FC<{
 
             {/* Legend - Bottom Left */}
             {saturationOrg !== 'none' && (
-                <div className="absolute bottom-6 left-6 z-[40] bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] animate-fade-in">
+                <div className="absolute bottom-6 left-6 z-[40] bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] animate-fade-in">
                     <h5 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Légende Historique</h5>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
@@ -777,20 +778,20 @@ const ProspectionMap: React.FC<{
 
             {/* Validation Bar - Bottom Center */}
             {selectedStats.count > 0 && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[40] bg-slate-900/95 backdrop-blur text-white p-4 rounded-2xl shadow-2xl flex items-center gap-8 animate-fade-in">
+                <div className="absolute bottom-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[40] bg-slate-900/95 backdrop-blur text-white p-3 md:p-4 rounded-2xl shadow-2xl flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-8 animate-fade-in">
                     <div>
-                        <p className="text-[var(--text-muted)] text-xs font-bold uppercase">Sélection</p>
-                        <p className="text-xl font-black">{selectedStats.count} <span className="text-sm font-medium text-[var(--text-muted)]">communes</span></p>
+                        <p className="text-slate-400 text-xs font-bold uppercase">Sélection</p>
+                        <p className="text-xl font-black">{selectedStats.count} <span className="text-sm font-medium text-slate-400">communes</span></p>
                     </div>
-                    <div className="w-px bg-white/20 h-8 self-center"></div>
+                    <div className="hidden md:block w-px bg-white/20 h-8 self-center"></div>
                     <div>
-                        <p className="text-[var(--text-muted)] text-xs font-bold uppercase">Potentiel Hab.</p>
+                        <p className="text-slate-400 text-xs font-bold uppercase">Potentiel Hab.</p>
                         <p className="text-xl font-black text-blue-400">{(selectedStats.pop / 1000).toFixed(1)}k</p>
                     </div>
-                    
-                    <button 
+
+                    <button
                         onClick={() => onValidationRequest(selectedStats.list)}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-blue-900/50 transition-all flex items-center gap-2 ml-4"
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-blue-900/50 transition-all flex items-center gap-2 w-full md:w-auto md:ml-4 justify-center"
                     >
                         Valider <ArrowRight size={18}/>
                     </button>
@@ -961,7 +962,8 @@ const CommunesTab: React.FC = () => {
 
     if (mapContainerRef.current && !mapInstanceRef.current) {
         const map = L.map(mapContainerRef.current, { zoomControl: false }).setView([46.603354, 1.888334], 5.5);
-        L.tileLayer.provider('CartoDB.Positron').addTo(map);
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        L.tileLayer.provider(isDarkMode ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
         L.control.zoom({ position: 'topright' }).addTo(map);
         mapInstanceRef.current = map;
     }
@@ -1009,7 +1011,7 @@ const CommunesTab: React.FC = () => {
         />
 
         {/* Left List Panel */}
-        <div className="w-[480px] flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-sm border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+        <div className="w-full md:w-[480px] flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-sm border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
             <div className="p-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-slate-800/30 space-y-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-extrabold text-[var(--text-primary)] flex items-center gap-2">
@@ -1110,7 +1112,7 @@ const CommunesTab: React.FC = () => {
                     )}
 
                     {mode === 'map' && (
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-800">
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-800 dark:text-blue-300">
                             <p className="font-bold flex items-center gap-1"><MousePointer2 size={12}/> Mode Prospection</p>
                             <p className="opacity-80 mt-1">Sélectionnez les départements ci-dessus pour charger la carte, puis utilisez le pinceau pour sélectionner des communes.</p>
                         </div>
@@ -1188,7 +1190,7 @@ const CommunesTab: React.FC = () => {
         </div>
 
         {/* Right Details & Map Panel */}
-        <div className="flex-1 flex flex-col gap-6 min-h-0">
+        <div className="flex-1 flex flex-col gap-6 min-h-[400px] md:min-h-0">
             {mode === 'list' ? (
                 <>
                      {selectedCommune ? (
@@ -1207,7 +1209,7 @@ const CommunesTab: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center">
                                     <Users className="text-blue-500 mb-1" size={20}/>
                                     <span className="text-lg font-black text-[var(--text-primary)]">{selectedCommune.population.toLocaleString()}</span>
@@ -1287,7 +1289,7 @@ const CommunesTab: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="flex-grow rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)] relative">
+                    <div className="flex-grow min-h-[300px] rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)] relative">
                         <div ref={mapContainerRef} className="absolute inset-0 z-0"></div>
                     </div>
                 </>

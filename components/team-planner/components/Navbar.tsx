@@ -79,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   if (isCinemaMode) return null; // Hide in cinema mode
 
   return (
-    <header className="h-16 bg-white/70 backdrop-blur-xl border-b border-white/50 flex items-center px-6 justify-between sticky top-0 z-50 gap-4 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
+    <header className="h-16 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 flex items-center px-6 justify-between sticky top-0 z-50 gap-4 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
       
       {/* Left: Branding & Week Nav */}
       <div className="flex items-center gap-6 flex-shrink-0">
@@ -88,22 +88,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden lg:inline tracking-tight">TeamPlanner</span>
           </div>
           
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
              <button 
                 onClick={() => onPageModeChange('board')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'board' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'board' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
              >
                  <LayoutDashboard size={14} /> Tableau
              </button>
              <button 
                 onClick={() => onPageModeChange('alumni')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'alumni' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'alumni' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
              >
                  <Users size={14} /> Nos Anciens
              </button>
              <button 
                 onClick={() => onPageModeChange('map')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'map' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'map' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
              >
                  <MapPin size={14} /> Carte
              </button>
@@ -112,38 +112,38 @@ export const Navbar: React.FC<NavbarProps> = ({
           {pageMode === 'board' && (
           <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-4 duration-300">
             {/* Week Selector */}
-            <div className="flex items-center bg-white/50 rounded-xl border border-white/60 p-1 shadow-sm">
-                <button onClick={onPrev} disabled={!hasPrev} className={`p-1.5 rounded-lg transition-colors ${!hasPrev ? 'text-gray-300' : 'text-slate-600 hover:bg-white hover:shadow-sm'}`}>
+            <div className="flex items-center bg-white/50 dark:bg-slate-800/50 rounded-xl border border-white/60 dark:border-slate-700 p-1 shadow-sm">
+                <button onClick={onPrev} disabled={!hasPrev} className={`p-1.5 rounded-lg transition-colors ${!hasPrev ? 'text-gray-300' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}>
                     <ChevronLeft size={16} />
                 </button>
                 <div className="flex flex-col items-center justify-center px-4 min-w-[120px]">
                     <span className="text-xs font-bold text-slate-800 tracking-wide">{currentWeekLabel}</span>
                     <span className="text-[9px] font-medium text-blue-600">{currentDateRange}</span>
                 </div>
-                <button onClick={onNext} disabled={!hasNext} className={`p-1.5 rounded-lg transition-colors ${!hasNext ? 'text-gray-300' : 'text-slate-600 hover:bg-white hover:shadow-sm'}`}>
+                <button onClick={onNext} disabled={!hasNext} className={`p-1.5 rounded-lg transition-colors ${!hasNext ? 'text-gray-300' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}>
                     <ChevronRight size={16} />
                 </button>
             </div>
 
             {/* View Mode Selector - Pill Style */}
-            <div className="hidden xl:flex bg-slate-100/80 rounded-lg border border-slate-200/50 p-1 gap-1">
+            <div className="hidden xl:flex bg-slate-100/80 dark:bg-slate-800/80 rounded-lg border border-slate-200/50 dark:border-slate-700/50 p-1 gap-1">
                 <button 
                     onClick={() => onViewModeChange('performance')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'performance' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'performance' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                     <BarChart2 size={12} /> Perf
                 </button>
                 <div className="w-px h-4 bg-slate-200 my-auto"></div>
                 <button 
                     onClick={() => onViewModeChange('identity')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'identity' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'identity' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                     <User size={12} /> Profil
                 </button>
                 <div className="w-px h-4 bg-slate-200 my-auto"></div>
                 <button 
                     onClick={() => onViewModeChange('hr')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'hr' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'hr' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                     <Briefcase size={12} /> RH
                 </button>
@@ -156,10 +156,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="flex-1 max-w-lg hidden md:flex items-center gap-3">
            <button 
                 onClick={onSearchClick}
-                className="flex-1 flex items-center justify-between px-3 py-2 bg-slate-100/50 hover:bg-white border border-slate-200 rounded-xl text-sm text-slate-500 hover:text-slate-800 hover:shadow-sm transition-all group"
+                className="flex-1 flex items-center justify-between px-3 py-2 bg-slate-100/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:shadow-sm transition-all group"
             >
                 <span className="flex items-center gap-2"><Search size={14} /> Rechercher...</span>
-                <span className="text-[10px] font-bold bg-white border border-slate-200 rounded px-1.5 py-0.5 group-hover:border-slate-300">⌘ K</span>
+                <span className="text-[10px] font-bold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded px-1.5 py-0.5 group-hover:border-slate-300">⌘ K</span>
             </button>
           
           {pageMode === 'board' && (
@@ -169,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 relative p-2 rounded-xl border transition-all duration-200 flex items-center gap-2
                 ${isFilterOpen || activeFilterCount > 0
                     ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-inner' 
-                    : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 shadow-sm'
+                    : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 shadow-sm'
                 }
             `}
           >
@@ -186,10 +186,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Right: Actions & User */}
       <div className="flex items-center gap-4 justify-end relative flex-shrink-0">
            
-           <div className="hidden lg:flex items-center bg-slate-100/80 rounded-lg border border-slate-200/50 p-1 gap-1">
-                <button 
+           <div className="hidden lg:flex items-center bg-slate-100/80 dark:bg-slate-800/80 rounded-lg border border-slate-200/50 dark:border-slate-700/50 p-1 gap-1">
+                <button
                     onClick={onDuplicate}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-blue-600 hover:bg-white hover:shadow-sm transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all"
                     title="Dupliquer la semaine"
                 >
                     <Copy size={12} /> <span className="hidden xl:inline">Dupliquer</span>
@@ -197,7 +197,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="w-px h-4 bg-slate-200 my-auto"></div>
                 <button 
                     onClick={onToggleHeatmap}
-                    className={`p-1.5 rounded-md transition-colors ${isHeatmapMode ? 'bg-white text-red-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                    className={`p-1.5 rounded-md transition-colors ${isHeatmapMode ? 'bg-white dark:bg-slate-700 text-red-500 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
                     title="Heatmap"
                 >
                     <Activity size={16} />
@@ -211,14 +211,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
                 <button 
                     onClick={onAutoSynergy}
-                    className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-white hover:shadow-sm transition-colors"
+                    className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-colors"
                     title="Détection Auto Synergies"
                 >
                     <Users size={16} />
                 </button>
                 <button 
                     onClick={onToggleCinema}
-                    className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-colors"
+                    className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-colors"
                     title="Mode Cinéma"
                 >
                     <Monitor size={16} />
@@ -227,11 +227,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <div className="h-6 w-px bg-slate-200"></div>
 
-           <div className="hidden lg:flex items-center bg-slate-100/80 rounded-lg border border-slate-200/50 p-1 gap-1">
-                <button 
+           <div className="hidden lg:flex items-center bg-slate-100/80 dark:bg-slate-800/80 rounded-lg border border-slate-200/50 dark:border-slate-700/50 p-1 gap-1">
+                <button
                     onClick={onUndo} 
                     disabled={!canUndo}
-                    className={`p-1.5 rounded-md transition-colors ${!canUndo ? 'text-gray-300 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm'}`}
+                    className={`p-1.5 rounded-md transition-colors ${!canUndo ? 'text-gray-300 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
                     title="Annuler"
                 >
                     <Undo2 size={16} />
@@ -240,7 +240,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button 
                     onClick={onRedo} 
                     disabled={!canRedo}
-                    className={`p-1.5 rounded-md transition-colors ${!canRedo ? 'text-gray-300 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm'}`}
+                    className={`p-1.5 rounded-md transition-colors ${!canRedo ? 'text-gray-300 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
                     title="Rétablir"
                 >
                     <Redo2 size={16} />
@@ -259,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                </button>
 
                {showHistory && (
-                   <div className="absolute top-full right-0 mt-4 w-64 bg-white border border-slate-100 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-50">
+                   <div className="absolute top-full right-0 mt-4 w-64 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-50">
                        <div className="px-4 py-3 border-b border-slate-50 bg-slate-50/50">
                            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historique récent</h3>
                        </div>
@@ -267,7 +267,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                            {actionLog.length > 0 ? (
                                <div className="flex flex-col">
                                    {actionLog.map((action, i) => (
-                                       <div key={i} className="px-4 py-3 border-b border-slate-50 text-xs text-slate-600 last:border-0 hover:bg-slate-50 transition-colors">
+                                       <div key={i} className="px-4 py-3 border-b border-slate-50 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                                            {action}
                                        </div>
                                    ))}

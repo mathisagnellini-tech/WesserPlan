@@ -150,10 +150,10 @@ const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walki
                      </div>
                 </div>
                 <div className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 shadow-sm w-fit
-                    ${walkingScore === 'Excellente' ? 'bg-emerald-100 text-emerald-700' : 
-                      walkingScore === 'Bonne' ? 'bg-blue-100 text-blue-700' : 
-                      walkingScore === 'Difficile' ? 'bg-orange-100 text-orange-700' : 
-                      'bg-red-100 text-red-700'}`}>
+                    ${walkingScore === 'Excellente' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' :
+                      walkingScore === 'Bonne' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400' :
+                      walkingScore === 'Difficile' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400' :
+                      'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400'}`}>
                     {walkingScore === 'Excellente' ? <Sun size={12}/> : <Cloud size={12}/>}
                     Marche : {walkingScore}
                 </div>
@@ -353,7 +353,8 @@ const FranceMap: React.FC<{ setGlobalWeather: (w: any) => void }> = ({ setGlobal
                 attributionControl: false
             });
 
-            L.tileLayer.provider('CartoDB.Positron').addTo(map);
+            const isDark = document.documentElement.classList.contains('dark');
+            L.tileLayer.provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
             L.control.zoom({ position: 'bottomright' }).addTo(map);
             mapInstanceRef.current = map;
 

@@ -647,7 +647,7 @@ export default function App() {
   const activeFilterCount = Object.values(filters).flat().length;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans overflow-hidden flex flex-col selection:bg-blue-200">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white font-sans overflow-hidden flex flex-col selection:bg-blue-200">
       
       <div 
         className="fixed inset-0 z-0 opacity-[0.4] pointer-events-none" 
@@ -656,7 +656,7 @@ export default function App() {
             backgroundSize: '24px 24px'
         }}
       />
-      <div className="fixed inset-0 bg-gradient-to-t from-blue-50/50 to-transparent pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-gradient-to-t from-blue-50/50 dark:from-slate-900/50 to-transparent pointer-events-none z-0" />
 
       <Navbar 
         currentWeekLabel={weekInfo.label}
@@ -763,7 +763,7 @@ export default function App() {
                 {!isCinemaMode && (
                     <div className="flex justify-between items-end mb-4 z-10 sticky left-0 px-2 w-[calc(100vw-48px)]">
                         <div className={`flex flex-col transition-opacity duration-500 ${isFocusMode ? 'opacity-40 blur-[1px]' : 'opacity-100'}`}>
-                            <h2 className="text-slate-900 font-black text-3xl tracking-tight">Vue d'ensemble</h2>
+                            <h2 className="text-slate-900 dark:text-white font-black text-3xl tracking-tight">Vue d'ensemble</h2>
                             <span className="text-slate-500 text-sm font-medium mt-1">
                                 {searchQuery ? `Recherche: "${searchQuery}"` : (
                                 <>
@@ -782,7 +782,7 @@ export default function App() {
                                     relative group overflow-hidden px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 border flex items-center gap-2
                                     ${showRelationships 
                                         ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/30' 
-                                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 shadow-sm'
+                                        : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 shadow-sm'
                                     }
                                 `}
                             >
@@ -790,7 +790,7 @@ export default function App() {
                                 <span>Relations</span>
                             </button>
 
-                            <div className="bg-white p-1 rounded-xl border border-slate-200 flex items-center gap-1 shadow-sm">
+                            <div className="bg-white dark:bg-[var(--bg-card-solid)] p-1 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 shadow-sm">
                                 <button 
                                     onClick={() => setDensity('standard')}
                                     className={`p-2 rounded-lg transition-all duration-200 ${density === 'standard' ? 'bg-slate-100 text-slate-900 shadow-inner' : 'text-slate-400 hover:text-slate-700'}`}
@@ -914,8 +914,8 @@ export default function App() {
       {/* RELATIONSHIP CREATION MODAL */}
       {relationshipCreation && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200">
-                  <h3 className="text-lg font-black text-slate-900 mb-4 text-center">Créer une Relation</h3>
+              <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-6 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 text-center">Créer une Relation</h3>
                   <div className="flex flex-col gap-3">
                       <button 
                           onClick={() => confirmRelationship('affinity')}
@@ -950,7 +950,7 @@ export default function App() {
                   </div>
                   <button 
                       onClick={() => setRelationshipCreation(null)}
-                      className="mt-4 w-full py-2 text-slate-400 font-bold text-xs hover:text-slate-600"
+                      className="mt-4 w-full py-2 text-slate-400 font-bold text-xs hover:text-slate-600 dark:hover:text-slate-300"
                   >
                       Annuler
                   </button>

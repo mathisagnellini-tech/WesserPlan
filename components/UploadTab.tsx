@@ -25,21 +25,21 @@ const DropZone: React.FC<{ title: string; description: string; icon: React.Eleme
 
     return (
         <div className="glass-card p-6">
-            <h3 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-3">
-                <Icon className="text-highlight-text" />
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 flex items-center gap-3">
+                <Icon className="text-[var(--highlight-text)]" />
                 {title}
             </h3>
-            <p className="text-sm text-text-secondary mb-4">{description}</p>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">{description}</p>
             <label
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`flex justify-center w-full h-32 px-4 transition bg-white/50 dark:bg-[var(--bg-card-solid)]/50 border-2 ${isDragOver ? 'border-highlight-text' : 'border-gray-300 dark:border-slate-600'} border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none`}>
+                className={`flex justify-center w-full h-32 px-4 transition bg-white/50 dark:bg-[var(--bg-card-solid)]/50 border-2 ${isDragOver ? 'border-[var(--highlight-text)]' : 'border-gray-300 dark:border-slate-600'} border-dashed rounded-xl appearance-none cursor-pointer hover:border-gray-400 dark:hover:border-slate-500 focus:outline-none`}>
                 <span className="flex items-center space-x-2">
-                    <UploadCloud className={`mx-auto h-10 w-10 ${isDragOver ? 'text-highlight-text' : 'text-[var(--text-secondary)]'}`} />
+                    <UploadCloud className={`mx-auto h-10 w-10 ${isDragOver ? 'text-[var(--highlight-text)]' : 'text-[var(--text-secondary)]'}`} />
                     <span className="font-medium text-[var(--text-secondary)]">
                         Glissez et déposez vos fichiers ici, ou{' '}
-                        <span className="text-blue-600 underline">parcourez</span>
+                        <span className="text-blue-600 dark:text-blue-400 underline">parcourez</span>
                     </span>
                 </span>
                 <input type="file" name="file_upload" className="hidden" />
@@ -52,8 +52,8 @@ const UploadTab: React.FC = () => {
     return (
         <section className="animate-fade-in">
             <header className="mb-4 md:mb-8">
-                <h2 className="text-2xl md:text-4xl font-extrabold text-text-primary">Importer des Données</h2>
-                <p className="text-sm md:text-lg text-text-secondary mt-1 md:mt-2">Mettez à jour l'application avec vos derniers fichiers de données.</p>
+                <h2 className="text-2xl md:text-4xl font-extrabold text-[var(--text-primary)]">Importer des Données</h2>
+                <p className="text-sm md:text-lg text-[var(--text-secondary)] mt-1 md:mt-2">Mettez à jour l'application avec vos derniers fichiers de données.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
