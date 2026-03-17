@@ -52,22 +52,22 @@ const MultiSelectDropdown: React.FC<{
         onClick={() => !disabled && setIsOpen(!isOpen)} 
         disabled={disabled} 
         className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex justify-between items-center shadow-sm group relative z-10
-        ${disabled 
-            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' 
-            : isOpen 
-                ? 'bg-white border-blue-500 ring-2 ring-blue-500/20' 
-                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md text-slate-800'
+        ${disabled
+            ? 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-400 cursor-not-allowed'
+            : isOpen
+                ? 'bg-white dark:bg-[var(--bg-card-solid)] border-blue-500 ring-2 ring-blue-500/20'
+                : 'bg-white dark:bg-[var(--bg-card-solid)] border-gray-200 dark:border-slate-700 hover:border-blue-300 hover:shadow-md text-[var(--text-primary)]'
         }`}
       >
         <div className="flex items-center gap-3 overflow-hidden">
-            <div className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+            <div className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}>
                 {icon}
             </div>
             <div className="flex flex-col">
-                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${selected.size > 0 ? "text-blue-600" : "text-gray-400"}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${selected.size > 0 ? "text-blue-600" : "text-[var(--text-muted)]"}`}>
                     {selected.size > 0 ? "Filtre Actif" : "Filtrer par"}
                 </span>
-                <span className={`font-bold truncate text-sm ${selected.size > 0 ? "text-slate-900" : "text-slate-600"}`}>
+                <span className={`font-bold truncate text-sm ${selected.size > 0 ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
                     {selectedLabel}
                 </span>
             </div>
@@ -76,21 +76,21 @@ const MultiSelectDropdown: React.FC<{
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[320px] bg-white border border-gray-100 rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
-            <div className="p-3 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
+            <div className="p-3 border-b border-[var(--border-subtle)] sticky top-0 bg-white dark:bg-[var(--bg-card-solid)] z-10">
                 <div className="relative group">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"/>
                     <input 
                         type="text" 
                         placeholder="Rechercher..." 
-                        className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full pl-10 pr-3 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-800 focus:border-blue-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         autoFocus
                     />
                 </div>
             </div>
-            <div className="overflow-y-auto p-2 custom-scrollbar flex-grow bg-white">
+            <div className="overflow-y-auto p-2 custom-scrollbar flex-grow bg-white dark:bg-[var(--bg-card-solid)]">
                 {filteredOptions.length > 0 ? (
                     filteredOptions.map(({ value, label }) => {
                         const isSelected = selected.has(value);
@@ -99,10 +99,10 @@ const MultiSelectDropdown: React.FC<{
                                 key={value} 
                                 onClick={() => onSelectionChange(value)}
                                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 border border-transparent
-                                ${isSelected ? 'bg-blue-50 text-blue-700 border-blue-100' : 'hover:bg-gray-50 text-slate-700 hover:border-gray-100'}`}
+                                ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 border-blue-100 dark:border-blue-800' : 'hover:bg-gray-50 dark:hover:bg-slate-800/50 text-[var(--text-secondary)] hover:border-gray-100 dark:hover:border-slate-700'}`}
                             >
                                 <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0
-                                    ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}`}>
+                                    ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
                                     {isSelected && <Check size={12} className="text-white stroke-[3]" />}
                                 </div>
                                 <span className="text-sm font-medium">{label}</span>
@@ -116,8 +116,8 @@ const MultiSelectDropdown: React.FC<{
                 )}
             </div>
             {selected.size > 0 && (
-                <div className="p-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
-                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wide ml-1">
+                <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] flex justify-between items-center">
+                     <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
                         {selected.size} sélectionné(s)
                     </span>
                     <button 
@@ -822,23 +822,23 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             <header className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-extrabold text-text-primary">DataWiz</h2>
                 <div className="flex items-center gap-3">
-                    <div className="inline-flex gap-1 p-1 rounded-lg bg-gray-200">
+                    <div className="inline-flex gap-1 p-1 rounded-lg bg-gray-200 dark:bg-slate-800">
                         <button 
                             onClick={() => { setMapLevel('regions'); setViewingRegion(null); setSelectedItem(null); }}
-                            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${mapLevel === 'regions' && !viewingRegion ? 'bg-white shadow-sm' : 'text-text-secondary hover:bg-gray-300/50'}`}
+                            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${mapLevel === 'regions' && !viewingRegion ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow-sm' : 'text-text-secondary hover:bg-gray-300/50 dark:hover:bg-slate-700/50'}`}
                         >
                             Régions
                         </button>
                         <button 
                             onClick={() => { setMapLevel('departments'); setViewingRegion(null); setSelectedItem(null); }}
-                            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${mapLevel === 'departments' && !viewingRegion ? 'bg-white shadow-sm' : 'text-text-secondary hover:bg-gray-300/50'}`}
+                            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${mapLevel === 'departments' && !viewingRegion ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow-sm' : 'text-text-secondary hover:bg-gray-300/50 dark:hover:bg-slate-700/50'}`}
                         >
                             Départements
                         </button>
                     </div>
-                    <button onClick={() => setIsDataLibraryOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-sm border border-border-color"><Library size={16}/> Bibliothèque</button>
-                    {viewingRegion && <button onClick={handleBackToRegions} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"><ArrowLeft size={16}/> Retour aux régions</button>}
-                    <button onClick={() => { setIsComparing(p => !p); setSelectedItem(null); setComparisonItem(null); }} className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${isComparing ? 'bg-blue-500 text-white shadow-md' : 'bg-white hover:bg-gray-50 border border-border-color'}`}><Shuffle size={16}/> {isComparing ? 'Mode Comparaison' : 'Comparer'}</button>
+                    <button onClick={() => setIsDataLibraryOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-white dark:bg-[var(--bg-card-solid)] rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors shadow-sm border border-border-color"><Library size={16}/> Bibliothèque</button>
+                    {viewingRegion && <button onClick={handleBackToRegions} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-200 dark:bg-slate-800 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-700 transition-colors"><ArrowLeft size={16}/> Retour aux régions</button>}
+                    <button onClick={() => { setIsComparing(p => !p); setSelectedItem(null); setComparisonItem(null); }} className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${isComparing ? 'bg-blue-500 text-white shadow-md' : 'bg-white dark:bg-[var(--bg-card-solid)] hover:bg-gray-50 dark:hover:bg-slate-800/50 border border-border-color'}`}><Shuffle size={16}/> {isComparing ? 'Mode Comparaison' : 'Comparer'}</button>
                 </div>
             </header>
 
@@ -865,9 +865,9 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-0">
                 <div className="lg:col-span-2 glass-card p-4 flex flex-col">
-                     <div className="flex flex-col gap-4 mb-3 border-b border-gray-100 pb-3">
+                     <div className="flex flex-col gap-4 mb-3 border-b border-[var(--border-subtle)] pb-3">
                          <div className="flex justify-between items-center">
-                            <h3 className="font-extrabold text-2xl text-slate-800 flex items-center gap-2">
+                            <h3 className="font-extrabold text-2xl text-[var(--text-primary)] flex items-center gap-2">
                                 {isComparing ? (
                                     <>
                                         <span className={selectedItem ? "text-blue-600" : "text-gray-400"}>
@@ -878,7 +878,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                                 </>
                                             ) : 'Sélection 1'}
                                         </span>
-                                        <span className="text-sm text-slate-400 font-bold uppercase bg-slate-100 px-2 py-1 rounded-md">VS</span>
+                                        <span className="text-sm text-[var(--text-muted)] font-bold uppercase bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">VS</span>
                                         <span className={comparisonItem ? "text-blue-600" : "text-gray-400"}>
                                             {comparisonItem ? (
                                                 <>
@@ -894,7 +894,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                         {selectedItem ? (
                                             <>
                                                 {selectedItem.properties.nom}
-                                                {mapLevel === 'departments' && <span className="text-xl text-slate-500 font-normal ml-2">({selectedItem.properties.code})</span>}
+                                                {mapLevel === 'departments' && <span className="text-xl text-[var(--text-secondary)] font-normal ml-2">({selectedItem.properties.code})</span>}
                                             </>
                                         ) : (
                                             viewingRegion ? viewingRegion.properties.nom : "France Entière"
@@ -902,7 +902,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                     </>
                                 )}
                             </h3>
-                            <label className="flex items-center gap-2 text-sm cursor-pointer bg-gray-100 px-2 py-1 rounded-lg hover:bg-gray-200 transition h-[32px] border border-transparent">
+                            <label className="flex items-center gap-2 text-sm cursor-pointer bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition h-[32px] border border-transparent">
                                 <span className="text-text-secondary text-xs font-medium px-1">Events</span>
                                 <input type="checkbox" checked={showEvents} onChange={e => setShowEvents(e.target.checked)} className="h-4 w-4 rounded accent-blue-500"/>
                             </label>
@@ -915,9 +915,9 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                     key={key}
                                     onClick={() => setActiveMetric(key as MapMetric)}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
-                                    ${activeMetric === key 
-                                        ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-105' 
-                                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'}`}
+                                    ${activeMetric === key
+                                        ? 'bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600 shadow-md transform scale-105'
+                                        : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'}`}
                                  >
                                      {config.icon}
                                      {config.label}
@@ -927,19 +927,19 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                     </div>
                     
                     <div className="relative flex-grow min-h-[500px] rounded-xl overflow-hidden border border-border-color z-0">
-                        <div id="wplan-map" ref={mapContainerRef} className="absolute inset-0 bg-gray-100"></div>
-                        {(!regionGeoJSON || !departmentGeoJSON) && <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">Chargement de la carte...</div>}
+                        <div id="wplan-map" ref={mapContainerRef} className="absolute inset-0 bg-gray-100 dark:bg-slate-800"></div>
+                        {(!regionGeoJSON || !departmentGeoJSON) && <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10 text-[var(--text-primary)]">Chargement de la carte...</div>}
                         
                         {/* DYNAMIC LEGEND - TOP LEFT */}
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-xl border border-slate-200 shadow-lg z-[500] min-w-[160px]">
-                            <h4 className="text-xs font-extrabold text-slate-800 uppercase mb-2 tracking-wider border-b border-slate-200 pb-1">
+                        <div className="absolute top-4 left-4 bg-white/90 dark:bg-[var(--bg-card-solid)] backdrop-blur-sm p-3 rounded-xl border border-[var(--border-subtle)] shadow-lg z-[500] min-w-[160px]">
+                            <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase mb-2 tracking-wider border-b border-[var(--border-subtle)] pb-1">
                                 {METRICS_CONFIG[activeMetric].label}
                             </h4>
                             <div className="flex flex-col gap-1.5">
                                 {METRICS_CONFIG[activeMetric].colors.map((color, idx) => (
                                     <div key={idx} className="flex items-center gap-2">
                                         <span className="w-4 h-4 rounded shadow-sm border border-black/5" style={{ backgroundColor: color }}></span>
-                                        <span className="text-xs text-slate-600 font-medium">
+                                        <span className="text-xs text-[var(--text-secondary)] font-medium">
                                             {METRICS_CONFIG[activeMetric].labels[idx]}
                                         </span>
                                     </div>
@@ -963,20 +963,20 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                         <div className="h-[200px]"><canvas ref={chartRefs.topDepts}></canvas></div>
                     </div>
                     {/* Placeholder for Retention Chart */}
-                    <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
-                        <div className="p-4 bg-gray-100 rounded-full mb-3">
-                            <TrendingUp size={24} className="text-gray-400" />
+                    <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-gray-50 dark:bg-slate-800/50 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
+                        <div className="p-4 bg-gray-100 dark:bg-slate-800 rounded-full mb-3">
+                            <TrendingUp size={24} className="text-[var(--text-muted)]" />
                         </div>
                         <h3 className="font-semibold text-text-secondary">Chart possible</h3>
-                        <p className="text-xs text-gray-400 mt-1">Emplacement réservé</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">Emplacement réservé</p>
                     </div>
                     {/* Placeholder for Correlation Chart */}
-                    <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
-                        <div className="p-4 bg-gray-100 rounded-full mb-3">
-                            <Shuffle size={24} className="text-gray-400" />
+                    <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-gray-50 dark:bg-slate-800/50 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
+                        <div className="p-4 bg-gray-100 dark:bg-slate-800 rounded-full mb-3">
+                            <Shuffle size={24} className="text-[var(--text-muted)]" />
                         </div>
                         <h3 className="font-semibold text-text-secondary">Chart possible</h3>
-                        <p className="text-xs text-gray-400 mt-1">Emplacement réservé</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">Emplacement réservé</p>
                     </div>
                 </div>
             </div>
@@ -989,31 +989,31 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
-                        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-                            <h4 className="text-xs font-bold text-green-800 uppercase mb-2 flex items-center gap-1"><CheckCircle2 size={12}/> Forces</h4>
-                            <ul className="text-xs text-green-900 space-y-1 list-disc list-inside">
+                        <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-100 dark:border-green-800/30">
+                            <h4 className="text-xs font-bold text-green-800 dark:text-green-400 uppercase mb-2 flex items-center gap-1"><CheckCircle2 size={12}/> Forces</h4>
+                            <ul className="text-xs text-green-900 dark:text-green-300 space-y-1 list-disc list-inside">
                                 <li>Forte conversion périurbaine</li>
                                 <li>Anciens donateurs fidèles (+6m)</li>
                                 <li>Image de marque positive locale</li>
                             </ul>
                         </div>
-                        <div className="bg-orange-50 p-3 rounded-lg border border-orange-100">
-                            <h4 className="text-xs font-bold text-orange-800 uppercase mb-2 flex items-center gap-1"><AlertTriangle size={12}/> Faiblesses</h4>
-                            <ul className="text-xs text-orange-900 space-y-1 list-disc list-inside">
+                        <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border border-orange-100 dark:border-orange-800/30">
+                            <h4 className="text-xs font-bold text-orange-800 dark:text-orange-400 uppercase mb-2 flex items-center gap-1"><AlertTriangle size={12}/> Faiblesses</h4>
+                            <ul className="text-xs text-orange-900 dark:text-orange-300 space-y-1 list-disc list-inside">
                                 <li>Saturation centre-ville</li>
                                 <li>Coût par acquisition élevé</li>
                             </ul>
                         </div>
-                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                            <h4 className="text-xs font-bold text-blue-800 uppercase mb-2 flex items-center gap-1"><TrendingUp size={12}/> Opportunités</h4>
-                            <ul className="text-xs text-blue-900 space-y-1 list-disc list-inside">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800/30">
+                            <h4 className="text-xs font-bold text-blue-800 dark:text-blue-400 uppercase mb-2 flex items-center gap-1"><TrendingUp size={12}/> Opportunités</h4>
+                            <ul className="text-xs text-blue-900 dark:text-blue-300 space-y-1 list-disc list-inside">
                                 <li>Marchés de Noël (Q4)</li>
                                 <li>Nouvelles zones résidentielles Nord</li>
                             </ul>
                         </div>
-                        <div className="bg-red-50 p-3 rounded-lg border border-red-100">
-                            <h4 className="text-xs font-bold text-red-800 uppercase mb-2 flex items-center gap-1"><Ban size={12}/> Menaces</h4>
-                            <ul className="text-xs text-red-900 space-y-1 list-disc list-inside">
+                        <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-800/30">
+                            <h4 className="text-xs font-bold text-red-800 dark:text-red-400 uppercase mb-2 flex items-center gap-1"><Ban size={12}/> Menaces</h4>
+                            <ul className="text-xs text-red-900 dark:text-red-300 space-y-1 list-disc list-inside">
                                 <li>Météo difficile en Janvier</li>
                                 <li>Concurrence ONG accrue (S40-44)</li>
                             </ul>
