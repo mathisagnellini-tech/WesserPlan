@@ -2,7 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Wesser Plan</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -224,6 +227,42 @@
       .leaflet-container {
         font-family: 'Inter', sans-serif;
       }
+
+      /* Mobile safe areas for notched phones */
+      .safe-area-top {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+      .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* Touch-friendly improvements */
+      @media (max-width: 767px) {
+        /* Prevent text selection on interactive elements */
+        button, a, nav { -webkit-user-select: none; user-select: none; }
+
+        /* Larger touch targets */
+        .glass-card { border-radius: 16px; }
+        .glass-card:hover { transform: none; }
+
+        /* Fix leaflet popups on mobile */
+        .leaflet-popup-content { min-width: 200px !important; max-width: 280px !important; }
+        .leaflet-popup-content-wrapper { border-radius: 16px !important; }
+
+        /* Prevent overscroll bounce */
+        html { overscroll-behavior: none; }
+
+        /* Zone planner sidebar: full width on mobile */
+        .zone-planner-sidebar { width: 100% !important; min-width: unset !important; max-height: 50vh; }
+
+        /* Hide blobs on mobile for performance */
+        body::before, body::after, .color-orb { display: none; }
+      }
+
+      /* Smooth scrolling on iOS */
+      @supports (-webkit-touch-callout: none) {
+        .overflow-y-auto { -webkit-overflow-scrolling: touch; }
+      }
     </style>
 </head>
 <body class="min-h-screen">
@@ -241,7 +280,7 @@
       window.onerror = function(msg, src, line, col, err) {
         var d = document.getElementById('root');
         if (d && !d.innerHTML) {
-          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#ef4444">Erreur JS</h1><pre style="background:#f1f5f9;padding:16px;border-radius:8px;overflow:auto;white-space:pre-wrap">' + msg + '\n\nSource: ' + src + '\nLine: ' + line + (err && err.stack ? '\n\n' + err.stack : '') + '</pre></div>';
+          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#ef4444">Erreur JS</h1><pre style="background:#f1f5f9;padding:16px;border-radius:8px;overflow:auto;white-space:pre-wrap">' + msg + '\n\nSource: ' + src + '\nLine: ' + line + '\nCol: ' + col + (err && err.stack ? '\n\n' + err.stack : '') + '</pre></div>';
         }
       };
       window.addEventListener('unhandledrejection', function(e) {

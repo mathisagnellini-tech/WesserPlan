@@ -51,9 +51,9 @@ const DropZone: React.FC<{ title: string; description: string; icon: React.Eleme
 const UploadTab: React.FC = () => {
     return (
         <section className="animate-fade-in">
-            <header className="mb-8">
-                <h2 className="text-4xl font-extrabold text-text-primary">Importer des Données</h2>
-                <p className="text-lg text-text-secondary mt-2">Mettez à jour l'application avec vos derniers fichiers de données.</p>
+            <header className="mb-4 md:mb-8">
+                <h2 className="text-2xl md:text-4xl font-extrabold text-text-primary">Importer des Données</h2>
+                <p className="text-sm md:text-lg text-text-secondary mt-1 md:mt-2">Mettez à jour l'application avec vos derniers fichiers de données.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

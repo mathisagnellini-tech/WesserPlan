@@ -27,12 +27,12 @@ const DashboardHeader: React.FC<{ lang: 'en' | 'fr'; onLangChange: () => void; t
   const dateString = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
-    <header className="flex items-center gap-6 mb-6 h-16">
+    <header className="flex items-center gap-3 md:gap-6 mb-4 md:mb-6 h-12 md:h-16">
       <div className="relative flex-grow">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
-        <input type="text" placeholder={t('searchPlaceholder')} className="w-full bg-white/50 dark:bg-[var(--input-bg)] pl-12 pr-4 py-3.5 rounded-2xl border border-transparent focus:border-gray-200 dark:focus:border-[var(--input-border)] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[var(--input-border)] outline-none transition-all shadow-sm dark:text-[var(--text-primary)] dark:placeholder-[var(--text-muted)]" />
+        <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+        <input type="text" placeholder={t('searchPlaceholder')} className="w-full bg-white/50 dark:bg-[var(--input-bg)] pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl border border-transparent focus:border-gray-200 dark:focus:border-[var(--input-border)] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[var(--input-border)] outline-none transition-all shadow-sm text-sm md:text-base dark:text-[var(--text-primary)] dark:placeholder-[var(--text-muted)]" />
       </div>
-      
+
       <div className="hidden md:flex flex-col items-end justify-center px-4 border-r border-gray-200/50 dark:border-[var(--border-subtle)]">
         <div className="text-3xl font-black text-[var(--text-primary)] leading-none tracking-tight">
             {timeString}
@@ -42,13 +42,13 @@ const DashboardHeader: React.FC<{ lang: 'en' | 'fr'; onLangChange: () => void; t
         </div>
       </div>
 
-      <div className="flex items-center gap-4 flex-shrink-0">
-        <button onClick={onLangChange} className="flex items-center gap-2 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+        <button onClick={onLangChange} className="hidden sm:flex items-center gap-2 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
           {lang.toUpperCase()} <ChevronDown size={16} />
         </button>
-        <button className="relative p-2.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-[var(--text-secondary)]">
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[var(--bg-card-solid)]"></span>
+        <button className="relative p-2 md:p-2.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-[var(--text-secondary)]">
+          <Bell size={18} />
+          <span className="absolute top-1.5 right-1.5 md:top-2 md:right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[var(--bg-card-solid)]"></span>
         </button>
       </div>
     </header>
@@ -522,39 +522,40 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ isActive }) => {
   const [globalWeather, setGlobalWeather] = useState({ temp: 0, condition: '-', walking: 'Bonne' as any });
 
   return (
-    <section className="animate-fade-in h-[calc(100vh-100px)] flex flex-col">
+    <section className="animate-fade-in h-auto lg:h-[calc(100vh-100px)] flex flex-col">
       <DashboardHeader lang={lang} onLangChange={() => setLang(l => l === 'en' ? 'fr' : 'en')} t={t} />
-      
-      <div className="flex-grow grid grid-cols-4 gap-6 min-h-0">
-          {/* Main Map Area - 3 Cols */}
-          <div className="col-span-3 flex flex-col gap-6">
-              <div className="flex-grow relative rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm">
+
+      <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 min-h-0">
+          {/* Main Map Area */}
+          <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6">
+              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm h-[50vh] md:h-[60vh] lg:h-auto lg:flex-grow">
                   <FranceMap setGlobalWeather={setGlobalWeather} />
 
                   {/* Floating Overlay Title */}
-                  <div className="absolute top-6 left-6 bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg border border-[var(--border-subtle)] z-[400]">
-                      <h2 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-0.5">Vue d'ensemble</h2>
-                      <div className="flex items-center gap-2">
-                          <MapPin size={18} className="text-blue-600"/>
-                          <h3 className="font-black text-[var(--text-primary)] text-lg">Déploiement National</h3>
+                  <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur-md px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-lg border border-[var(--border-subtle)] z-[400]">
+                      <h2 className="text-[10px] md:text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-0.5">Vue d'ensemble</h2>
+                      <div className="flex items-center gap-1.5 md:gap-2">
+                          <MapPin size={14} className="text-blue-600 md:hidden"/>
+                          <MapPin size={18} className="text-blue-600 hidden md:block"/>
+                          <h3 className="font-black text-[var(--text-primary)] text-sm md:text-lg">Déploiement National</h3>
                       </div>
                   </div>
               </div>
           </div>
 
-          {/* Right Sidebar - Split into Weather & Feed - 1 Col */}
-          <div className="col-span-1 h-full flex flex-col gap-6">
+          {/* Right Sidebar - Weather & Feed */}
+          <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6">
               {/* Compact Weather Top */}
-              <div className="h-32 shrink-0">
-                  <CompactWeatherWidget 
-                      avgTemp={globalWeather.temp} 
-                      condition={globalWeather.condition} 
-                      walkingScore={globalWeather.walking} 
+              <div className="h-28 md:h-32 shrink-0">
+                  <CompactWeatherWidget
+                      avgTemp={globalWeather.temp}
+                      condition={globalWeather.condition}
+                      walkingScore={globalWeather.walking}
                   />
               </div>
 
               {/* Activity Feed & Calendar Bottom */}
-              <div className="flex-grow min-h-0">
+              <div className="min-h-[300px] lg:flex-grow lg:min-h-0">
                   <ActivityFeed />
               </div>
           </div>

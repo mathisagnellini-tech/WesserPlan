@@ -619,7 +619,7 @@ const ZonePlanner: React.FC = () => {
       {/* SIDEBAR - PISTE 1 SOFT UI */}
       <aside 
         ref={sidebarRef}
-        className="bg-slate-50/50 flex flex-col h-screen overflow-hidden sticky top-0 shadow-[20px_0_60px_-15px_rgba(0,0,0,0.03)] z-30 transition-none border-r border-slate-200/60"
+        className="bg-slate-50/50 flex flex-col max-h-[50vh] md:max-h-none md:h-screen overflow-hidden md:sticky top-0 shadow-[20px_0_60px_-15px_rgba(0,0,0,0.03)] z-30 transition-none border-r border-slate-200/60 zone-planner-sidebar"
         style={{ width: `${sidebarWidth}px`, minWidth: '320px' }}
       >
         <div className="flex-none p-8 bg-white/40 backdrop-blur-sm border-b border-slate-200/60">

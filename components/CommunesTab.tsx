@@ -998,7 +998,7 @@ const CommunesTab: React.FC = () => {
   }, [filteredCommunes, mode]);
 
   return (
-    <section className="h-[calc(100vh-100px)] flex gap-6 animate-fade-in">
+    <section className="min-h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in">
         {/* VALIDATION MODAL */}
         <ProspectValidationModal 
             isOpen={!!validationData}

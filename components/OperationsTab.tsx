@@ -473,8 +473,8 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
         <LogisticsDashboard housings={housingData} cars={carsData} />
 
         {/* --- Navigation & Main Actions --- */}
-        <div className="flex justify-between items-center mb-6">
-            <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl w-fit border border-[var(--border-subtle)]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+            <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl w-full sm:w-fit border border-[var(--border-subtle)]">
                 <button onClick={() => setActiveSubTab('housing')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'housing' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-blue-600 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
                     🏠 Logements
                 </button>
