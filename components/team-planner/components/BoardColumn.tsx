@@ -35,16 +35,16 @@ interface BoardColumnProps {
 // Updated Gradient Logic for NGO Colors
 const getGradientHeader = (bgClass: string) => {
     // Specific NGO Colors
-    if (bgClass.includes('cyan')) return 'bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600'; // UNICEF
+    if (bgClass.includes('cyan')) return 'bg-gradient-to-br from-cyan-400 via-cyan-500 to-orange-600'; // UNICEF
     if (bgClass.includes('emerald')) return 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700'; // WWF
     if (bgClass.includes('green')) return 'bg-gradient-to-br from-green-500 via-green-600 to-emerald-700'; // Greenpeace
     if (bgClass.includes('yellow')) return 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600'; // Amnesty
     
     // Generic Fallbacks
-    if (bgClass.includes('blue-700')) return 'bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900';
-    if (bgClass.includes('blue')) return 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700';
+    if (bgClass.includes('orange-700')) return 'bg-gradient-to-br from-orange-700 via-orange-800 to-orange-900';
+    if (bgClass.includes('blue')) return 'bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700';
     if (bgClass.includes('red')) return 'bg-gradient-to-br from-red-500 via-rose-600 to-pink-700';
-    if (bgClass.includes('purple')) return 'bg-gradient-to-br from-purple-500 via-violet-600 to-indigo-700';
+    if (bgClass.includes('purple')) return 'bg-gradient-to-br from-purple-500 via-violet-600 to-orange-700';
     if (bgClass.includes('orange')) return 'bg-gradient-to-br from-orange-400 via-orange-500 to-red-600';
     
     return 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800';
@@ -256,7 +256,7 @@ export const BoardColumn = memo<BoardColumnProps>(({
         bg-slate-100/40 backdrop-blur-xl border border-white/40
         shadow-[0_4px_30px_rgba(0,0,0,0.03)]
         
-        ${isOver ? (conflictData.hasConflict ? 'ring-2 ring-red-500 bg-red-50/80 scale-[1.01]' : 'ring-2 ring-blue-500/50 scale-[1.005] bg-blue-50/50') : ''}
+        ${isOver ? (conflictData.hasConflict ? 'ring-2 ring-red-500 bg-red-50/80 scale-[1.01]' : 'ring-2 ring-orange-500/50 scale-[1.005] bg-orange-50/50') : ''}
         ${isDimmed ? 'opacity-50 blur-[1px]' : 'opacity-100'}
         ${isDraggingColumn ? 'opacity-30 scale-95' : 'opacity-100'}
       `}
@@ -303,7 +303,7 @@ export const BoardColumn = memo<BoardColumnProps>(({
                       <div className="flex items-center gap-1 bg-black/20 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm" title={`Ambiance: ${teamVibe}`}>
                           {teamVibe === 'explosif' && <Flame size={12} className="text-red-400 animate-pulse" />}
                           {teamVibe === 'soudé' && <Handshake size={12} className="text-emerald-400" />}
-                          {teamVibe === 'froid' && <Snowflake size={12} className="text-blue-300" />}
+                          {teamVibe === 'froid' && <Snowflake size={12} className="text-orange-300" />}
                           {teamVibe === 'neutre' && <Zap size={12} className="text-yellow-400" />}
                       </div>
                   </div>
@@ -312,7 +312,7 @@ export const BoardColumn = memo<BoardColumnProps>(({
                       <h2 className={`font-[800] text-white leading-none tracking-tighter drop-shadow-md font-sans ${density === 'compact' ? 'text-xl' : 'text-3xl'}`}>
                           {column.title.split(' ').slice(0, 2).join(' ')}
                       </h2>
-                      <div className="text-[10px] font-bold text-blue-50 uppercase tracking-widest mt-1 opacity-80 pl-0.5">{column.title.split(' ').slice(2).join(' ')}</div>
+                      <div className="text-[10px] font-bold text-orange-50 uppercase tracking-widest mt-1 opacity-80 pl-0.5">{column.title.split(' ').slice(2).join(' ')}</div>
                   </div>
                   
                   <div className={`flex items-end justify-between border-t border-white/10 ${density === 'compact' ? 'pt-3 mt-1' : 'pt-4 mt-2'}`}>
@@ -427,10 +427,10 @@ export const BoardColumn = memo<BoardColumnProps>(({
               {/* Add Button */}
               {showAddButton && density !== 'tiny' && (
                   <button className={`
-                      group relative border border-dashed border-slate-300/60 hover:border-blue-500/50 hover:bg-blue-50/50 transition-all duration-300 flex items-center justify-center flex-shrink-0
+                      group relative border border-dashed border-slate-300/60 hover:border-orange-500/50 hover:bg-orange-50/50 transition-all duration-300 flex items-center justify-center flex-shrink-0
                       ${density === 'compact' ? 'w-full h-8 rounded-xl' : 'w-full h-[70px] rounded-[24px]'}
                   `}>
-                       <div className="flex items-center gap-2 text-slate-400 group-hover:text-blue-600 font-bold transition-transform group-hover:scale-110">
+                       <div className="flex items-center gap-2 text-slate-400 group-hover:text-orange-600 font-bold transition-transform group-hover:scale-110">
                            <UserPlus size={density === 'compact' ? 14 : 20} />
                        </div>
                   </button>

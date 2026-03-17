@@ -151,7 +151,7 @@ const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walki
                 </div>
                 <div className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 shadow-sm w-fit
                     ${walkingScore === 'Excellente' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' :
-                      walkingScore === 'Bonne' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400' :
+                      walkingScore === 'Bonne' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400' :
                       walkingScore === 'Difficile' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400' :
                       'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400'}`}>
                     {walkingScore === 'Excellente' ? <Sun size={12}/> : <Cloud size={12}/>}
@@ -250,7 +250,7 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
                              <input type="date" value={specificDate} onChange={e => setSpecificDate(e.target.value)} className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)]" required/>
                          </div>
                      )}
-                     <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">Ajouter</button>
+                     <button type="submit" className="w-full bg-orange-600 text-white font-bold py-2 rounded-lg hover:bg-orange-700 transition-colors">Ajouter</button>
                  </form>
              </div>
         </div>
@@ -272,7 +272,7 @@ const ActivityFeed: React.FC = () => {
 
     const getIcon = (type: string) => {
         switch(type) {
-            case 'housing': return <Home size={14} className="text-blue-600"/>;
+            case 'housing': return <Home size={14} className="text-orange-600"/>;
             case 'refusal': return <Ban size={14} className="text-red-600"/>;
             case 'done': return <CheckCircle2 size={14} className="text-emerald-600"/>;
             default: return <Activity size={14} className="text-slate-600 dark:text-slate-400"/>;
@@ -285,11 +285,11 @@ const ActivityFeed: React.FC = () => {
             
             <div className="p-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
                 <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <Activity size={18} className="text-blue-600"/> Activité Récente
+                    <Activity size={18} className="text-orange-600"/> Activité Récente
                 </h3>
                 <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] px-2 py-0.5 rounded text-[var(--text-secondary)]">Live</span>
-                    <button onClick={() => setIsModalOpen(true)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-[var(--text-secondary)] hover:text-blue-600 transition-colors">
+                    <button onClick={() => setIsModalOpen(true)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-[var(--text-secondary)] hover:text-orange-600 transition-colors">
                         <Plus size={16} />
                     </button>
                 </div>
@@ -305,7 +305,7 @@ const ActivityFeed: React.FC = () => {
                         </div>
                         <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] p-2.5 rounded-xl shadow-sm flex-grow hover:shadow-md transition-shadow">
                             <div className="flex items-center gap-2 mb-1">
-                                <div className={`p-1 rounded-md ${act.type === 'refusal' ? 'bg-red-50 dark:bg-red-900/30' : act.type === 'housing' ? 'bg-blue-50 dark:bg-blue-900/30' : act.type === 'done' ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-slate-50 dark:bg-slate-800'}`}>
+                                <div className={`p-1 rounded-md ${act.type === 'refusal' ? 'bg-red-50 dark:bg-red-900/30' : act.type === 'housing' ? 'bg-orange-50 dark:bg-orange-900/30' : act.type === 'done' ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-slate-50 dark:bg-slate-800'}`}>
                                     {getIcon(act.type)}
                                 </div>
                                 <span className="text-xs font-bold text-[var(--text-primary)]">{act.text}</span>
@@ -317,7 +317,7 @@ const ActivityFeed: React.FC = () => {
             </div>
 
             {/* Main Event Highlight */}
-            <div className="p-4 bg-gradient-to-br from-blue-600 to-indigo-700 text-white m-4 rounded-xl shadow-lg shadow-blue-500/30 relative overflow-hidden group">
+            <div className="p-4 bg-gradient-to-br from-orange-600 to-orange-700 text-white m-4 rounded-xl shadow-lg shadow-orange-500/30 relative overflow-hidden group">
                  <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                      <Flag size={60} />
                  </div>
@@ -536,8 +536,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ isActive }) => {
                   <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur-md px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-lg border border-[var(--border-subtle)] z-[400]">
                       <h2 className="text-[10px] md:text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-0.5">Vue d'ensemble</h2>
                       <div className="flex items-center gap-1.5 md:gap-2">
-                          <MapPin size={14} className="text-blue-600 md:hidden"/>
-                          <MapPin size={18} className="text-blue-600 hidden md:block"/>
+                          <MapPin size={14} className="text-orange-600 md:hidden"/>
+                          <MapPin size={18} className="text-orange-600 hidden md:block"/>
                           <h3 className="font-black text-[var(--text-primary)] text-sm md:text-lg">Déploiement National</h3>
                       </div>
                   </div>

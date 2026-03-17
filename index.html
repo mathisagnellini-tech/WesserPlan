@@ -31,11 +31,11 @@
         --text-primary: #1a1a1a;
         --text-secondary: #5a5a5a;
         --text-muted: #94a3b8;
-        --accent-primary: #1B2A4A;
-        --accent-secondary: #7A1B3E;
-        --highlight-bg: #F0E6EA;
-        --highlight-text: #7A1B3E;
-        --highlight-bg-hover: #e6d0d8;
+        --accent-primary: #FF5B2B;
+        --accent-secondary: #E04A1F;
+        --highlight-bg: #FFF0EB;
+        --highlight-text: #FF5B2B;
+        --highlight-bg-hover: #FFE0D4;
         --border-color: rgba(255, 255, 255, 0.6);
         --border-subtle: #e2e8f0;
         --shadow-soft: 0 10px 40px rgba(0,0,0,.04);
@@ -55,11 +55,11 @@
         --text-primary: #e8eaed;
         --text-secondary: #9aa0b0;
         --text-muted: #5a6178;
-        --accent-primary: #4A6FA5;
-        --accent-secondary: #C75B7A;
-        --highlight-bg: #2a1a22;
-        --highlight-text: #e88da5;
-        --highlight-bg-hover: #3a2230;
+        --accent-primary: #FF7A50;
+        --accent-secondary: #FF5B2B;
+        --highlight-bg: #2a1510;
+        --highlight-text: #FF9A75;
+        --highlight-bg-hover: #3a2015;
         --border-color: rgba(255, 255, 255, 0.08);
         --border-subtle: rgba(255, 255, 255, 0.1);
         --shadow-soft: 0 10px 40px rgba(0,0,0,.2);
@@ -95,13 +95,13 @@
       /* Blob 1: Navy, Top Right */
       body::before {
         content: ''; position: fixed; width: 800px; height: 800px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
+        background: radial-gradient(circle, rgba(255, 91, 43, 0.12), transparent 70%);
         top: -20%; right: -10%; z-index: -1; pointer-events: none;
         filter: blur(80px); opacity: 0.8;
         animation: blob-float-1 25s infinite ease-in-out;
       }
       .dark body::before {
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.08), transparent 70%);
+        background: radial-gradient(circle, rgba(255, 91, 43, 0.06), transparent 70%);
         opacity: 0.5;
       }
 
@@ -245,20 +245,20 @@
          These fix all colored badges/pills/backgrounds
          that use hardcoded light-mode Tailwind classes
          ======================================== */
-      .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.12) !important; }
-      .dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.18) !important; }
+      .dark .bg-blue-50, .dark .bg-orange-50 { background-color: rgba(255, 91, 43, 0.12) !important; }
+      .dark .bg-blue-100, .dark .bg-orange-100 { background-color: rgba(255, 91, 43, 0.18) !important; }
       .dark .bg-green-50 { background-color: rgba(34, 197, 94, 0.12) !important; }
       .dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.18) !important; }
       .dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.12) !important; }
       .dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.18) !important; }
       .dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12) !important; }
       .dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.18) !important; }
-      .dark .bg-orange-50 { background-color: rgba(249, 115, 22, 0.12) !important; }
-      .dark .bg-orange-100 { background-color: rgba(249, 115, 22, 0.18) !important; }
+      .dark .bg-orange-50 { background-color: rgba(255, 91, 43, 0.12) !important; }
+      .dark .bg-orange-100 { background-color: rgba(255, 91, 43, 0.18) !important; }
       .dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.12) !important; }
       .dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.18) !important; }
-      .dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.12) !important; }
-      .dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.18) !important; }
+      .dark .bg-indigo-50 { background-color: rgba(255, 91, 43, 0.12) !important; }
+      .dark .bg-indigo-100 { background-color: rgba(255, 91, 43, 0.18) !important; }
       .dark .bg-purple-50 { background-color: rgba(168, 85, 247, 0.12) !important; }
       .dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.18) !important; }
       .dark .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.10) !important; }
@@ -269,24 +269,24 @@
       .dark .bg-gray-100 { background-color: rgba(30, 33, 48, 0.8) !important; }
 
       /* Dark mode: colored text adjustments for readability */
-      .dark .text-blue-700 { color: #93bbfd !important; }
-      .dark .text-blue-800 { color: #93bbfd !important; }
+      .dark .text-blue-700, .dark .text-orange-700 { color: #fdba74 !important; }
+      .dark .text-blue-800, .dark .text-orange-800 { color: #fdba74 !important; }
       .dark .text-green-700 { color: #6ee7b7 !important; }
       .dark .text-green-800 { color: #6ee7b7 !important; }
       .dark .text-red-700 { color: #fca5a5 !important; }
       .dark .text-red-800 { color: #fca5a5 !important; }
       .dark .text-amber-700 { color: #fbbf24 !important; }
       .dark .text-orange-700, .dark .text-orange-800, .dark .text-orange-900 { color: #fdba74 !important; }
-      .dark .text-indigo-700 { color: #a5b4fc !important; }
+      .dark .text-indigo-700 { color: #fdba74 !important; }
       .dark .text-emerald-700 { color: #6ee7b7 !important; }
       .dark .text-slate-600 { color: #9aa0b0 !important; }
 
       /* Dark mode: border color overrides */
-      .dark .border-blue-100, .dark .border-blue-200 { border-color: rgba(59, 130, 246, 0.2) !important; }
+      .dark .border-blue-100, .dark .border-blue-200, .dark .border-orange-100, .dark .border-orange-200 { border-color: rgba(255, 91, 43, 0.2) !important; }
       .dark .border-green-100, .dark .border-green-200 { border-color: rgba(34, 197, 94, 0.2) !important; }
       .dark .border-red-100, .dark .border-red-200 { border-color: rgba(239, 68, 68, 0.2) !important; }
       .dark .border-amber-100, .dark .border-amber-200 { border-color: rgba(245, 158, 11, 0.2) !important; }
-      .dark .border-orange-100, .dark .border-orange-200 { border-color: rgba(249, 115, 22, 0.2) !important; }
+      .dark .border-orange-100, .dark .border-orange-200 { border-color: rgba(255, 91, 43, 0.2) !important; }
       .dark .border-yellow-100, .dark .border-yellow-200 { border-color: rgba(234, 179, 8, 0.2) !important; }
       .dark .border-slate-50 { border-color: rgba(255, 255, 255, 0.05) !important; }
       .dark .border-slate-100 { border-color: rgba(255, 255, 255, 0.08) !important; }
@@ -300,10 +300,10 @@
       .dark .hover\:bg-slate-100:hover { background-color: rgba(30, 33, 48, 0.8) !important; }
       .dark .hover\:bg-slate-200:hover { background-color: rgba(45, 48, 65, 0.8) !important; }
       .dark .hover\:bg-gray-50:hover { background-color: rgba(30, 33, 48, 0.6) !important; }
-      .dark .hover\:bg-blue-50:hover { background-color: rgba(59, 130, 246, 0.15) !important; }
+      .dark .hover\:bg-blue-50:hover, .dark .hover\:bg-orange-50:hover { background-color: rgba(255, 91, 43, 0.15) !important; }
       .dark .hover\:bg-red-50:hover { background-color: rgba(239, 68, 68, 0.15) !important; }
-      .dark .hover\:bg-blue-100:hover { background-color: rgba(59, 130, 246, 0.22) !important; }
-      .dark .hover\:bg-blue-200:hover { background-color: rgba(59, 130, 246, 0.28) !important; }
+      .dark .hover\:bg-blue-100:hover, .dark .hover\:bg-orange-100:hover { background-color: rgba(255, 91, 43, 0.22) !important; }
+      .dark .hover\:bg-blue-200:hover, .dark .hover\:bg-orange-200:hover { background-color: rgba(255, 91, 43, 0.28) !important; }
       .dark .hover\:bg-green-100:hover { background-color: rgba(34, 197, 94, 0.22) !important; }
       .dark .hover\:bg-red-100:hover { background-color: rgba(239, 68, 68, 0.22) !important; }
       .dark .hover\:bg-red-200:hover { background-color: rgba(239, 68, 68, 0.28) !important; }

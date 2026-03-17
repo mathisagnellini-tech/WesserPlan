@@ -59,7 +59,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
   const WeatherIcon = () => {
       switch (zone.weather.condition) {
           case 'Sunny': return <Sun size={24} className="text-amber-500" strokeWidth={2} />;
-          case 'Rainy': return <CloudRain size={24} className="text-blue-500" strokeWidth={2} />;
+          case 'Rainy': return <CloudRain size={24} className="text-orange-500" strokeWidth={2} />;
           case 'Cloudy': return <Cloud size={24} className="text-slate-500" strokeWidth={2} />;
           default: return <Sun size={24} className="text-amber-500" strokeWidth={2} />;
       }
@@ -101,7 +101,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
               <button 
                   onClick={() => isEditing ? handleSave() : setIsEditing(true)}
                   className={`absolute top-6 right-20 p-2.5 rounded-full backdrop-blur-md transition-all shadow-sm hover:shadow-md border border-white/40 z-20 flex items-center gap-2 px-4
-                    ${isEditing ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-900 dark:text-white'}
+                    ${isEditing ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-900 dark:text-white'}
                   `}
               >
                   {isEditing ? <Save size={18} /> : <Edit2 size={18} />}
@@ -127,7 +127,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           </div>
                       ) : (
                         <>
-                            <div className="flex items-center gap-1.5 text-blue-700 font-bold uppercase tracking-wider text-[10px] mb-2 bg-blue-100/90 backdrop-blur-md px-2.5 py-1 rounded-lg w-fit shadow-sm border border-blue-200/50">
+                            <div className="flex items-center gap-1.5 text-orange-700 font-bold uppercase tracking-wider text-[10px] mb-2 bg-orange-100/90 backdrop-blur-md px-2.5 py-1 rounded-lg w-fit shadow-sm border border-orange-200/50">
                                 <MapPin size={10} strokeWidth={3} /> {zone.name}
                             </div>
                             <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none drop-shadow-sm line-clamp-2">{column.title}</h2>
@@ -185,13 +185,13 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                   <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       
                       <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-blue-50 rounded-[28px] p-5 border border-blue-100/50 hover:bg-blue-100/50 transition-colors cursor-pointer group flex flex-col justify-between h-40">
+                          <div className="bg-orange-50 rounded-[28px] p-5 border border-orange-100/50 hover:bg-orange-100/50 transition-colors cursor-pointer group flex flex-col justify-between h-40">
                               <div className="flex justify-between items-start">
-                                  <div className="p-3 bg-white rounded-2xl text-blue-600 shadow-sm"><Navigation size={20} /></div>
-                                  <ChevronRight size={20} className="text-blue-300 group-hover:text-blue-600 transition-colors" />
+                                  <div className="p-3 bg-white rounded-2xl text-orange-600 shadow-sm"><Navigation size={20} /></div>
+                                  <ChevronRight size={20} className="text-orange-300 group-hover:text-orange-600 transition-colors" />
                               </div>
                               <div>
-                                  <div className="text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-1">Trajet</div>
+                                  <div className="text-[10px] text-orange-400 font-bold uppercase tracking-wider mb-1">Trajet</div>
                                   <div className="text-slate-900 dark:text-white font-bold text-xl leading-tight">Secteur<br/>Nord</div>
                               </div>
                           </div>
@@ -265,13 +265,13 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                       <div className="bg-slate-50 rounded-[28px] p-2 border border-slate-100">
                           <div className="p-4 flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60">
                               <div className="flex items-center gap-4">
-                                  <div className="bg-blue-100 p-3 rounded-2xl text-blue-600"><Wifi size={20}/></div>
+                                  <div className="bg-orange-100 p-3 rounded-2xl text-orange-600"><Wifi size={20}/></div>
                                   <div>
                                       <div className="text-[10px] uppercase text-slate-400 font-bold">Réseau Wifi</div>
                                       <div className="text-slate-900 dark:text-white font-mono text-sm font-bold">{housing.wifiDetails?.split('/')[0] || 'Unknown'}</div>
                                   </div>
                               </div>
-                              <button className="p-2 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-blue-600 transition-colors" title="Copier"><Copy size={18}/></button>
+                              <button className="p-2 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-orange-600 transition-colors" title="Copier"><Copy size={18}/></button>
                           </div>
                           <div className="p-4 flex items-center justify-between">
                               <div className="flex items-center gap-4">
@@ -366,7 +366,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                                   <div className="text-sm font-bold text-slate-900 dark:text-white">Localiser le véhicule</div>
                                   <div className="text-xs text-slate-500 font-medium">Dernière position : Parking Hôtel</div>
                               </div>
-                              <ExternalLink size={18} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
+                              <ExternalLink size={18} className="text-slate-300 group-hover:text-orange-500 transition-colors" />
                           </button>
                       </div>
                   </div>

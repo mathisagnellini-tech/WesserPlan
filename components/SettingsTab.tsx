@@ -19,7 +19,7 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
         <span className="text-sm text-[var(--text-secondary)]">{label}</span>
         <div className="relative">
             <input id={label} type="checkbox" className="sr-only" checked={enabled} onChange={() => setEnabled(!enabled)} />
-            <div className={`block w-10 h-6 rounded-full transition ${enabled ? 'bg-blue-500' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
+            <div className={`block w-10 h-6 rounded-full transition ${enabled ? 'bg-orange-500' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
             <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition ${enabled ? 'transform translate-x-full' : ''}`}></div>
         </div>
     </label>
@@ -43,20 +43,20 @@ const SettingsTab: React.FC<{ isDark: boolean; onSetTheme: (theme: 'light' | 'da
                                 GL
                             </div>
                             <div>
-                                <button className="text-sm font-semibold bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition">Changer d'avatar</button>
+                                <button className="text-sm font-semibold bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-4 py-2 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-500/30 transition">Changer d'avatar</button>
                                 <p className="text-xs text-[var(--text-secondary)] mt-1">PNG ou JPG, max 800Kb.</p>
                             </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Nom complet</label>
-                            <input type="text" defaultValue="Gérard Larcher" className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition p-2.5" />
+                            <input type="text" defaultValue="Gérard Larcher" className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Adresse e-mail</label>
-                            <input type="email" defaultValue="gerard.larcher@example.com" className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition p-2.5" />
+                            <input type="email" defaultValue="gerard.larcher@example.com" className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
                         </div>
                         <div className="flex justify-end">
-                            <button className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-500/20">Enregistrer</button>
+                            <button className="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition shadow-lg shadow-orange-500/20">Enregistrer</button>
                         </div>
                     </SettingsCard>
 
@@ -76,13 +76,13 @@ const SettingsTab: React.FC<{ isDark: boolean; onSetTheme: (theme: 'light' | 'da
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => onSetTheme('light')}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${!isDark ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${!isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300'}`}
                                 >
                                     <Sun size={18} /> Clair
                                 </button>
                                 <button
                                     onClick={() => onSetTheme('dark')}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${isDark ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300'}`}
                                 >
                                     <Moon size={18} /> Sombre
                                 </button>
@@ -90,7 +90,7 @@ const SettingsTab: React.FC<{ isDark: boolean; onSetTheme: (theme: 'light' | 'da
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Langue</label>
-                            <select className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition p-2.5">
+                            <select className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5">
                                 <option>Français</option>
                                 <option>English</option>
                             </select>
@@ -105,7 +105,7 @@ const SettingsTab: React.FC<{ isDark: boolean; onSetTheme: (theme: 'light' | 'da
                      <SettingsCard title="API & Intégrations" icon={KeyRound}>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Clé API Wesser</label>
-                            <input type="password" value="••••••••••••••••••••" readOnly className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition p-2.5" />
+                            <input type="password" value="••••••••••••••••••••" readOnly className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
                         </div>
                      </SettingsCard>
                 </div>

@@ -84,26 +84,26 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Left: Branding & Week Nav */}
       <div className="flex items-center gap-6 flex-shrink-0">
           <div className="font-bold text-lg text-slate-800 flex items-center gap-2 mr-2">
-              <div className="w-6 h-6 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-md shadow-blue-500/20"></div>
+              <div className="w-6 h-6 bg-gradient-to-br from-orange-600 to-orange-600 rounded-lg shadow-md shadow-orange-500/20"></div>
               <span className="hidden lg:inline tracking-tight">TeamPlanner</span>
           </div>
           
           <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
              <button 
                 onClick={() => onPageModeChange('board')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'board' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'board' ? 'bg-white dark:bg-slate-700 text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
              >
                  <LayoutDashboard size={14} /> Tableau
              </button>
              <button 
                 onClick={() => onPageModeChange('alumni')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'alumni' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'alumni' ? 'bg-white dark:bg-slate-700 text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
              >
                  <Users size={14} /> Nos Anciens
              </button>
              <button 
                 onClick={() => onPageModeChange('map')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'map' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pageMode === 'map' ? 'bg-white dark:bg-slate-700 text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
              >
                  <MapPin size={14} /> Carte
              </button>
@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
                 <div className="flex flex-col items-center justify-center px-4 min-w-[120px]">
                     <span className="text-xs font-bold text-slate-800 tracking-wide">{currentWeekLabel}</span>
-                    <span className="text-[9px] font-medium text-blue-600">{currentDateRange}</span>
+                    <span className="text-[9px] font-medium text-orange-600">{currentDateRange}</span>
                 </div>
                 <button onClick={onNext} disabled={!hasNext} className={`p-1.5 rounded-lg transition-colors ${!hasNext ? 'text-gray-300' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}>
                     <ChevronRight size={16} />
@@ -168,14 +168,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             className={`
                 relative p-2 rounded-xl border transition-all duration-200 flex items-center gap-2
                 ${isFilterOpen || activeFilterCount > 0
-                    ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-inner' 
+                    ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-inner' 
                     : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 shadow-sm'
                 }
             `}
           >
               <ListFilter size={18} />
               {activeFilterCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
                       {activeFilterCount}
                   </span>
               )}
@@ -189,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
            <div className="hidden lg:flex items-center bg-slate-100/80 dark:bg-slate-800/80 rounded-lg border border-slate-200/50 dark:border-slate-700/50 p-1 gap-1">
                 <button
                     onClick={onDuplicate}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-orange-600 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all"
                     title="Dupliquer la semaine"
                 >
                     <Copy size={12} /> <span className="hidden xl:inline">Dupliquer</span>
@@ -211,7 +211,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
                 <button 
                     onClick={onAutoSynergy}
-                    className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-colors"
+                    className="p-1.5 rounded-md text-slate-500 hover:text-orange-600 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-colors"
                     title="Détection Auto Synergies"
                 >
                     <Users size={16} />
@@ -252,7 +252,7 @@ export const Navbar: React.FC<NavbarProps> = ({
            <div className="relative">
                <button 
                 onClick={() => setShowHistory(!showHistory)}
-                className={`transition-colors ${showHistory ? 'text-blue-600' : 'text-slate-400 hover:text-slate-800'}`}
+                className={`transition-colors ${showHistory ? 'text-orange-600' : 'text-slate-400 hover:text-slate-800'}`}
                 title="Historique des actions"
                >
                  <History size={16} />
@@ -284,7 +284,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
            {/* Removed redundant Carte button */}
            
-           <div className="h-9 w-9 rounded-full border border-white shadow-md p-0.5 cursor-pointer hover:border-blue-200 transition-colors">
+           <div className="h-9 w-9 rounded-full border border-white shadow-md p-0.5 cursor-pointer hover:border-orange-200 transition-colors">
              <img src={userPhoto} alt="User" className="w-full h-full rounded-full object-cover" />
            </div>
       </div>

@@ -157,7 +157,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-5 bg-white dark:bg-[var(--bg-card-solid)] rounded-[28px] border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-shadow duration-300">
                             <div className="flex items-center gap-2 text-slate-400 mb-2">
-                                <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg"><TrendingDown size={14} /></div>
+                                <div className="p-1.5 bg-orange-50 text-orange-500 rounded-lg"><TrendingDown size={14} /></div>
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Perf.</span>
                             </div>
                             <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{person.drRate}</div>
@@ -185,7 +185,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                     <div className="space-y-3">
                         <button className="w-full bg-white dark:bg-[var(--bg-card-solid)] p-4 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex items-center justify-between group active:scale-[0.98]">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
                                     <Mail size={18} />
                                 </div>
                                 <div className="text-left">
@@ -193,7 +193,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                                     <div className="text-sm font-bold text-slate-900 dark:text-white">{person.email}</div>
                                 </div>
                             </div>
-                            <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-500" />
+                            <ChevronRight size={16} className="text-slate-300 group-hover:text-orange-500" />
                         </button>
                         <button className="w-full bg-white dark:bg-[var(--bg-card-solid)] p-4 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex items-center justify-between group active:scale-[0.98]">
                             <div className="flex items-center gap-4">
@@ -218,7 +218,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                     <div className="bg-white dark:bg-[var(--bg-card-solid)] p-4 rounded-[28px] border border-slate-100 dark:border-slate-800 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
-                                <Plus size={14} className="text-blue-500" /> Ajouter une relation
+                                <Plus size={14} className="text-orange-500" /> Ajouter une relation
                             </h3>
                         </div>
                         
@@ -228,7 +228,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                                 placeholder="Rechercher un collègue..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-50 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                className="w-full px-4 py-3 bg-slate-50 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
                             />
                             {searchQuery.length > 1 && (
                                 <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden z-20">
@@ -240,7 +240,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                                             </div>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button onClick={() => { onAddRelationship(p.id, 'affinity'); setSearchQuery(''); }} className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100" title="Affinité"><Heart size={14} /></button>
-                                                <button onClick={() => { onAddRelationship(p.id, 'synergy'); setSearchQuery(''); }} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100" title="Synergie"><Zap size={14} /></button>
+                                                <button onClick={() => { onAddRelationship(p.id, 'synergy'); setSearchQuery(''); }} className="p-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100" title="Synergie"><Zap size={14} /></button>
                                                 <button onClick={() => { onAddRelationship(p.id, 'conflict'); setSearchQuery(''); }} className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100" title="Conflit"><AlertTriangle size={14} /></button>
                                             </div>
                                         </div>
@@ -266,7 +266,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
 
                                 const config = {
                                     affinity: { icon: Heart, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100', label: 'Affinité' },
-                                    synergy: { icon: Zap, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100', label: 'Synergie' },
+                                    synergy: { icon: Zap, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-100', label: 'Synergie' },
                                     conflict: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-100', label: 'Conflit' }
                                 }[rel.type];
 
@@ -318,7 +318,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                                         {!hasRel && (
                                             <button 
                                                 onClick={() => onAddRelationship(teammate.id, 'synergy')}
-                                                className="px-3 py-1.5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all flex items-center gap-1"
+                                                className="px-3 py-1.5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-orange-600 hover:border-orange-200 shadow-sm transition-all flex items-center gap-1"
                                             >
                                                 <Zap size={10} /> Créer Synergie
                                             </button>
@@ -343,12 +343,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     
                     {/* Next Availability Card */}
-                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-[28px] shadow-lg text-white relative overflow-hidden">
+                    <div className="bg-gradient-to-br from-orange-500 to-purple-600 p-6 rounded-[28px] shadow-lg text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-20">
                             <Calendar size={100} />
                         </div>
                         <div className="relative z-10">
-                            <div className="text-indigo-100 text-xs font-bold uppercase tracking-widest mb-1">Prochaine Disponibilité</div>
+                            <div className="text-orange-100 text-xs font-bold uppercase tracking-widest mb-1">Prochaine Disponibilité</div>
                             <div className="text-3xl font-black tracking-tight">{person.nextAvailability || "Inconnue"}</div>
                             <div className="mt-4 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold">
                                 <Check size={12} /> Confirmé
@@ -376,10 +376,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                                     statusColor = 'bg-emerald-500';
                                     statusText = `Mission : ${week.location}`;
                                 } else if (week.status === 'planned') {
-                                    statusColor = 'bg-blue-500';
+                                    statusColor = 'bg-orange-500';
                                     statusText = `Prévu : ${week.location || 'À définir'}`;
                                 } else if (week.status === 'available') {
-                                    statusColor = 'bg-indigo-400';
+                                    statusColor = 'bg-orange-400';
                                     statusText = 'Disponible';
                                 }
 
@@ -429,7 +429,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
 
                     <div className="grid grid-cols-2 gap-4">
                         {[
-                            { id: 'cni', icon: FileText, label: 'Identité', color: 'text-blue-600', bg: 'bg-blue-50' },
+                            { id: 'cni', icon: FileText, label: 'Identité', color: 'text-orange-600', bg: 'bg-orange-50' },
                             { id: 'license', icon: Car, label: 'Permis', color: 'text-orange-600', bg: 'bg-orange-50' },
                             { id: 'badge', icon: CreditCard, label: 'Badge', color: 'text-purple-600', bg: 'bg-purple-50' },
                             { id: 'score', icon: PieChart, label: 'Scorecard', color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -492,7 +492,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-2 h-2 rounded-full ${
                                                     note.type === 'incident' ? 'bg-red-500' : 
-                                                    note.type === 'feedback' ? 'bg-blue-500' : 'bg-slate-300'
+                                                    note.type === 'feedback' ? 'bg-orange-500' : 'bg-slate-300'
                                                 }`} />
                                                 <span className="text-xs font-bold text-slate-500 uppercase">{note.type}</span>
                                             </div>

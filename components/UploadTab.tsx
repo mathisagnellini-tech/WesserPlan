@@ -39,7 +39,7 @@ const DropZone: React.FC<{ title: string; description: string; icon: React.Eleme
                     <UploadCloud className={`mx-auto h-10 w-10 ${isDragOver ? 'text-[var(--highlight-text)]' : 'text-[var(--text-secondary)]'}`} />
                     <span className="font-medium text-[var(--text-secondary)]">
                         Glissez et déposez vos fichiers ici, ou{' '}
-                        <span className="text-blue-600 dark:text-blue-400 underline">parcourez</span>
+                        <span className="text-orange-600 dark:text-orange-400 underline">parcourez</span>
                     </span>
                 </span>
                 <input type="file" name="file_upload" className="hidden" />

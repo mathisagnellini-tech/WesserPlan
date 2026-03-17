@@ -317,7 +317,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
                  top: mousePos.y + 20 
              }}
            >
-             <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{hoveredData.id}</div>
+             <div className="text-[10px] font-black text-orange-600 uppercase tracking-widest">{hoveredData.id}</div>
              <div className="text-sm font-black text-slate-900 dark:text-white leading-tight">{hoveredData.name}</div>
              <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{hoveredData.population.toLocaleString()} habitants</div>
            </div>

@@ -30,7 +30,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">{person.name}</h2>
               <div className="flex items-center gap-4 text-sm">
-                  <span className="text-blue-400 flex items-center gap-1 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  <span className="text-orange-400 flex items-center gap-1 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
                     <MapPin size={12} /> {person.origin}
                   </span>
                   <span className="text-gray-400">{person.age} ans</span>
@@ -78,7 +78,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
                         />
                         {/* Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all shadow-xl">
+                            <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:bg-orange-600 group-hover:border-orange-500 transition-all shadow-xl">
                                 <Play size={24} className="text-white ml-1 fill-white" />
                             </div>
                         </div>
@@ -101,7 +101,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
                                         <div className="absolute left-[19px] top-8 bottom-[-16px] w-px bg-gray-700"></div>
                                     )}
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-[#1e1e1e] z-10 
-                                        ${entry.type === 'call' ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-700 text-gray-400'}`}>
+                                        ${entry.type === 'call' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-700 text-gray-400'}`}>
                                         {entry.type === 'call' ? <PhoneCall size={16} /> : <Calendar size={16} />}
                                     </div>
                                     <div className="flex-1 pt-1">
@@ -129,7 +129,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
                  {/* Contact Card */}
                  <div className="bg-[#2a2a2a] p-4 rounded-xl border border-white/5 space-y-3">
                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-500/20 text-blue-400 rounded-lg">
+                        <div className="p-2 bg-orange-500/20 text-orange-400 rounded-lg">
                             <Mail size={18} />
                         </div>
                         <div className="overflow-hidden">
@@ -184,7 +184,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
         {/* Footer Actions */}
         <div className="p-4 border-t border-gray-700 bg-[#252525] flex justify-end gap-3">
             <button onClick={onClose} className="px-4 py-2 rounded-md bg-transparent hover:bg-gray-700 text-gray-300 transition border border-gray-600 hover:border-gray-500 text-sm">Fermer</button>
-            <button className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-medium transition shadow-lg shadow-blue-900/20 text-sm flex items-center gap-2">
+            <button className="px-4 py-2 rounded-md bg-orange-600 hover:bg-orange-500 text-white font-medium transition shadow-lg shadow-orange-900/20 text-sm flex items-center gap-2">
                 <Phone size={14} /> Contacter
             </button>
         </div>

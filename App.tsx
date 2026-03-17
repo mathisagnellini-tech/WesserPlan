@@ -173,7 +173,7 @@ const TopNavbar: React.FC<{
               className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)] transition-all duration-200"
               title={isDark ? 'Mode clair' : 'Mode sombre'}
             >
-              {isDark ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-indigo-400" />}
+              {isDark ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-orange-400" />}
             </button>
 
             {/* User Avatar */}
@@ -265,7 +265,7 @@ const MobileSidebar: React.FC<{
             onClick={onToggleTheme}
             className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-[var(--text-secondary)] hover:bg-[var(--bg-card-solid)] hover:text-[var(--text-primary)]"
           >
-            {isDark ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} className="text-indigo-400" />}
+            {isDark ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} className="text-orange-400" />}
             <span className="text-sm font-bold">{isDark ? 'Mode Clair' : 'Mode Sombre'}</span>
           </button>
 

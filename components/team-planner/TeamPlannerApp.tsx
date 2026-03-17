@@ -647,7 +647,7 @@ export default function App() {
   const activeFilterCount = Object.values(filters).flat().length;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white font-sans overflow-hidden flex flex-col selection:bg-blue-200">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white font-sans overflow-hidden flex flex-col selection:bg-orange-200">
       
       <div 
         className="fixed inset-0 z-0 opacity-[0.4] pointer-events-none" 
@@ -656,7 +656,7 @@ export default function App() {
             backgroundSize: '24px 24px'
         }}
       />
-      <div className="fixed inset-0 bg-gradient-to-t from-blue-50/50 dark:from-slate-900/50 to-transparent pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-gradient-to-t from-orange-50/50 dark:from-slate-900/50 to-transparent pointer-events-none z-0" />
 
       <Navbar 
         currentWeekLabel={weekInfo.label}
@@ -781,7 +781,7 @@ export default function App() {
                                 className={`
                                     relative group overflow-hidden px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 border flex items-center gap-2
                                     ${showRelationships 
-                                        ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/30' 
+                                        ? 'bg-orange-600 border-orange-500 text-white shadow-lg shadow-orange-500/30' 
                                         : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 shadow-sm'
                                     }
                                 `}
@@ -939,9 +939,9 @@ export default function App() {
                       </button>
                       <button 
                           onClick={() => confirmRelationship('synergy')}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors font-bold"
+                          className="flex items-center gap-3 p-3 rounded-xl bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors font-bold"
                       >
-                          <div className="p-2 bg-blue-200 rounded-full"><Zap size={20} /></div>
+                          <div className="p-2 bg-orange-200 rounded-full"><Zap size={20} /></div>
                           <div>
                               <div className="text-sm">Synergie Pure</div>
                               <div className="text-[10px] opacity-70">Productivité exceptionnelle</div>
