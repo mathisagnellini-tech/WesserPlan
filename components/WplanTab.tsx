@@ -931,7 +931,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                         {(!regionGeoJSON || !departmentGeoJSON) && <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10 text-[var(--text-primary)]">Chargement de la carte...</div>}
                         
                         {/* DYNAMIC LEGEND - TOP LEFT */}
-                        <div className="absolute top-4 left-4 bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur-sm p-3 rounded-xl border border-[var(--border-subtle)] shadow-lg z-[500] min-w-[160px]">
+                        <div className="absolute top-4 left-4 bg-white/90 dark:bg-[var(--bg-card-solid)] backdrop-blur-sm p-3 rounded-xl border border-[var(--border-subtle)] shadow-lg z-[500] min-w-[160px]">
                             <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase mb-2 tracking-wider border-b border-[var(--border-subtle)] pb-1">
                                 {METRICS_CONFIG[activeMetric].label}
                             </h4>
