@@ -998,7 +998,7 @@ const CommunesTab: React.FC = () => {
   }, [filteredCommunes, mode]);
 
   return (
-    <section className="h-[calc(100vh-100px)] flex gap-6 animate-fade-in">
+    <section className="min-h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in">
         {/* VALIDATION MODAL */}
         <ProspectValidationModal 
             isOpen={!!validationData}
@@ -1009,7 +1009,7 @@ const CommunesTab: React.FC = () => {
         />
 
         {/* Left List Panel */}
-        <div className="w-[480px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-shrink-0">
+        <div className="w-full md:w-[480px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-shrink-0 max-h-[60vh] md:max-h-none">
             <div className="p-4 border-b border-slate-100 bg-slate-50/50 space-y-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
@@ -1188,15 +1188,15 @@ const CommunesTab: React.FC = () => {
         </div>
 
         {/* Right Details & Map Panel */}
-        <div className="flex-1 flex flex-col gap-6 min-h-0">
+        <div className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
             {mode === 'list' ? (
                 <>
                      {selectedCommune ? (
-                        <div className="glass-card p-6 animate-fade-in flex flex-col gap-6 overflow-y-auto custom-scrollbar max-h-[50vh]">
-                            <div className="flex justify-between items-start">
+                        <div className="glass-card p-4 md:p-6 animate-fade-in flex flex-col gap-4 md:gap-6 overflow-y-auto custom-scrollbar max-h-[50vh]">
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
                                 <div>
-                                    <h2 className="text-3xl font-black text-slate-800 mb-1">{selectedCommune.nom}</h2>
-                                    <p className="text-slate-500 font-medium text-lg">{departmentMap[selectedCommune.departement]} ({selectedCommune.departement})</p>
+                                    <h2 className="text-xl md:text-3xl font-black text-slate-800 mb-1">{selectedCommune.nom}</h2>
+                                    <p className="text-slate-500 font-medium text-sm md:text-lg">{departmentMap[selectedCommune.departement]} ({selectedCommune.departement})</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Statut Actuel</p>

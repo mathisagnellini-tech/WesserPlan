@@ -819,9 +819,9 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
     return (
         <section>
             {isDataLibraryOpen && <DataLibraryModal onClose={() => setIsDataLibraryOpen(false)} />}
-            <header className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-extrabold text-text-primary">DataWiz</h2>
-                <div className="flex items-center gap-3">
+            <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 md:mb-6">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-text-primary">DataWiz</h2>
+                <div className="flex flex-wrap items-center gap-2 md:gap-3">
                     <div className="inline-flex gap-1 p-1 rounded-lg bg-gray-200">
                         <button 
                             onClick={() => { setMapLevel('regions'); setViewingRegion(null); setSelectedItem(null); }}

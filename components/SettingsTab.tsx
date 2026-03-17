@@ -31,9 +31,9 @@ const SettingsTab: React.FC = () => {
 
     return (
         <section className="animate-fade-in">
-            <header className="mb-8 mt-2">
-                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Paramètres</h2>
-                <p className="text-lg text-slate-500 mt-1 font-medium">Gérez votre profil, vos préférences et les données de l'application.</p>
+            <header className="mb-4 md:mb-8 mt-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Paramètres</h2>
+                <p className="text-sm md:text-lg text-slate-500 mt-1 font-medium">Gérez votre profil, vos préférences et les données de l'application.</p>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
