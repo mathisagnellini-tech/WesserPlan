@@ -14,24 +14,31 @@ interface OperationsTabProps {
 // --- Types ---
 interface Housing {
   id: string;
+  week: string;
+  zone: string;
   name: string;
-  date: string;
   lead: string;
   region: string;
   dept: string;
   org: string;
   people: number;
   nights: number;
-  cost: number;
+  dateStart: string;
+  dateEnd: string;
+  costReservation: number;
+  costAdditional: number;
+  hasInsurance: boolean;
+  costTotal: number;
+  receiptOk: boolean;
   channel: string;
   address: string;
-  owner: string;
-  ownerName: string;
-  rating: number;
-  comment: string;
-  lat: number;
-  lng: number;
-  amenities: string[];
+  deptScore: number | null;
+  teamNote: string;
+  status: string;
+  refundAmount: number;
+  costFinal: number;
+  lat: number | null;
+  lng: number | null;
   // Smart Match properties (dynamic)
   _matchScore?: number;
   _matchDistance?: number;
@@ -123,7 +130,7 @@ const MOCK_ZONES: TargetZone[] = [
 
 // 1. LOGISTICS DASHBOARD WIDGET
 const LogisticsDashboard: React.FC<{ housings: Housing[], cars: Car[] }> = ({ housings, cars }) => {
-    const totalCost = housings.reduce((acc, h) => acc + h.cost, 0);
+    const totalCost = housings.reduce((acc, h) => acc + h.costFinal, 0);
     const totalNights = housings.reduce((acc, h) => acc + h.nights, 0);
     const avgCostPerNight = totalNights > 0 ? (totalCost / totalNights).toFixed(0) : 0;
     
@@ -281,18 +288,20 @@ const AddHousingModal: React.FC<{
     const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'done'>('idle');
     const [formData, setFormData] = useState<Partial<Housing>>({ org: 'MSF', amenities: [], rating: 0, people: 5, nights: 5, date: new Date().toISOString().split('T')[0] });
 
-    useEffect(() => { if(isOpen) { setMode(initialMode); setScanStatus('idle'); setFormData({ org: 'MSF', amenities: [], rating: 0, people: 5, nights: 5, date: new Date().toISOString().split('T')[0] }); } }, [isOpen, initialMode]);
+    useEffect(() => { if(isOpen) { setMode(initialMode); setScanStatus('idle'); setFormData({ org: 'MSF', people: 5, nights: 7, dateStart: new Date().toISOString().split('T')[0] } as any); } }, [isOpen, initialMode]);
     if (!isOpen) return null;
 
-    const handleManualSubmit = (e: React.FormEvent) => { e.preventDefault(); const newHousing: Housing = { id: Date.now().toString(), name: formData.name || "Logement sans nom", date: formData.date || new Date().toISOString().split('T')[0], lead: "Moi", region: "Nouvelle-Aquitaine", dept: "33", org: formData.org || 'MSF', people: Number(formData.people), nights: Number(formData.nights), cost: Number(formData.cost) || 0, channel: formData.channel || "Direct", address: formData.address || "Adresse non renseignée", owner: formData.owner || "", ownerName: formData.ownerName || "Propriétaire", rating: 0, comment: formData.comment || "", lat: 44.8378, lng: -0.5792, amenities: formData.amenities || [] }; onAdd(newHousing); onClose(); };
-    const handleScanFile = () => { setScanStatus('scanning'); setTimeout(() => { setScanStatus('done'); setFormData({ name: "Gîte Airbnb 'Le Petit Bonheur'", address: "12 Rue des Lilas, 33000 Bordeaux", cost: 450, nights: 4, ownerName: "Airbnb Receipt #4920", channel: "Airbnb", people: 2, org: "MSF", date: new Date().toISOString().split('T')[0] }); setTimeout(() => setMode('manual'), 800); }, 2000); };
+    const handleManualSubmit = (e: React.FormEvent) => { e.preventDefault(); const newHousing: Housing = { id: Date.now().toString(), week: '', zone: '', name: formData.name || "Logement sans nom", lead: (formData as any).lead || "Moi", region: (formData as any).region || '', dept: '', org: formData.org || 'MSF', people: Number(formData.people), nights: Number(formData.nights), dateStart: (formData as any).dateStart || new Date().toISOString().split('T')[0], dateEnd: (formData as any).dateEnd || '', costReservation: Number((formData as any).costReservation) || 0, costAdditional: 0, hasInsurance: false, costTotal: Number((formData as any).costReservation) || 0, receiptOk: false, channel: formData.channel || "Direct", address: formData.address || "", deptScore: null, teamNote: '', status: 'Honorée', refundAmount: 0, costFinal: Number((formData as any).costReservation) || 0, lat: null, lng: null }; onAdd(newHousing); onClose(); };
+    const handleScanFile = () => { setScanStatus('scanning'); setTimeout(() => { setScanStatus('done'); setFormData({ name: "Gîte Airbnb 'Le Petit Bonheur'", address: "12 Rue des Lilas, 33000 Bordeaux", costReservation: 450, nights: 4, channel: "Airbnb", people: 2, org: "MSF", dateStart: new Date().toISOString().split('T')[0] } as any); setTimeout(() => setMode('manual'), 800); }, 2000); };
 
-    return ( <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in"> <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose}></div> <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"> <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center"> <h3 className="font-bold text-lg text-slate-800">{mode === 'manual' ? 'Saisie Manuelle' : 'Scanner un document'}</h3> <button onClick={onClose}><X className="text-slate-400 hover:text-slate-600" /></button> </div> <div className="p-6 overflow-y-auto"> {mode === 'scan' && ( <div className="flex flex-col items-center justify-center py-8 text-center"> {scanStatus === 'idle' && ( <div onClick={handleScanFile} className="w-full h-48 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-colors"> <Upload size={48} className="text-slate-300 mb-4" /> <p className="font-medium text-slate-600">Cliquez pour uploader le reçu</p> <p className="text-xs text-slate-400 mt-1">PDF, JPG, PNG acceptés</p> </div> )} {scanStatus === 'scanning' && ( <div className="py-12"> <Loader2 size={48} className="text-purple-600 animate-spin mb-4 mx-auto" /> <p className="font-bold text-slate-800">Analyse du document...</p> <p className="text-sm text-slate-500">Extraction des données via IA</p> </div> )} {scanStatus === 'done' && ( <div className="py-12 text-green-600"> <CheckCircle2 size={48} className="mx-auto mb-4" /> <p className="font-bold">Analyse terminée !</p> </div> )} <button onClick={() => setMode('manual')} className="mt-6 text-blue-600 text-sm hover:underline font-medium">Passer à la saisie manuelle</button> </div> )} {mode === 'manual' && ( <form onSubmit={handleManualSubmit} className="space-y-4"> <div className="grid grid-cols-2 gap-4"> <div className="col-span-2"> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nom du Logement</label> <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Ex: Gîte des Lilas" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} autoFocus required /> </div> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Adresse complète</label> <div className="relative"> <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /> <input type="text" className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Ex: 12 Rue de la Paix, 75000 Paris" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} required /> </div> </div> <div className="grid grid-cols-2 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date début location</label> <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} required /> {formData.date && ( <p className="text-xs text-blue-600 font-bold mt-1 text-right">{getWeekNumberLabel(formData.date)}</p> )} </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Capacité (Pers.)</label> <div className="flex items-center gap-2"> <input type="number" className="w-16 px-2 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-center" value={formData.people || ''} onChange={e => setFormData({...formData, people: +e.target.value})} /> <button type="button" onClick={() => setFormData({...formData, people: 5})} className={`px-3 py-2 rounded-lg text-xs font-bold border ${formData.people === 5 ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>5</button> <button type="button" onClick={() => setFormData({...formData, people: 10})} className={`px-3 py-2 rounded-lg text-xs font-bold border ${formData.people === 10 ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>10</button> </div> </div> </div> <div className="grid grid-cols-2 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Coût Total (€)</label> <input type="number" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="0" value={formData.cost || ''} onChange={e => setFormData({...formData, cost: +e.target.value})} required /> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Source</label> <select className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium bg-white" value={formData.channel || 'Direct'} onChange={e => setFormData({...formData, channel: e.target.value})} > <option value="Direct">Direct</option> <option value="Airbnb">Airbnb</option> <option value="Booking">Booking</option> <option value="Gîtes">Gîtes</option> </select> </div> </div> <div className="grid grid-cols-2 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nom Contact</label> <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="M. Martin" value={formData.ownerName || ''} onChange={e => setFormData({...formData, ownerName: e.target.value})} /> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Téléphone</label> <input type="tel" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="06..." value={formData.owner || ''} onChange={e => setFormData({...formData, owner: e.target.value})} /> </div> </div> <div className="flex gap-3 pt-2"> <button type="button" onClick={onClose} className="flex-1 py-3 text-slate-600 font-bold text-sm hover:bg-slate-100 rounded-lg transition-colors">Annuler</button> <button type="submit" className="flex-1 py-3 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"> <Save size={16} /> Enregistrer </button> </div> </form> )} </div> </div> </div> );
+    return ( <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in"> <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose}></div> <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"> <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center"> <h3 className="font-bold text-lg text-slate-800">{mode === 'manual' ? 'Saisie Manuelle' : 'Scanner un document'}</h3> <button onClick={onClose}><X className="text-slate-400 hover:text-slate-600" /></button> </div> <div className="p-6 overflow-y-auto"> {mode === 'scan' && ( <div className="flex flex-col items-center justify-center py-8 text-center"> {scanStatus === 'idle' && ( <div onClick={handleScanFile} className="w-full h-48 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-colors"> <Upload size={48} className="text-slate-300 mb-4" /> <p className="font-medium text-slate-600">Cliquez pour uploader le reçu</p> <p className="text-xs text-slate-400 mt-1">PDF, JPG, PNG acceptés</p> </div> )} {scanStatus === 'scanning' && ( <div className="py-12"> <Loader2 size={48} className="text-purple-600 animate-spin mb-4 mx-auto" /> <p className="font-bold text-slate-800">Analyse du document...</p> <p className="text-sm text-slate-500">Extraction des données via IA</p> </div> )} {scanStatus === 'done' && ( <div className="py-12 text-green-600"> <CheckCircle2 size={48} className="mx-auto mb-4" /> <p className="font-bold">Analyse terminée !</p> </div> )} <button onClick={() => setMode('manual')} className="mt-6 text-blue-600 text-sm hover:underline font-medium">Passer à la saisie manuelle</button> </div> )} {mode === 'manual' && ( <form onSubmit={handleManualSubmit} className="space-y-4"> <div className="grid grid-cols-2 gap-4"> <div className="col-span-2"> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nom du Logement</label> <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Ex: Gîte des Lilas" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} autoFocus required /> </div> </div> <div className="grid grid-cols-2 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Chef d'équipe</label> <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Nom du CE" value={(formData as any).lead || ''} onChange={e => setFormData({...formData, lead: e.target.value} as any)} required /> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Région</label> <select className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium bg-white" value={(formData as any).region || ''} onChange={e => setFormData({...formData, region: e.target.value} as any)}> <option value="Franche Comté">Franche Comté</option> <option value="PACA">PACA</option> <option value="Aquitaine">Aquitaine</option> <option value="Alsace">Alsace</option> </select> </div> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Adresse complète</label> <div className="relative"> <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /> <input type="text" className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Ex: 12 Rue de la Paix, 75000 Paris" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} /> </div> </div> <div className="grid grid-cols-2 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date début</label> <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={(formData as any).dateStart || ''} onChange={e => setFormData({...formData, dateStart: e.target.value} as any)} required /> {(formData as any).dateStart && ( <p className="text-xs text-blue-600 font-bold mt-1 text-right">{getWeekNumberLabel((formData as any).dateStart)}</p> )} </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date fin</label> <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={(formData as any).dateEnd || ''} onChange={e => setFormData({...formData, dateEnd: e.target.value} as any)} /> </div> </div> <div className="grid grid-cols-3 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Capacité</label> <div className="flex items-center gap-2"> <input type="number" className="w-16 px-2 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-center" value={formData.people || ''} onChange={e => setFormData({...formData, people: +e.target.value})} /> <button type="button" onClick={() => setFormData({...formData, people: 5})} className={`px-3 py-2 rounded-lg text-xs font-bold border ${formData.people === 5 ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>5</button> <button type="button" onClick={() => setFormData({...formData, people: 10})} className={`px-3 py-2 rounded-lg text-xs font-bold border ${formData.people === 10 ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>10</button> </div> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nuits</label> <input type="number" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={formData.nights || ''} onChange={e => setFormData({...formData, nights: +e.target.value})} /> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Asso</label> <select className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium bg-white" value={formData.org || 'MSF'} onChange={e => setFormData({...formData, org: e.target.value})}> <option value="MSF">MSF</option> <option value="Unicef">Unicef</option> <option value="MDM">MDM</option> </select> </div> </div> <div className="grid grid-cols-2 gap-4"> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Coût réservation (€)</label> <input type="number" step="0.01" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="0" value={(formData as any).costReservation || ''} onChange={e => setFormData({...formData, costReservation: +e.target.value} as any)} required /> </div> <div> <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Plateforme</label> <select className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium bg-white" value={formData.channel || 'Booking'} onChange={e => setFormData({...formData, channel: e.target.value})} > <option value="Booking">Booking</option> <option value="Airbnb">Airbnb</option> <option value="Répertoire interne">Répertoire interne</option> <option value="Appart City">Appart City</option> <option value="Compte d'un collab">Compte d'un collab</option> </select> </div> </div> <div className="flex gap-3 pt-2"> <button type="button" onClick={onClose} className="flex-1 py-3 text-slate-600 font-bold text-sm hover:bg-slate-100 rounded-lg transition-colors">Annuler</button> <button type="submit" className="flex-1 py-3 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"> <Save size={16} /> Enregistrer </button> </div> </form> )} </div> </div> </div> );
 };
 
 const HousingDetailModal: React.FC<{ housing: Housing | null; onClose: () => void; }> = ({ housing, onClose }) => {
     if (!housing) return null;
-    return ( <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in"> <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div> <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"> <div className="h-40 bg-slate-100 relative"> <div className="absolute inset-0 flex items-center justify-center text-slate-300"> <MapPin size={48} opacity={0.2}/> <span className="ml-2 text-sm font-medium">Aperçu carte indisponible</span> </div> <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full text-slate-600 transition-colors shadow-sm"> <X size={20} /> </button> <div className="absolute bottom-4 left-6"> <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${housing.org === 'MSF' ? 'bg-red-600' : housing.org === 'UNICEF' ? 'bg-blue-500' : 'bg-green-600'}`}> Utilisé par {housing.org} </span> </div> </div> <div className="p-8 overflow-y-auto"> <div className="flex justify-between items-start mb-6"> <div> <h2 className="text-2xl font-bold text-slate-900 leading-tight mb-1">{housing.name}</h2> <p className="text-slate-500 text-sm">{housing.address}</p> <div className="flex items-center gap-2 mt-1"> <span className="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{getWeekNumberLabel(housing.date)}</span> <span className="text-xs text-slate-500">{housing.region} ({housing.dept})</span> </div> </div> <div className="text-right"> <div className="text-2xl font-extrabold text-slate-900">{housing.cost} € <span className="text-sm font-medium text-slate-400">/ sem.</span></div> <div className="text-sm text-slate-500">{(housing.cost / housing.nights).toFixed(0)}€ / nuit</div> </div> </div> <div className="grid grid-cols-3 gap-4 mb-8"> <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <User className="text-blue-500 mb-2" size={24} /> <span className="font-bold text-slate-800 text-lg">{housing.people}</span> <span className="text-xs text-slate-500 uppercase font-bold">Personnes</span> </div> <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <Bed className="text-blue-500 mb-2" size={24} /> <span className="font-bold text-slate-800 text-lg">{housing.nights}</span> <span className="text-xs text-slate-500 uppercase font-bold">Nuits min.</span> </div> <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <Star className="text-yellow-500 mb-2" size={24} fill="currentColor" /> <span className="font-bold text-slate-800 text-lg">{housing.rating}/5</span> <span className="text-xs text-slate-500 uppercase font-bold">Avis Équipe</span> </div> </div> <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8"> <div> <h3 className="font-bold text-slate-900 mb-3">Commentaire Chef d'Équipe</h3> <div className="bg-yellow-50 p-4 rounded-xl text-sm text-slate-700 italic border border-yellow-100 relative"> <span className="absolute top-2 left-2 text-4xl text-yellow-200 font-serif leading-none">"</span> <p className="relative z-10">{housing.comment || "Aucun commentaire spécifique."}</p> <p className="text-right mt-2 text-xs font-bold not-italic text-slate-400">- {housing.lead}</p> </div> </div> <div> <h3 className="font-bold text-slate-900 mb-3">Commodités</h3> <div className="space-y-2"> {housing.amenities.map(am => ( <div key={am} className="flex items-center gap-3 text-sm text-slate-600"> <CheckCircle2 size={16} className="text-green-500"/> {am} </div> ))} </div> </div> </div> <div className="border-t border-slate-100 pt-6 flex items-center justify-between"> <div className="flex items-center gap-3"> <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500"> <User size={20} /> </div> <div> <p className="text-sm font-bold text-slate-900">{housing.ownerName}</p> <p className="text-xs text-slate-500">{housing.channel}</p> </div> </div> <button className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"> <Phone size={18} /> {housing.owner} </button> </div> </div> </div> </div> );
+    const costPerNight = housing.nights > 0 ? (housing.costFinal / housing.nights).toFixed(0) : '—';
+    const statusColor = housing.status === 'Annulée' ? 'bg-red-600' : 'bg-green-600';
+    return ( <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in"> <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div> <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"> <div className="h-32 bg-gradient-to-br from-slate-100 to-slate-200 relative"> <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full text-slate-600 transition-colors shadow-sm"> <X size={20} /> </button> <div className="absolute bottom-4 left-6 flex gap-2"> <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${housing.org === 'MSF' ? 'bg-red-600' : housing.org === 'Unicef' ? 'bg-blue-500' : 'bg-orange-500'}`}>{housing.org}</span> <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${statusColor}`}>{housing.status}</span> {housing.week && <span className="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-white shadow-sm">{housing.week}</span>} </div> </div> <div className="p-8 overflow-y-auto"> <div className="flex justify-between items-start mb-6"> <div> <h2 className="text-2xl font-bold text-slate-900 leading-tight mb-1">{housing.name}</h2> {housing.address && <p className="text-slate-500 text-sm">{housing.address}</p>} <div className="flex items-center gap-2 mt-1"> <span className="text-xs text-slate-500">{housing.region}</span> {housing.dateStart && <span className="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{getWeekNumberLabel(housing.dateStart)}</span>} </div> </div> <div className="text-right"> <div className="text-2xl font-extrabold text-slate-900">{housing.costFinal.toFixed(0)} €</div> {housing.costAdditional > 0 && <div className="text-xs text-orange-600 font-bold">dont {housing.costAdditional}€ annexe</div>} {housing.refundAmount > 0 && <div className="text-xs text-green-600 font-bold">Remboursé: {housing.refundAmount}€</div>} <div className="text-sm text-slate-500">{costPerNight}€ / nuit</div> </div> </div> <div className="grid grid-cols-4 gap-3 mb-8"> <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <User className="text-blue-500 mb-1" size={20} /> <span className="font-bold text-slate-800">{housing.people}</span> <span className="text-[10px] text-slate-500 uppercase font-bold">Pers.</span> </div> <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <Bed className="text-blue-500 mb-1" size={20} /> <span className="font-bold text-slate-800">{housing.nights}</span> <span className="text-[10px] text-slate-500 uppercase font-bold">Nuits</span> </div> <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <Calendar className="text-blue-500 mb-1" size={20} /> <span className="font-bold text-slate-800 text-xs">{housing.dateStart || '—'}</span> <span className="text-[10px] text-slate-500 uppercase font-bold">Début</span> </div> <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center"> <Calendar className="text-blue-500 mb-1" size={20} /> <span className="font-bold text-slate-800 text-xs">{housing.dateEnd || '—'}</span> <span className="text-[10px] text-slate-500 uppercase font-bold">Fin</span> </div> </div> <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"> <div> <h3 className="font-bold text-slate-900 mb-3">Détails financiers</h3> <div className="space-y-2 text-sm"> <div className="flex justify-between"><span className="text-slate-500">Coût réservation</span><span className="font-bold text-slate-800">{housing.costReservation.toFixed(2)} €</span></div> {housing.costAdditional > 0 && <div className="flex justify-between"><span className="text-slate-500">Coût annexe</span><span className="font-bold text-orange-600">{housing.costAdditional.toFixed(2)} €</span></div>} <div className="flex justify-between border-t border-slate-100 pt-2"><span className="text-slate-500 font-bold">Coût total</span><span className="font-bold text-slate-800">{housing.costTotal.toFixed(2)} €</span></div> {housing.refundAmount > 0 && <div className="flex justify-between"><span className="text-slate-500">Remboursement</span><span className="font-bold text-green-600">-{housing.refundAmount.toFixed(2)} €</span></div>} <div className="flex justify-between border-t border-slate-200 pt-2"><span className="text-slate-900 font-extrabold">Coût final</span><span className="font-extrabold text-slate-900">{housing.costFinal.toFixed(2)} €</span></div> </div> </div> <div> <h3 className="font-bold text-slate-900 mb-3">Informations</h3> <div className="space-y-2 text-sm"> <div className="flex justify-between"><span className="text-slate-500">Chef d'équipe</span><span className="font-bold text-slate-800">{housing.lead}</span></div> <div className="flex justify-between"><span className="text-slate-500">Plateforme</span><span className="font-bold text-slate-800">{housing.channel || '—'}</span></div> <div className="flex justify-between"><span className="text-slate-500">Reçu</span><span className={`font-bold ${housing.receiptOk ? 'text-green-600' : 'text-red-500'}`}>{housing.receiptOk ? 'OK' : 'Manquant'}</span></div> {housing.hasInsurance && <div className="flex justify-between"><span className="text-slate-500">Assurance annulation</span><span className="font-bold text-blue-600">Oui</span></div>} {housing.deptScore !== null && housing.deptScore !== undefined && <div className="flex justify-between"><span className="text-slate-500">Score département</span><span className="font-bold text-slate-800">{housing.deptScore}</span></div>} </div> </div> </div> </div> </div> </div> );
 };
 
 const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
@@ -321,24 +330,31 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
     if (housingsRes.data) {
       setHousingData(housingsRes.data.map((h: any) => ({
         id: String(h.id),
+        week: h.week || '',
+        zone: h.zone || '',
         name: h.name,
-        date: h.date || '',
         lead: h.lead || '',
         region: h.region || '',
         dept: h.dept || '',
         org: h.org || '',
         people: h.people || 0,
         nights: h.nights || 0,
-        cost: Number(h.cost) || 0,
+        dateStart: h.date_start || '',
+        dateEnd: h.date_end || '',
+        costReservation: Number(h.cost_reservation) || 0,
+        costAdditional: Number(h.cost_additional) || 0,
+        hasInsurance: h.has_insurance || false,
+        costTotal: Number(h.cost_total) || 0,
+        receiptOk: h.receipt_ok || false,
         channel: h.channel || '',
         address: h.address || '',
-        owner: h.owner_phone || '',
-        ownerName: h.owner_name || '',
-        rating: h.rating || 0,
-        comment: h.comment || '',
+        deptScore: h.dept_score,
+        teamNote: h.team_note || '',
+        status: h.status || 'Honorée',
+        refundAmount: Number(h.refund_amount) || 0,
+        costFinal: Number(h.cost_final) || 0,
         lat: h.lat,
         lng: h.lng,
-        amenities: h.amenities || [],
       })));
     }
 
@@ -486,31 +502,37 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
 
   const handleAddNewHousing = async (newHousing: Housing) => {
     const { data, error } = await supabase.from('housings').insert({
+      week: newHousing.week || null,
+      zone: newHousing.zone || null,
       name: newHousing.name,
-      date: newHousing.date || null,
       lead: newHousing.lead,
       region: newHousing.region,
       dept: newHousing.dept,
       org: newHousing.org,
       people: newHousing.people,
       nights: newHousing.nights,
-      cost: newHousing.cost,
+      date_start: newHousing.dateStart || null,
+      date_end: newHousing.dateEnd || null,
+      cost_reservation: newHousing.costReservation,
+      cost_additional: newHousing.costAdditional,
+      has_insurance: newHousing.hasInsurance,
+      cost_total: newHousing.costTotal,
+      receipt_ok: newHousing.receiptOk,
       channel: newHousing.channel,
       address: newHousing.address,
-      owner_phone: newHousing.owner,
-      owner_name: newHousing.ownerName,
-      rating: newHousing.rating,
-      comment: newHousing.comment,
+      dept_score: newHousing.deptScore,
+      team_note: newHousing.teamNote,
+      status: newHousing.status,
+      refund_amount: newHousing.refundAmount,
+      cost_final: newHousing.costFinal,
       lat: newHousing.lat,
       lng: newHousing.lng,
-      amenities: newHousing.amenities,
     }).select().single();
 
     if (data && !error) {
       const mapped: Housing = { ...newHousing, id: String(data.id) };
       setHousingData([mapped, ...housingData]);
     } else {
-      // Fallback: add locally even if Supabase fails
       setHousingData([newHousing, ...housingData]);
     }
   };
@@ -630,14 +652,21 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
                 {viewMode === 'list' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in">
                         {filteredHousing.map((h: any) => (
-                            <div 
-                                key={h.id} 
+                            <div
+                                key={h.id}
                                 onClick={() => setSelectedHousing(h)}
-                                className={`group bg-white rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer relative ${h._matchLabel === 'Top Match' ? 'border-green-400 ring-2 ring-green-100' : 'border-slate-200'}`}
+                                className={`group bg-white rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer relative ${h.status === 'Annulée' ? 'border-red-300 opacity-60' : h._matchLabel === 'Top Match' ? 'border-green-400 ring-2 ring-green-100' : 'border-slate-200'}`}
                             >
+                                    {/* Status + Org Badges */}
+                                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                                        <span className={`text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm ${h.org === 'MSF' ? 'bg-red-600' : h.org === 'Unicef' ? 'bg-blue-500' : 'bg-orange-500'}`}>{h.org}</span>
+                                        {h.status === 'Annulée' && <span className="text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm bg-red-600">Annulée</span>}
+                                        {h.week && <span className="text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm bg-slate-700">{h.week}</span>}
+                                    </div>
+
                                     {/* Smart Match Badges */}
                                     {h._matchLabel && (
-                                        <div className={`absolute top-3 left-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg z-20 shadow-sm uppercase tracking-wide flex items-center gap-1 ${h._matchColor}`}>
+                                        <div className={`absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg z-20 shadow-sm uppercase tracking-wide flex items-center gap-1 ${h._matchColor}`}>
                                             {h._matchLabel === 'Top Match' && <Star size={10} fill="currentColor"/>}
                                             {h._matchLabel} ({h._matchScore}%)
                                         </div>
@@ -645,43 +674,43 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
 
                                     {/* Card Header */}
                                     <div className="h-24 bg-gradient-to-br from-slate-100 to-slate-200 flex items-end p-4 relative">
-                                        <h3 className="font-extrabold text-xl text-slate-900 leading-tight line-clamp-1 w-full pr-12">
+                                        <h3 className="font-extrabold text-lg text-slate-900 leading-tight line-clamp-2 w-full pr-4">
                                             {h.name}
                                         </h3>
                                     </div>
 
                                     {/* Card Body */}
-                                    <div className="p-5 space-y-4 flex-grow">
-                                        <div className="flex items-start gap-3 group/addr">
-                                            <MapPin className={`mt-0.5 shrink-0 text-slate-400`} size={16} />
-                                            <div className="flex-grow">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="text-xs font-semibold text-slate-500 line-clamp-1">{h.address}</p>
-                                                    <button onClick={(e) => copyToClipboard(h.address, h.id, e)} className="text-slate-300 hover:text-blue-500 transition-colors opacity-0 group-hover/addr:opacity-100">
-                                                        {copiedId === h.id ? <Check size={14} className="text-green-500"/> : <Copy size={14} />}
-                                                    </button>
+                                    <div className="p-5 space-y-3 flex-grow">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                                            <User className="text-slate-400 shrink-0" size={14} />
+                                            <span className="font-medium">{h.lead}</span>
+                                        </div>
+                                        {h.address && (
+                                            <div className="flex items-start gap-2 group/addr">
+                                                <MapPin className="mt-0.5 shrink-0 text-slate-400" size={14} />
+                                                <div className="flex-grow">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-xs text-slate-500 line-clamp-1">{h.address}</p>
+                                                        <button onClick={(e) => copyToClipboard(h.address, h.id, e)} className="text-slate-300 hover:text-blue-500 transition-colors opacity-0 group-hover/addr:opacity-100 shrink-0">
+                                                            {copiedId === h.id ? <Check size={12} className="text-green-500"/> : <Copy size={12} />}
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                {h._matchDistance !== undefined && (
-                                                    <p className="text-xs font-bold text-blue-600 mt-1">à {h._matchDistance.toFixed(1)} km de la zone</p>
-                                                )}
                                             </div>
-                                        </div>
-                                        
-                                        <div className="flex flex-wrap gap-2">
-                                            {h.amenities.slice(0, 2).map((am: string) => (
-                                                <span key={am} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded-md border border-slate-200">{am}</span>
-                                            ))}
-                                            {h.amenities.length > 2 && <span className="text-[10px] text-slate-400 px-1 py-1">+{h.amenities.length - 2}</span>}
-                                        </div>
-                                        
-                                            <div className="flex items-center justify-between pt-3 border-t border-slate-100 border-dashed">
-                                            <div className="flex items-center gap-2">
-                                                <User className="text-slate-400" size={16} />
-                                                <span className="text-sm font-medium text-slate-600">{h.people} pers.</span>
+                                        )}
+                                        {h._matchDistance !== undefined && (
+                                            <p className="text-xs font-bold text-blue-600">à {h._matchDistance.toFixed(1)} km de la zone</p>
+                                        )}
+
+                                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 border-dashed text-xs">
+                                            <div className="flex items-center gap-3">
+                                                <span className="flex items-center gap-1 text-slate-600"><User size={12} className="text-slate-400"/> {h.people} pers.</span>
+                                                <span className="flex items-center gap-1 text-slate-600"><Bed size={12} className="text-slate-400"/> {h.nights}n</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Bed className="text-slate-400" size={16} />
-                                                <span className="text-sm font-medium text-slate-600">{h.nights} nuits min.</span>
+                                            <div className="flex items-center gap-1.5">
+                                                {h.dateStart && <span className="text-slate-500">{h.dateStart.slice(5)}</span>}
+                                                {h.dateStart && h.dateEnd && <ArrowRight size={10} className="text-slate-300"/>}
+                                                {h.dateEnd && <span className="text-slate-500">{h.dateEnd.slice(5)}</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -689,10 +718,12 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
                                     {/* Card Footer */}
                                     <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50 group-hover:bg-blue-50/30 transition-colors">
                                             <div>
-                                            <p className="text-lg font-extrabold text-slate-900">{h.cost} €</p>
+                                            <p className="text-lg font-extrabold text-slate-900">{h.costFinal.toFixed(0)} €</p>
+                                            {h.costAdditional > 0 && <p className="text-[10px] text-orange-500 font-bold">+{h.costAdditional}€ annexe</p>}
                                             </div>
-                                            <div className="flex items-center gap-1 text-blue-600 font-bold text-sm">
-                                                Voir <ArrowRight size={16} />
+                                            <div className="flex items-center gap-2">
+                                                {h.receiptOk ? <CheckCircle2 size={14} className="text-green-500"/> : <AlertTriangle size={14} className="text-orange-400"/>}
+                                                <span className="text-xs text-slate-500 font-medium">{h.channel || '—'}</span>
                                             </div>
                                     </div>
                             </div>

@@ -26,24 +26,31 @@ CREATE TABLE communes (
 -- Table des logements
 CREATE TABLE housings (
   id BIGSERIAL PRIMARY KEY,
+  week TEXT,
+  zone TEXT,
   name TEXT NOT NULL,
-  date DATE,
   lead TEXT,
   region TEXT,
   dept TEXT,
   org TEXT,
   people INTEGER DEFAULT 0,
   nights INTEGER DEFAULT 0,
-  cost NUMERIC(10,2) DEFAULT 0,
+  date_start DATE,
+  date_end DATE,
+  cost_reservation NUMERIC(10,2) DEFAULT 0,
+  cost_additional NUMERIC(10,2) DEFAULT 0,
+  has_insurance BOOLEAN DEFAULT FALSE,
+  cost_total NUMERIC(10,2) DEFAULT 0,
+  receipt_ok BOOLEAN DEFAULT FALSE,
   channel TEXT,
   address TEXT,
-  owner_phone TEXT,
-  owner_name TEXT,
-  rating INTEGER DEFAULT 0 CHECK (rating >= 0 AND rating <= 5),
-  comment TEXT,
-  lat DOUBLE PRECISION NOT NULL,
-  lng DOUBLE PRECISION NOT NULL,
-  amenities TEXT[] DEFAULT '{}',
+  dept_score INTEGER,
+  team_note TEXT,
+  status TEXT DEFAULT 'Honorée' CHECK (status IN ('Honorée', 'Annulée')),
+  refund_amount NUMERIC(10,2) DEFAULT 0,
+  cost_final NUMERIC(10,2) DEFAULT 0,
+  lat DOUBLE PRECISION,
+  lng DOUBLE PRECISION,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -72,6 +79,8 @@ CREATE INDEX idx_communes_departement ON communes(departement);
 CREATE INDEX idx_communes_statut ON communes(statut);
 CREATE INDEX idx_housings_org ON housings(org);
 CREATE INDEX idx_housings_dept ON housings(dept);
+CREATE INDEX idx_housings_week ON housings(week);
+CREATE INDEX idx_housings_status ON housings(status);
 
 -- Fonction pour mettre à jour updated_at automatiquement
 CREATE OR REPLACE FUNCTION update_updated_at()
