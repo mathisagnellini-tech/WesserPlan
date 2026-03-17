@@ -43,7 +43,7 @@ export const MapView: React.FC<MapViewProps> = ({ data }) => {
         <div className="flex-1 bg-slate-100 relative overflow-hidden flex items-center justify-center p-8 h-full">
             <div className="relative w-full max-w-5xl aspect-[1.4/1] bg-white rounded-3xl shadow-xl border border-slate-200 p-8 flex flex-col">
                 <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                    <MapPin className="text-blue-600" /> Carte des Missions
+                    <MapPin className="text-orange-600" /> Carte des Missions
                 </h2>
                 
                 {/* Map Container */}

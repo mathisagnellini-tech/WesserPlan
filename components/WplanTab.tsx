@@ -55,16 +55,16 @@ const MultiSelectDropdown: React.FC<{
         ${disabled
             ? 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-400 cursor-not-allowed'
             : isOpen
-                ? 'bg-white dark:bg-[var(--bg-card-solid)] border-blue-500 ring-2 ring-blue-500/20'
-                : 'bg-white dark:bg-[var(--bg-card-solid)] border-gray-200 dark:border-slate-700 hover:border-blue-300 hover:shadow-md text-[var(--text-primary)]'
+                ? 'bg-white dark:bg-[var(--bg-card-solid)] border-orange-500 ring-2 ring-orange-500/20'
+                : 'bg-white dark:bg-[var(--bg-card-solid)] border-gray-200 dark:border-slate-700 hover:border-orange-300 hover:shadow-md text-[var(--text-primary)]'
         }`}
       >
         <div className="flex items-center gap-3 overflow-hidden">
-            <div className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}>
+            <div className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}>
                 {icon}
             </div>
             <div className="flex flex-col">
-                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${selected.size > 0 ? "text-blue-600" : "text-[var(--text-muted)]"}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${selected.size > 0 ? "text-orange-600" : "text-[var(--text-muted)]"}`}>
                     {selected.size > 0 ? "Filtre Actif" : "Filtrer par"}
                 </span>
                 <span className={`font-bold truncate text-sm ${selected.size > 0 ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
@@ -72,18 +72,18 @@ const MultiSelectDropdown: React.FC<{
                 </span>
             </div>
         </div>
-        <Layers size={18} className={`text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-blue-500' : 'group-hover:text-blue-500'}`} />
+        <Layers size={18} className={`text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-orange-500' : 'group-hover:text-orange-500'}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
+        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-0 sm:min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
             <div className="p-3 border-b border-[var(--border-subtle)] sticky top-0 bg-white dark:bg-[var(--bg-card-solid)] z-10">
                 <div className="relative group">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"/>
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"/>
                     <input 
                         type="text" 
                         placeholder="Rechercher..." 
-                        className="w-full pl-10 pr-3 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-800 focus:border-blue-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full pl-10 pr-3 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-800 focus:border-orange-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all font-medium"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         autoFocus
@@ -99,10 +99,10 @@ const MultiSelectDropdown: React.FC<{
                                 key={value} 
                                 onClick={() => onSelectionChange(value)}
                                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 border border-transparent
-                                ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 border-blue-100 dark:border-blue-800' : 'hover:bg-gray-50 dark:hover:bg-slate-800/50 text-[var(--text-secondary)] hover:border-gray-100 dark:hover:border-slate-700'}`}
+                                ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 border-orange-100 dark:border-orange-800' : 'hover:bg-gray-50 dark:hover:bg-slate-800/50 text-[var(--text-secondary)] hover:border-gray-100 dark:hover:border-slate-700'}`}
                             >
                                 <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0
-                                    ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                    ${isSelected ? 'bg-orange-600 border-orange-600' : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
                                     {isSelected && <Check size={12} className="text-white stroke-[3]" />}
                                 </div>
                                 <span className="text-sm font-medium">{label}</span>
@@ -137,9 +137,9 @@ const MultiSelectDropdown: React.FC<{
 // --- DATA LAB WIDGETS ---
 const GoldenHourWidget: React.FC = () => {
     return (
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden group hover:border-orange-500/30 transition-all">
             <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity">
-                <Clock size={20} className="text-blue-400" />
+                <Clock size={20} className="text-orange-400" />
             </div>
             <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Horloge Thermique</h4>
             <div className="relative w-32 h-32 flex items-center justify-center">
@@ -153,16 +153,16 @@ const GoldenHourWidget: React.FC = () => {
                     <p className="text-2xl font-black text-white">19h15</p>
                 </div>
             </div>
-            <p className="text-center text-xs text-blue-300 mt-3 font-medium">Pic de conversion (+24%)</p>
+            <p className="text-center text-xs text-orange-300 mt-3 font-medium">Pic de conversion (+24%)</p>
         </div>
     );
 };
 
 const WeatherCorrelatorWidget: React.FC = () => {
     return (
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-orange-500/30 transition-all">
             <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity">
-                <CloudRain size={20} className="text-blue-400" />
+                <CloudRain size={20} className="text-orange-400" />
             </div>
             <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Weather-Correlator</h4>
             <div className="flex-grow flex items-end gap-1 h-32 mt-2">
@@ -170,7 +170,7 @@ const WeatherCorrelatorWidget: React.FC = () => {
                 {[40, 60, 30, 80, 20, 90, 50, 45].map((h, i) => (
                     <div key={i} className="flex-1 flex flex-col justify-end gap-1 h-full group/bar">
                          {/* Rain */}
-                        <div style={{height: `${100-h}%`}} className="bg-blue-500/30 w-full rounded-t-sm relative"></div>
+                        <div style={{height: `${100-h}%`}} className="bg-orange-500/30 w-full rounded-t-sm relative"></div>
                          {/* Signatures */}
                         <div style={{height: `${h}%`}} className="bg-amber-400/80 w-full rounded-t-sm shadow-[0_0_10px_rgba(251,191,36,0.3)]"></div>
                     </div>
@@ -186,13 +186,13 @@ const WeatherCorrelatorWidget: React.FC = () => {
 
 const GenomeWidget: React.FC = () => {
     return (
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-orange-500/30 transition-all">
              <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity">
-                <Fingerprint size={20} className="text-blue-400" />
+                <Fingerprint size={20} className="text-orange-400" />
             </div>
             <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Génome Donateur (S42)</h4>
             <div className="flex items-center gap-4">
-                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 p-0.5 shadow-lg shadow-purple-500/20">
+                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-purple-600 p-0.5 shadow-lg shadow-purple-500/20">
                      <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
                          <UserPlus size={28} className="text-white" />
                      </div>
@@ -213,7 +213,7 @@ const GenomeWidget: React.FC = () => {
                  </div>
             </div>
             <div className="mt-4 w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-400 to-purple-500 w-[75%] h-full"></div>
+                <div className="bg-gradient-to-r from-orange-400 to-purple-500 w-[75%] h-full"></div>
             </div>
             <p className="text-[10px] text-right text-slate-500 mt-1 font-mono">Match Index: 94%</p>
         </div>
@@ -222,7 +222,7 @@ const GenomeWidget: React.FC = () => {
 
 const SeismographWidget: React.FC = () => {
      return (
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-orange-500/30 transition-all">
             <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity">
                 <Activity size={20} className="text-red-400" />
             </div>
@@ -247,11 +247,11 @@ const DataLibraryModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             {/* Header */}
             <header className="flex justify-between items-center p-8 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
               <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-600 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)]">
+                  <div className="p-3 bg-orange-600 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)]">
                     <Library className="text-white w-6 h-6" />
                   </div>
                   <div>
-                      <h3 className="text-3xl font-black text-white tracking-tight">Data Lab <span className="text-blue-500">.</span></h3>
+                      <h3 className="text-3xl font-black text-white tracking-tight">Data Lab <span className="text-orange-500">.</span></h3>
                       <p className="text-slate-400 text-sm font-medium">Observatoire de la donnée terrain & Intelligence Artificielle</p>
                   </div>
               </div>
@@ -277,13 +277,13 @@ const DataLibraryModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {/* Section 2: Catalogue (Original Data) */}
                 <div className="mb-8">
                     <h4 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
                         Catalogue de Données
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {dataLibraryData.categories.map((category, idx) => (
-                            <div key={category.nom} className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 hover:border-blue-500/30 transition-colors group">
-                                <h5 className="font-bold text-blue-400 mb-4 text-sm uppercase tracking-wider flex items-center justify-between">
+                            <div key={category.nom} className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 hover:border-orange-500/30 transition-colors group">
+                                <h5 className="font-bold text-orange-400 mb-4 text-sm uppercase tracking-wider flex items-center justify-between">
                                     {category.nom}
                                     <span className="text-slate-600 text-[10px] bg-slate-800 px-2 py-1 rounded-full group-hover:text-white transition-colors">{category.items.length}</span>
                                 </h5>
@@ -560,7 +560,9 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
     useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
             const map = L.map(mapContainerRef.current, { zoomControl: false, minZoom: 5, maxZoom: 10 }).setView([46.8, 2.8], 5.5);
-            L.tileLayer.provider('CartoDB.Positron').addTo(map);
+            const isDark = document.documentElement.classList.contains('dark');
+            const tileLayer = L.tileLayer.provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
+            (map as any)._tileLayer = tileLayer;
             L.control.zoom({ position: 'topright' }).addTo(map);
             mapInstanceRef.current = map;
         }
@@ -585,8 +587,8 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             eventData.forEach(event => {
                 const popupContent = `
                     <div>
-                        <h3 style="font-weight: 700; margin: 0 0 8px; color: #1a1a1a; font-size: 15px;">${event.name}</h3>
-                        <p style="margin: 0; color: #5a5a5a; font-size: 13px;"><strong>Lieu:</strong> ${event.location}</p>
+                        <h3 style="font-weight: 700; margin: 0 0 8px; color: var(--text-primary); font-size: 15px;">${event.name}</h3>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 13px;"><strong>Lieu:</strong> ${event.location}</p>
                     </div>
                 `;
                 const marker = L.marker([event.lat, event.lng], { icon: eventIcon })
@@ -627,11 +629,12 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             if (selectedItem?.properties.code === code) return { weight: 3, color: '#FF5B2B', fillOpacity: 0.9, fillColor: baseColor };
             if (comparisonItem?.properties.code === code) return { weight: 3, color: '#3b82f6', fillOpacity: 0.9, fillColor: baseColor };
             
+            const isDark = document.documentElement.classList.contains('dark');
             return {
                 fillColor: baseColor,
                 weight: 1.2,
                 opacity: 1,
-                color: 'rgba(255,255,255,0.8)',
+                color: isDark ? 'rgba(30,33,48,0.8)' : 'rgba(255,255,255,0.8)',
                 dashArray: '',
                 fillOpacity: 0.75
             };
@@ -655,7 +658,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                     <hr class="my-1 border-gray-200"/>
                     <div class="flex justify-between items-center">
                         <span>${METRICS_CONFIG[activeMetric].label}</span>
-                        <b class="text-blue-600">${Math.floor(Math.random()*100)}</b>
+                        <b class="text-orange-600">${Math.floor(Math.random()*100)}</b>
                     </div>
                 </div>`
             );
@@ -683,6 +686,20 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
             setTimeout(() => mapInstanceRef.current.invalidateSize(), 150);
         }
     }, [isActive]);
+
+    // --- DARK MODE TILE SWAP ---
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const map = mapInstanceRef.current;
+            if (!map) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            const provider = isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron';
+            if ((map as any)._tileLayer) map.removeLayer((map as any)._tileLayer);
+            (map as any)._tileLayer = L.tileLayer.provider(provider).addTo(map);
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
 
     // --- CHARTS LOGIC ---
     useEffect(() => {
@@ -838,7 +855,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                     </div>
                     <button onClick={() => setIsDataLibraryOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-white dark:bg-[var(--bg-card-solid)] rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors shadow-sm border border-border-color"><Library size={16}/> Bibliothèque</button>
                     {viewingRegion && <button onClick={handleBackToRegions} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-200 dark:bg-slate-800 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-700 transition-colors"><ArrowLeft size={16}/> Retour aux régions</button>}
-                    <button onClick={() => { setIsComparing(p => !p); setSelectedItem(null); setComparisonItem(null); }} className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${isComparing ? 'bg-blue-500 text-white shadow-md' : 'bg-white dark:bg-[var(--bg-card-solid)] hover:bg-gray-50 dark:hover:bg-slate-800/50 border border-border-color'}`}><Shuffle size={16}/> {isComparing ? 'Mode Comparaison' : 'Comparer'}</button>
+                    <button onClick={() => { setIsComparing(p => !p); setSelectedItem(null); setComparisonItem(null); }} className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${isComparing ? 'bg-orange-500 text-white shadow-md' : 'bg-white dark:bg-[var(--bg-card-solid)] hover:bg-gray-50 dark:hover:bg-slate-800/50 border border-border-color'}`}><Shuffle size={16}/> {isComparing ? 'Mode Comparaison' : 'Comparer'}</button>
                 </div>
             </header>
 
@@ -867,10 +884,10 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                 <div className="lg:col-span-2 glass-card p-4 flex flex-col">
                      <div className="flex flex-col gap-4 mb-3 border-b border-[var(--border-subtle)] pb-3">
                          <div className="flex justify-between items-center">
-                            <h3 className="font-extrabold text-2xl text-[var(--text-primary)] flex items-center gap-2">
+                            <h3 className="font-extrabold text-xl sm:text-2xl text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
                                 {isComparing ? (
                                     <>
-                                        <span className={selectedItem ? "text-blue-600" : "text-gray-400"}>
+                                        <span className={selectedItem ? "text-orange-600" : "text-gray-400"}>
                                             {selectedItem ? (
                                                 <>
                                                     {selectedItem.properties.nom}
@@ -879,7 +896,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                             ) : 'Sélection 1'}
                                         </span>
                                         <span className="text-sm text-[var(--text-muted)] font-bold uppercase bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">VS</span>
-                                        <span className={comparisonItem ? "text-blue-600" : "text-gray-400"}>
+                                        <span className={comparisonItem ? "text-orange-600" : "text-gray-400"}>
                                             {comparisonItem ? (
                                                 <>
                                                     {comparisonItem.properties.nom}
@@ -890,7 +907,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <MapPin className="text-blue-600" />
+                                        <MapPin className="text-orange-600" />
                                         {selectedItem ? (
                                             <>
                                                 {selectedItem.properties.nom}
@@ -904,7 +921,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                             </h3>
                             <label className="flex items-center gap-2 text-sm cursor-pointer bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition h-[32px] border border-transparent">
                                 <span className="text-text-secondary text-xs font-medium px-1">Events</span>
-                                <input type="checkbox" checked={showEvents} onChange={e => setShowEvents(e.target.checked)} className="h-4 w-4 rounded accent-blue-500"/>
+                                <input type="checkbox" checked={showEvents} onChange={e => setShowEvents(e.target.checked)} className="h-4 w-4 rounded accent-orange-500"/>
                             </label>
                          </div>
 
@@ -916,7 +933,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                     onClick={() => setActiveMetric(key as MapMetric)}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
                                     ${activeMetric === key
-                                        ? 'bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600 shadow-md transform scale-105'
+                                        ? 'bg-slate-800 dark:bg-orange-600 text-white border-slate-800 dark:border-orange-600 shadow-md transform scale-105'
                                         : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'}`}
                                  >
                                      {config.icon}
@@ -926,7 +943,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                          </div>
                     </div>
                     
-                    <div className="relative flex-grow min-h-[500px] rounded-xl overflow-hidden border border-border-color z-0">
+                    <div className="relative flex-grow min-h-[350px] sm:min-h-[500px] rounded-xl overflow-hidden border border-border-color z-0">
                         <div id="wplan-map" ref={mapContainerRef} className="absolute inset-0 bg-gray-100 dark:bg-slate-800"></div>
                         {(!regionGeoJSON || !departmentGeoJSON) && <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10 text-[var(--text-primary)]">Chargement de la carte...</div>}
                         
@@ -958,7 +975,7 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                     <div className="glass-card p-4">
                         <div className="flex justify-between items-center mb-2">
                              <h3 className="font-bold text-text-primary">{chartTitle}</h3>
-                             {isComparing && <Radar size={16} className="text-blue-500"/>}
+                             {isComparing && <Radar size={16} className="text-orange-500"/>}
                         </div>
                         <div className="h-[200px]"><canvas ref={chartRefs.topDepts}></canvas></div>
                     </div>
@@ -1004,9 +1021,9 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
                                 <li>Coût par acquisition élevé</li>
                             </ul>
                         </div>
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800/30">
-                            <h4 className="text-xs font-bold text-blue-800 dark:text-blue-400 uppercase mb-2 flex items-center gap-1"><TrendingUp size={12}/> Opportunités</h4>
-                            <ul className="text-xs text-blue-900 dark:text-blue-300 space-y-1 list-disc list-inside">
+                        <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border border-orange-100 dark:border-orange-800/30">
+                            <h4 className="text-xs font-bold text-orange-800 dark:text-orange-400 uppercase mb-2 flex items-center gap-1"><TrendingUp size={12}/> Opportunités</h4>
+                            <ul className="text-xs text-orange-900 dark:text-orange-300 space-y-1 list-disc list-inside">
                                 <li>Marchés de Noël (Q4)</li>
                                 <li>Nouvelles zones résidentielles Nord</li>
                             </ul>

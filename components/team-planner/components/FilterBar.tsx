@@ -15,7 +15,7 @@ const FilterGroup: React.FC<{
   selected: string[];
   onChange: (val: string) => void;
   colorClass?: string;
-}> = ({ label, options, selected, onChange, colorClass = "bg-blue-600" }) => {
+}> = ({ label, options, selected, onChange, colorClass = "bg-orange-600" }) => {
   return (
     <div className="flex flex-col gap-2 min-w-fit">
       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">{label}</span>

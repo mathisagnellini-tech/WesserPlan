@@ -110,13 +110,13 @@ export const AlumniView: React.FC<AlumniViewProps> = ({ alumni, onInfoClick, onA
                     
                     <div className="flex items-center gap-3">
                         <div className="relative group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" size={16} />
                             <input 
                                 type="text" 
                                 placeholder="Filtrer les profils..." 
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
-                                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-64 shadow-sm"
+                                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all w-64 shadow-sm"
                             />
                         </div>
                         <button className="p-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-slate-900 hover:shadow-md transition-all active:scale-95">
@@ -138,7 +138,7 @@ export const AlumniView: React.FC<AlumniViewProps> = ({ alumni, onInfoClick, onA
                         value={totalStudents} 
                         trend="+12% vs N-1"
                         icon={GraduationCap} 
-                        color="bg-blue-600" 
+                        color="bg-orange-600" 
                     />
                     <StatCard 
                         label="Top Performers" 
@@ -196,7 +196,7 @@ export const AlumniView: React.FC<AlumniViewProps> = ({ alumni, onInfoClick, onA
                             <div className="absolute top-4 right-14 opacity-0 group-hover/card:opacity-100 transition-opacity z-20">
                                 <button 
                                     onClick={(e) => { e.stopPropagation(); onAddToIncoming(person); }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transform hover:scale-105 transition-all"
+                                    className="bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transform hover:scale-105 transition-all"
                                 >
                                     <Calendar size={12} />
                                     Planifier Retour

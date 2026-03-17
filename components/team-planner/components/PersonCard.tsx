@@ -78,7 +78,7 @@ export const PersonCard = memo<PersonCardProps>(({
       const weeks = person.weeksOfExperience || 1;
       switch(weeks) {
           case 1: return { bg: 'bg-yellow-400', border: 'border-yellow-400', text: 'text-yellow-500' };
-          case 2: return { bg: 'bg-blue-500', border: 'border-blue-500', text: 'text-blue-600' };
+          case 2: return { bg: 'bg-orange-500', border: 'border-orange-500', text: 'text-orange-600' };
           case 3: return { bg: 'bg-purple-500', border: 'border-purple-500', text: 'text-purple-600' };
           case 4: return { bg: 'bg-rose-500', border: 'border-rose-500', text: 'text-rose-600' };
           default: return { bg: 'bg-slate-200', border: 'border-slate-400', text: 'text-slate-400' }; // 5+ weeks: Visible border
@@ -91,7 +91,7 @@ export const PersonCard = memo<PersonCardProps>(({
     if (!isHeatmapMode) return '';
     if (person.drRate >= 20) return 'bg-emerald-500 border-emerald-400 text-white';
     if (person.drRate >= 15) return 'bg-emerald-100 border-emerald-200';
-    if (person.drRate >= 12) return 'bg-white border-slate-200';
+    if (person.drRate >= 12) return 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700';
     return 'bg-red-500 border-red-400 text-white';
   };
 
@@ -129,7 +129,7 @@ export const PersonCard = memo<PersonCardProps>(({
   const getMetricConfig = (val: number) => {
       if (isHeatmapMode && forceWhiteText) return { color: 'text-white', bg: 'bg-white/20', ring: 'ring-white/30' };
       if (val >= 20) return { color: 'text-emerald-600', bg: 'bg-emerald-400/10', ring: 'ring-emerald-500/20' };
-      if (val >= 15) return { color: 'text-blue-600', bg: 'bg-blue-400/10', ring: 'ring-blue-500/20' };
+      if (val >= 15) return { color: 'text-orange-600', bg: 'bg-orange-400/10', ring: 'ring-orange-500/20' };
       return { color: 'text-amber-600', bg: 'bg-amber-400/10', ring: 'ring-amber-500/20' };
   };
   const metricConfig = getMetricConfig(person.drRate);
@@ -142,7 +142,7 @@ export const PersonCard = memo<PersonCardProps>(({
                 <div className={`text-[9px] uppercase font-bold ${forceWhiteText ? 'text-white/70' : 'text-slate-400'} mb-0.5 flex items-center justify-end gap-1`}>
                     <Calendar size={10} /> Dispo
                 </div>
-                <div className={`text-xs font-black ${forceWhiteText ? 'text-white bg-white/20' : 'text-slate-700 bg-white/60'} px-2 py-1 rounded-md border ${forceWhiteText ? 'border-white/30' : 'border-slate-100'} text-right shadow-sm backdrop-blur-sm`}>
+                <div className={`text-xs font-black ${forceWhiteText ? 'text-white bg-white/20' : 'text-slate-700 dark:text-slate-200 bg-white/60 dark:bg-slate-800/60'} px-2 py-1 rounded-md border ${forceWhiteText ? 'border-white/30' : 'border-slate-100 dark:border-slate-800'} text-right shadow-sm backdrop-blur-sm`}>
                     {person.returnDate}
                 </div>
             </div>
@@ -174,7 +174,7 @@ export const PersonCard = memo<PersonCardProps>(({
                   <div className="flex flex-col items-end justify-center h-full">
                       <div className={`${forceWhiteText ? 'text-white' : 'text-slate-800'} font-bold text-lg leading-none mb-1 tracking-tight`}>{person.age}</div>
                       <div className={`flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full ring-1 backdrop-blur-sm truncate max-w-[80px]
-                        ${forceWhiteText ? 'text-white bg-white/20 ring-white/30' : 'text-slate-500 bg-white/50 ring-slate-200/50'}
+                        ${forceWhiteText ? 'text-white bg-white/20 ring-white/30' : 'text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-800/50 ring-slate-200/50'}
                       `}>
                           <MapPin size={9} /> {person.origin.split(',')[0]}
                       </div>
@@ -204,7 +204,7 @@ export const PersonCard = memo<PersonCardProps>(({
                             {person.contractStatus === 'Signed' ? 'Contrat OK' : 'En Attente'}
                         </div>
                         <div className="flex items-center gap-1">
-                             <div className={`p-1 rounded-full ${person.hasLicense ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-500') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 text-slate-300')}`}>
+                             <div className={`p-1 rounded-full ${person.hasLicense ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-500') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 text-slate-300')}`}>
                                  <Car size={10} />
                              </div>
                              <div className={`p-1 rounded-full ${person.medicalVisit ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-purple-50 text-purple-500') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 text-slate-300')}`}>
@@ -269,9 +269,9 @@ export const PersonCard = memo<PersonCardProps>(({
           onDrop={handleDrop}
           className={`
             relative group flex items-center gap-3 p-2 pl-4 rounded-xl transition-all duration-200 select-none overflow-hidden
-            ${isHeatmapMode ? heatmapClass : 'bg-white hover:bg-slate-50 border border-slate-200'}
+            ${isHeatmapMode ? heatmapClass : 'bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'}
             ${isDragging ? 'opacity-50 scale-95 shadow-none' : 'shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5'}
-            ${isSelected ? 'ring-2 ring-blue-500 z-10' : ''}
+            ${isSelected ? 'ring-2 ring-orange-500 z-10' : ''}
             ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 cursor-crosshair' : ''}
             ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 z-20 scale-105' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
           `}
@@ -323,7 +323,7 @@ export const PersonCard = memo<PersonCardProps>(({
             onDrop={handleDrop}
             className={`
                 relative w-10 h-10 rounded-full transition-transform duration-200 hover:scale-110 shadow-sm
-                ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                ${isSelected ? 'ring-2 ring-orange-500 ring-offset-2' : ''}
                 ${isHeatmapMode ? heatmapClass.replace('bg-', 'border-') + ' border-2' : `ring-2 ${seniorityColors.border} ring-offset-1`}
                 ${showRelationships && !isDragging ? 'hover:ring-4 hover:ring-purple-400 cursor-crosshair' : ''}
                 ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 scale-110 z-20' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 cursor-crosshair' : 'opacity-60')) : 'cursor-pointer'}
@@ -351,9 +351,9 @@ export const PersonCard = memo<PersonCardProps>(({
       onDrop={handleDrop}
       className={`
         relative group rounded-[24px] p-4 pl-6 transition-all duration-300 select-none overflow-hidden
-        ${isHeatmapMode ? heatmapClass : `bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]`}
+        ${isHeatmapMode ? heatmapClass : `bg-gradient-to-b from-white/90 to-white/50 dark:from-slate-800/90 dark:to-slate-800/50 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]`}
         ${isDragging ? 'opacity-40 scale-95 rotate-2 shadow-none' : 'hover:-translate-y-1 hover:scale-[1.02]'}
-        ${isSelected ? 'ring-2 ring-blue-500 z-10' : ''}
+        ${isSelected ? 'ring-2 ring-orange-500 z-10' : ''}
         ${(person.isWarning || alertConfig) && !isHeatmapMode ? 'ring-1 ring-red-400/50 bg-red-50/50' : ''}
         ${!isHeatmapMode && !isSelected ? `border-2 ${seniorityColors.border}` : ''}
         ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 cursor-crosshair' : ''}
@@ -409,7 +409,7 @@ export const PersonCard = memo<PersonCardProps>(({
 
                 {/* NGO Experience Warning */}
                 {showNgoWarning && !isHeatmapMode && (
-                     <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border bg-indigo-50 text-indigo-600 border-indigo-200 flex items-center gap-1" title="Jamais travaillé avec cette asso">
+                     <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border bg-orange-50 text-orange-600 border-orange-200 flex items-center gap-1" title="Jamais travaillé avec cette asso">
                         <Info size={8} />
                         New Asso
                     </div>
@@ -437,14 +437,14 @@ export const PersonCard = memo<PersonCardProps>(({
       <button 
         onClick={(e) => { e.stopPropagation(); onInfoClick(); }}
         className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0
-            ${forceWhiteText ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-white text-slate-400 hover:text-blue-600 shadow-sm'}
+            ${forceWhiteText ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-400 hover:text-orange-600 shadow-sm'}
         `}
       >
         <Info size={14} />
       </button>
 
       {/* Bottom Section: Metrics or Alumni Info */}
-      <div className={`pt-3 border-t ${forceWhiteText ? 'border-white/20' : 'border-slate-100'}`}>
+      <div className={`pt-3 border-t ${forceWhiteText ? 'border-white/20' : 'border-slate-100 dark:border-slate-800'}`}>
           <div className="flex items-center justify-between h-10">
               {isAlumni ? (
                   <>

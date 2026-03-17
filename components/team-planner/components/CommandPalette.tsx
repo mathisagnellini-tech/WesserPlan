@@ -88,7 +88,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
                         key={action.id}
                         onClick={() => { action.perform(); onClose(); }}
                         className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-colors ${
-                            index === selectedIndex ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100'
+                            index === selectedIndex ? 'bg-orange-600 text-white' : 'text-slate-700 hover:bg-slate-100'
                         }`}
                     >
                         <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
                         </div>
                         {action.shortcut && (
                             <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${
-                                index === selectedIndex ? 'bg-blue-500 text-blue-100' : 'bg-slate-100 text-slate-400 border border-slate-200'
+                                index === selectedIndex ? 'bg-orange-500 text-orange-100' : 'bg-slate-100 text-slate-400 border border-slate-200'
                             }`}>
                                 {action.shortcut}
                             </span>

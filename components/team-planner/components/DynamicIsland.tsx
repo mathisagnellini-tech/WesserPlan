@@ -92,7 +92,7 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
                 className={`flex items-center gap-3 group cursor-pointer transition-opacity ${activeSection === 'arrivals' ? 'opacity-100' : 'opacity-50 hover:opacity-100'}`}
                 onClick={(e) => { e.stopPropagation(); setActiveSection('arrivals'); }}
             >
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isExpanded && activeSection === 'arrivals' ? 'bg-blue-500 text-white' : 'bg-white/10 text-blue-400'}`}>
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isExpanded && activeSection === 'arrivals' ? 'bg-orange-500 text-white' : 'bg-white/10 text-orange-400'}`}>
                     <UserPlus size={14} />
                 </div>
                 <div className="flex flex-col justify-center">
@@ -101,7 +101,7 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
                         {!isExpanded && (
                             <>
                                 <span className="text-white/20">|</span>
-                                <span className="text-blue-400">{count}</span>
+                                <span className="text-orange-400">{count}</span>
                             </>
                         )}
                     </span>
@@ -191,7 +191,7 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
                         <div className="flex bg-black/40 rounded-full p-1 border border-white/5">
                             <button 
                                 onClick={() => setActiveTab('new')}
-                                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${activeTab === 'new' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${activeTab === 'new' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
                             >
                                 <Sparkles size={10} />
                                 Nouveaux <span className="opacity-60 ml-0.5">{newcomers.length}</span>

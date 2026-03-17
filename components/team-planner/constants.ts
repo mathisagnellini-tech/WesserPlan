@@ -49,9 +49,9 @@ const NGO_COLORS: Record<string, string> = {
     'Greenpeace': 'bg-green-600', // Vert Eco
     'Amnesty': 'bg-yellow-500', // Jaune Noir
     'AIDES': 'bg-purple-600', // Violet
-    'MdM': 'bg-blue-500', // Bleu
+    'MdM': 'bg-cyan-500', // Cyan
     'SPA': 'bg-orange-500', // Orange
-    'Action Contre la Faim': 'bg-blue-700' // Bleu foncé
+    'Action Contre la Faim': 'bg-teal-700' // Teal
 };
 
 // --- UTILS ---

@@ -54,9 +54,17 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
     }).setView([47.1, 6.4], 9);
     
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-      attribution: '&copy; OpenStreetMap', opacity: 0.15, filter: 'grayscale(1)' 
-    }).addTo(map);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO', opacity: 0.15
+      }).addTo(map);
+    } else {
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', opacity: 0.15, filter: 'grayscale(1)'
+      }).addTo(map);
+    }
 
     mapInstanceRef.current = map;
     labelLayerRef.current = L.layerGroup().addTo(map);
@@ -298,20 +306,20 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
   }, [clusters, allCommunes, brushSelection, bonusSelection, isBrushMode, selectedClusterId, visibleTeamPath, focusedCommuneId, onCommuneClick, onSelectCluster]); // Dépendances complétées
 
   return (
-    <div className="w-full h-full relative z-0 bg-slate-50 cursor-crosshair">
+    <div className="w-full h-full relative z-0 bg-slate-50 dark:bg-slate-900 cursor-crosshair">
        <div ref={mapContainerRef} className="w-full h-full" />
        
        {hoveredData && (
            <div 
-             className="fixed z-[1000] pointer-events-none bg-white/95 backdrop-blur-md border border-slate-200 px-4 py-3 rounded-2xl shadow-2xl flex flex-col gap-0.5 animate-in fade-in zoom-in duration-150 ring-1 ring-black/5"
+             className="fixed z-[1000] pointer-events-none bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-2xl shadow-2xl flex flex-col gap-0.5 animate-in fade-in zoom-in duration-150 ring-1 ring-black/5"
              style={{ 
                  left: mousePos.x + 20, 
                  top: mousePos.y + 20 
              }}
            >
-             <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{hoveredData.id}</div>
-             <div className="text-sm font-black text-slate-900 leading-tight">{hoveredData.name}</div>
-             <div className="text-[11px] font-bold text-slate-500">{hoveredData.population.toLocaleString()} habitants</div>
+             <div className="text-[10px] font-black text-orange-600 uppercase tracking-widest">{hoveredData.id}</div>
+             <div className="text-sm font-black text-slate-900 dark:text-white leading-tight">{hoveredData.name}</div>
+             <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{hoveredData.population.toLocaleString()} habitants</div>
            </div>
        )}
 
@@ -321,6 +329,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
           .step-label { pointer-events: none; display: flex; justify-content: center; }
           .leaflet-interactive { transition: fill-opacity 0.2s, stroke-width 0.2s, stroke 0.2s; outline: none; }
           .leaflet-container { cursor: crosshair !important; background: #f1f5f9 !important; }
+          .dark .leaflet-container { background: #0f172a !important; }
        `}</style>
     </div>
   );
