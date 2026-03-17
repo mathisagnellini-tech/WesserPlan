@@ -1,7 +1,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
 import { Cluster, Commune } from '../types';
+
+declare const L: any;
 
 interface MapCanvasProps {
   clusters: Cluster[];
