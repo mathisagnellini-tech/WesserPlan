@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Wesser Plan</title>
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,6 +161,28 @@
 </head>
 <body class="min-h-screen">
     <div id="root"></div>
+    <script>
+      // Diagnostic: show errors instead of blank page
+      window.onerror = function(msg, src, line, col, err) {
+        var d = document.getElementById('root');
+        if (d && !d.innerHTML) {
+          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#ef4444">Erreur JS</h1><pre style="background:#f1f5f9;padding:16px;border-radius:8px;overflow:auto;white-space:pre-wrap">' + msg + '\n\nSource: ' + src + '\nLine: ' + line + '\nCol: ' + col + (err && err.stack ? '\n\n' + err.stack : '') + '</pre></div>';
+        }
+      };
+      window.addEventListener('unhandledrejection', function(e) {
+        var d = document.getElementById('root');
+        if (d && !d.innerHTML) {
+          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#ef4444">Erreur Promise</h1><pre style="background:#f1f5f9;padding:16px;border-radius:8px;overflow:auto;white-space:pre-wrap">' + (e.reason && e.reason.stack || e.reason || 'Unknown') + '</pre></div>';
+        }
+      });
+      // Timeout: if nothing renders in 10s, show diagnostic
+      setTimeout(function() {
+        var d = document.getElementById('root');
+        if (d && !d.innerHTML) {
+          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#f59e0b">App non chargee</h1><p>Le JavaScript principal n\'a pas reussi a se charger en 10 secondes.</p><p>Verifiez la console (F12) pour plus de details.</p></div>';
+        }
+      }, 10000);
+    </script>
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
