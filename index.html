@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" style="color-scheme: light;">
+<html lang="fr">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
@@ -27,16 +27,41 @@
         --bg-main: #F8F9FE;
         --bg-sidebar: rgba(249, 247, 246, 0.8);
         --bg-card: rgba(255, 255, 255, 0.85);
+        --bg-card-solid: #ffffff;
         --text-primary: #1a1a1a;
         --text-secondary: #5a5a5a;
+        --text-muted: #94a3b8;
         --highlight-bg: #FFEFEB;
         --highlight-text: #FF5B2B;
         --highlight-bg-hover: #ffddd4;
         --border-color: rgba(255, 255, 255, 0.6);
+        --border-subtle: #e2e8f0;
         --shadow-soft: 0 10px 40px rgba(0,0,0,.04);
         --radius-lg: 24px;
         --radius-md: 16px;
         --radius-sm: 12px;
+        --input-bg: #ffffff;
+        --input-border: #e2e8f0;
+        color-scheme: light;
+      }
+
+      .dark {
+        --bg-main: #0f111a;
+        --bg-sidebar: rgba(17, 19, 30, 0.92);
+        --bg-card: rgba(30, 33, 48, 0.85);
+        --bg-card-solid: #1e2130;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa0b0;
+        --text-muted: #5a6178;
+        --highlight-bg: #2a1a15;
+        --highlight-text: #ff7a52;
+        --highlight-bg-hover: #3a2218;
+        --border-color: rgba(255, 255, 255, 0.08);
+        --border-subtle: rgba(255, 255, 255, 0.1);
+        --shadow-soft: 0 10px 40px rgba(0,0,0,.2);
+        --input-bg: #1a1d2e;
+        --input-border: rgba(255, 255, 255, 0.12);
+        color-scheme: dark;
       }
 
       html,body {
@@ -71,6 +96,10 @@
         filter: blur(80px); opacity: 0.8;
         animation: blob-float-1 25s infinite ease-in-out;
       }
+      .dark body::before {
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.08), transparent 70%);
+        opacity: 0.5;
+      }
 
       /* Blob 2: Purple, Bottom Left */
       body::after {
@@ -79,6 +108,10 @@
         bottom: -20%; left: -10%; z-index: -1; pointer-events: none;
         filter: blur(100px); opacity: 0.8;
         animation: blob-float-2 30s infinite ease-in-out reverse;
+      }
+      .dark body::after {
+        background: radial-gradient(circle, rgba(147, 51, 234, 0.06), transparent 70%);
+        opacity: 0.4;
       }
 
       .color-orb {
@@ -109,10 +142,25 @@
           background-color: rgba(255, 255, 255, 0.92);
       }
 
+      .dark .glass-card {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .dark .glass-card:hover {
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+        border-color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(30, 33, 48, 0.95);
+      }
+
       #france-map, #wplan-map, #define-areas-map {
         height:100%;
         border-radius: var(--radius-lg);
         background: #e5e7eb;
+      }
+      .dark #france-map, .dark #wplan-map, .dark #define-areas-map {
+        background: #1a1d2e;
       }
 
       .leaflet-tooltip {
@@ -124,11 +172,18 @@
         font-family: 'Inter', sans-serif;
         padding: 4px 8px;
       }
+      .dark .leaflet-tooltip {
+        background: rgba(30, 33, 48, 0.95);
+        border-color: rgba(255,255,255,0.1);
+        color: #e8eaed;
+      }
 
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
       ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      .dark ::-webkit-scrollbar-thumb { background: #3a3f54; }
+      .dark ::-webkit-scrollbar-thumb:hover { background: #4a5070; }
 
       @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       .animate-fade-in { animation: fade-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
@@ -137,12 +192,24 @@
         background: rgba(255,255,255,0.6); backdrop-filter: blur(12px);
         border: 1px solid var(--border-color); box-shadow: var(--shadow-soft);
       }
+      .dark #nc-tab-nav {
+        background: rgba(30, 33, 48, 0.6);
+      }
 
       .commune-card { transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1); }
 
       .tooltip-zone {
         background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);
         border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      }
+      .dark .tooltip-zone {
+        background-color: rgba(30, 33, 48, 0.95);
+        border-color: rgba(255,255,255,0.1);
+      }
+
+      /* Smooth theme transition */
+      html.theme-transition, html.theme-transition *, html.theme-transition *::before, html.theme-transition *::after {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
       }
 
       /* TeamPlanner dark scrollbar (scoped) */
@@ -185,10 +252,8 @@
         /* Prevent overscroll bounce */
         html { overscroll-behavior: none; }
 
-        /* Zone planner sidebar: full width on mobile, inline width on desktop */
-        @media (max-width: 767px) {
-          .zone-planner-sidebar { width: 100% !important; min-width: unset !important; max-height: 50vh; }
-        }
+        /* Zone planner sidebar: full width on mobile */
+        .zone-planner-sidebar { width: 100% !important; min-width: unset !important; max-height: 50vh; }
 
         /* Hide blobs on mobile for performance */
         body::before, body::after, .color-orb { display: none; }
@@ -201,9 +266,17 @@
     </style>
 </head>
 <body class="min-h-screen">
+    <script>
+      // Restore theme before render to prevent flash
+      (function() {
+        var t = localStorage.getItem('wesserplan-theme');
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script>
-      // Diagnostic: show errors instead of blank page
       window.onerror = function(msg, src, line, col, err) {
         var d = document.getElementById('root');
         if (d && !d.innerHTML) {
@@ -216,11 +289,10 @@
           d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#ef4444">Erreur Promise</h1><pre style="background:#f1f5f9;padding:16px;border-radius:8px;overflow:auto;white-space:pre-wrap">' + (e.reason && e.reason.stack || e.reason || 'Unknown') + '</pre></div>';
         }
       });
-      // Timeout: if nothing renders in 10s, show diagnostic
       setTimeout(function() {
         var d = document.getElementById('root');
         if (d && !d.innerHTML) {
-          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#f59e0b">App non chargee</h1><p>Le JavaScript principal n\'a pas reussi a se charger en 10 secondes.</p><p>Verifiez la console (F12) pour plus de details.</p></div>';
+          d.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h1 style="color:#f59e0b">App non chargee</h1><p>Le JavaScript n\'a pas reussi a se charger en 10 secondes.</p><p>Ouvrez la console (F12) pour voir l\'erreur.</p></div>';
         }
       }, 10000);
     </script>

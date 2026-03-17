@@ -20,7 +20,7 @@ interface ProspectHistoryItem {
 // --- SUB-COMPONENTS ---
 
 const StatusBadge: React.FC<{ status: CommuneStatus, interactive?: boolean, onClick?: (e: React.MouseEvent) => void }> = ({ status, interactive, onClick }) => {
-  const config = statusMap[status] || { text: status, color: 'text-slate-600', bg: 'bg-slate-100' };
+  const config = statusMap[status] || { text: status, color: 'text-[var(--text-secondary)]', bg: 'bg-slate-100 dark:bg-slate-800' };
   
   const getIcon = () => {
     switch(status) {
@@ -97,7 +97,7 @@ const QuickStatusDropdown: React.FC<{
             
             {isOpen && createPortal(
                 <div 
-                    className="fixed z-[9999] bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden min-w-[160px] animate-fade-in"
+                    className="fixed z-[9999] bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-2xl border border-[var(--border-subtle)] overflow-hidden min-w-[160px] animate-fade-in"
                     style={{ 
                         top: coords.top, 
                         left: coords.left 
@@ -112,8 +112,8 @@ const QuickStatusDropdown: React.FC<{
                                 onSelect(key as CommuneStatus); 
                                 setIsOpen(false); 
                             }}
-                            className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 flex items-center justify-between transition-colors border-b border-slate-50 last:border-0
-                            ${key === currentStatus ? 'bg-blue-50 text-blue-600' : 'text-slate-600'}`}
+                            className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center justify-between transition-colors border-b border-slate-50 last:border-0
+                            ${key === currentStatus ? 'bg-blue-50 text-blue-600' : 'text-[var(--text-secondary)]'}`}
                         >
                             <span>{conf.text}</span>
                             {key === currentStatus && <Check size={12}/>}
@@ -159,24 +159,24 @@ const MultiSelectFilter: React.FC<{
         <div className="relative min-w-[140px]" ref={containerRef}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between px-3 py-2 text-sm border rounded-xl bg-white transition-all
-                ${selected.size > 0 ? 'border-blue-300 ring-1 ring-blue-100 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-300'}`}
+                className={`w-full flex items-center justify-between px-3 py-2 text-sm border rounded-xl bg-white dark:bg-[var(--bg-card-solid)] transition-all
+                ${selected.size > 0 ? 'border-blue-300 ring-1 ring-blue-100 text-blue-700' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-blue-300'}`}
             >
                 <div className="flex items-center gap-2 truncate">
                     <span className="font-bold truncate">
                         {selected.size === 0 ? label : `${selected.size} ${label}`}
                     </span>
                 </div>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
+                <ChevronDown size={14} className={`text-[var(--text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 max-h-64 flex flex-col bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden">
-                    <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+                <div className="absolute top-full left-0 mt-2 w-56 max-h-64 flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-[var(--border-subtle)] z-50 overflow-hidden">
+                    <div className="p-2 border-b border-[var(--border-subtle)] sticky top-0 bg-white dark:bg-[var(--bg-card-solid)] z-10">
                         <input 
                             type="text" 
                             placeholder={`Chercher ${label}...`}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400"
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400"
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             autoFocus
@@ -190,21 +190,21 @@ const MultiSelectFilter: React.FC<{
                                     key={opt.value} 
                                     onClick={() => toggleOption(opt.value)}
                                     className={`flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-xs font-medium mb-0.5
-                                    ${isSelected ? 'bg-blue-50 text-blue-700' : 'hover:bg-slate-50 text-slate-700'}`}
+                                    ${isSelected ? 'bg-blue-50 text-blue-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-[var(--text-primary)]'}`}
                                 >
                                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors
-                                        ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}`}>
+                                        ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[var(--bg-card-solid)]'}`}>
                                         {isSelected && <Check size={10} className="text-white" strokeWidth={3}/>}
                                     </div>
                                     <span className="truncate">{opt.label}</span>
                                 </div>
                             )
                         }) : (
-                            <div className="p-4 text-center text-xs text-slate-400">Aucun résultat</div>
+                            <div className="p-4 text-center text-xs text-[var(--text-muted)]">Aucun résultat</div>
                         )}
                     </div>
                     {selected.size > 0 && (
-                        <div className="p-2 border-t border-slate-100 bg-slate-50">
+                        <div className="p-2 border-t border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50">
                             <button 
                                 onClick={() => onChange(new Set())}
                                 className="w-full py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -233,10 +233,10 @@ const EditableField: React.FC<{
     if (isEditing) {
         return (
             <div className="flex items-center gap-2 animate-fade-in w-full">
-                <Icon size={16} className="text-slate-400"/>
+                <Icon size={16} className="text-[var(--text-muted)]"/>
                 <input 
                     type={type} 
-                    className="flex-1 min-w-0 bg-white border border-blue-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 min-w-0 bg-white dark:bg-[var(--bg-card-solid)] border border-blue-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={tempValue}
                     onChange={(e) => setTempValue(e.target.value)}
                     autoFocus
@@ -251,10 +251,10 @@ const EditableField: React.FC<{
     }
 
     return (
-        <div className="flex items-center justify-between group w-full cursor-pointer p-1 -ml-1 rounded hover:bg-slate-50 transition-colors" onClick={() => setIsEditing(true)}>
+        <div className="flex items-center justify-between group w-full cursor-pointer p-1 -ml-1 rounded hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setIsEditing(true)}>
              <div className="flex items-center gap-2 min-w-0">
-                <Icon size={16} className="text-slate-400"/>
-                <span className="text-slate-700 font-medium truncate">{value || 'Non renseigné'}</span>
+                <Icon size={16} className="text-[var(--text-muted)]"/>
+                <span className="text-[var(--text-primary)] font-medium truncate">{value || 'Non renseigné'}</span>
              </div>
              <Edit2 size={12} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
@@ -263,7 +263,7 @@ const EditableField: React.FC<{
 
 // --- MINI MAP VISUALIZER FOR HISTORY ---
 const MiniZoneVisualizer: React.FC<{ points: {lat: number, lng: number}[] }> = ({ points }) => {
-    if (!points || points.length === 0) return <div className="w-full h-full bg-slate-100 rounded-lg"></div>;
+    if (!points || points.length === 0) return <div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-lg"></div>;
 
     // Calculate bounds
     const lats = points.map(p => p.lat);
@@ -275,7 +275,7 @@ const MiniZoneVisualizer: React.FC<{ points: {lat: number, lng: number}[] }> = (
 
     // Normalize and plot
     return (
-        <div className="w-full h-24 bg-slate-100 rounded-lg relative overflow-hidden border border-slate-200">
+        <div className="w-full h-24 bg-slate-100 dark:bg-slate-800 rounded-lg relative overflow-hidden border border-[var(--border-subtle)]">
             {points.map((p, idx) => {
                 // Simple linear normalization to 10-90% range to keep padding
                 const y = 90 - ((p.lat - minLat) / (maxLat - minLat || 1)) * 80; // Invert Y for CSS top
@@ -288,7 +288,7 @@ const MiniZoneVisualizer: React.FC<{ points: {lat: number, lng: number}[] }> = (
                     />
                 );
             })}
-            <div className="absolute bottom-1 right-1 text-[8px] font-bold text-slate-400 uppercase">Mini-Map</div>
+            <div className="absolute bottom-1 right-1 text-[8px] font-bold text-[var(--text-muted)] uppercase">Mini-Map</div>
         </div>
     );
 };
@@ -305,19 +305,19 @@ const ProspectValidationModal: React.FC<{
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-fade-in overflow-hidden">
+             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+             <div className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-fade-in overflow-hidden">
                 
                 {/* Header */}
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
                     <div>
-                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                        <h2 className="text-xl font-black text-[var(--text-primary)] flex items-center gap-2">
                             <Send className="text-blue-600" size={24}/>
                             Validation de la Prospection
                         </h2>
-                        <p className="text-sm text-slate-500">Récapitulatif de votre demande de zone</p>
+                        <p className="text-sm text-[var(--text-secondary)]">Récapitulatif de votre demande de zone</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X size={20} /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"><X size={20} /></button>
                 </div>
 
                 {/* Content */}
@@ -352,14 +352,14 @@ const ProspectValidationModal: React.FC<{
 
                     {/* Commune List */}
                     <div>
-                        <h4 className="font-bold text-slate-700 mb-2 text-sm flex items-center gap-2">
+                        <h4 className="font-bold text-[var(--text-primary)] mb-2 text-sm flex items-center gap-2">
                             <ListIcon size={16}/> Liste des communes ciblées
                         </h4>
-                        <div className="bg-slate-50 rounded-xl border border-slate-200 max-h-48 overflow-y-auto p-2 grid grid-cols-2 gap-2">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-[var(--border-subtle)] max-h-48 overflow-y-auto p-2 grid grid-cols-2 gap-2">
                             {communes.map((c) => (
-                                <div key={c.properties.code} className="bg-white px-3 py-2 rounded-lg border border-slate-100 shadow-sm flex justify-between items-center text-xs">
-                                    <span className="font-bold text-slate-700">{c.properties.nom}</span>
-                                    <span className="text-slate-400">{c.properties.population.toLocaleString()} hab.</span>
+                                <div key={c.properties.code} className="bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] shadow-sm flex justify-between items-center text-xs">
+                                    <span className="font-bold text-[var(--text-primary)]">{c.properties.nom}</span>
+                                    <span className="text-[var(--text-muted)]">{c.properties.population.toLocaleString()} hab.</span>
                                 </div>
                             ))}
                         </div>
@@ -368,8 +368,8 @@ const ProspectValidationModal: React.FC<{
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-                    <button onClick={onClose} className="px-5 py-2.5 text-slate-600 hover:bg-slate-200 rounded-xl font-bold text-sm transition-colors">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] flex justify-end gap-3">
+                    <button onClick={onClose} className="px-5 py-2.5 text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-sm transition-colors">
                         Annuler
                     </button>
                     <button onClick={onConfirm} className="px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
@@ -589,7 +589,7 @@ const ProspectionMap: React.FC<{
                             <b>${feature.properties.nom}</b><br/>
                             ${feature.properties.population.toLocaleString()} hab.<br/>
                             <span class="text-xs text-emerald-600 font-bold">${feature.properties.revenue.toLocaleString()} €</span><br/>
-                            ${saturationOrg !== 'none' ? `<span class="text-xs ${lastVisit ? 'text-slate-600' : 'text-green-600'}">Dernier passage (${saturationOrg.toUpperCase()}): <b>${dateStr}</b></span>` : ''}
+                            ${saturationOrg !== 'none' ? `<span class="text-xs ${lastVisit ? 'text-[var(--text-secondary)]' : 'text-green-600'}">Dernier passage (${saturationOrg.toUpperCase()}): <b>${dateStr}</b></span>` : ''}
                         </div>
                     `, { sticky: true, direction: 'top' });
 
@@ -644,8 +644,8 @@ const ProspectionMap: React.FC<{
 
     if (departments.size === 0) {
         return (
-            <div className="h-full flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                <div className="text-center text-slate-400">
+            <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-[var(--border-subtle)]">
+                <div className="text-center text-[var(--text-muted)]">
                     <Filter size={48} className="mx-auto mb-4 opacity-50"/>
                     <p className="text-lg font-bold">Sélectionnez un ou plusieurs départements</p>
                     <p className="text-sm">Utilisez les filtres à gauche pour charger la carte.</p>
@@ -655,83 +655,83 @@ const ProspectionMap: React.FC<{
     }
 
     return (
-        <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+        <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)]">
             {isLoading && (
-                 <div className="absolute inset-0 z-[50] bg-white/80 backdrop-blur-sm flex items-center justify-center flex-col">
+                 <div className="absolute inset-0 z-[50] bg-white/80 dark:bg-[var(--bg-card-solid)]/80 backdrop-blur-sm flex items-center justify-center flex-col">
                      <Loader2 size={48} className="text-blue-600 animate-spin mb-4"/>
-                     <p className="font-bold text-slate-800">Chargement de la topographie...</p>
+                     <p className="font-bold text-[var(--text-primary)]">Chargement de la topographie...</p>
                  </div>
             )}
             
             {/* Toolbar - Top Left (Brush Tools) */}
-            <div className="absolute top-4 left-4 z-[40] bg-white p-3 rounded-xl shadow-lg border border-slate-100 flex flex-col gap-4 w-64">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <div className="absolute top-4 left-4 z-[40] bg-white dark:bg-[var(--bg-card-solid)] p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] flex flex-col gap-4 w-64">
+                <h4 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
                     <Filter size={14}/> Critères de Cinglage
                 </h4>
                 
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-500 font-bold">Pop. Min</span>
+                        <span className="text-[var(--text-secondary)] font-bold">Pop. Min</span>
                         <span className="text-blue-600 font-bold">{minPop} hab.</span>
                     </div>
                     <input 
                         type="range" min="0" max="5000" step="100" 
                         value={minPop} onChange={(e) => setMinPop(Number(e.target.value))}
-                        className="w-full accent-blue-600 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                        className="w-full accent-blue-600 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
                     />
                 </div>
 
                 {/* Revenu Filter Restored */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-500 font-bold">Rev. Min</span>
+                        <span className="text-[var(--text-secondary)] font-bold">Rev. Min</span>
                         <span className="text-emerald-600 font-bold">{minRevenue / 1000}k €</span>
                     </div>
                     <input 
                         type="range" min="15000" max="45000" step="1000" 
                         value={minRevenue} onChange={(e) => setMinRevenue(Number(e.target.value))}
-                        className="w-full accent-emerald-600 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                        className="w-full accent-emerald-600 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
                     />
                 </div>
 
-                <div className="h-px bg-slate-100 my-1"></div>
+                <div className="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
 
-                <div className="flex bg-slate-100 p-1 rounded-lg">
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                      <button 
                         onClick={() => setTool('move')}
-                        className={`flex-1 flex items-center justify-center py-2 rounded-md transition-all ${tool === 'move' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`flex-1 flex items-center justify-center py-2 rounded-md transition-all ${tool === 'move' ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                         title="Naviguer"
                     >
                         <Move size={16} />
                     </button>
                     <button 
                         onClick={() => setTool('brush')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${tool === 'brush' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${tool === 'brush' ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow text-blue-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                         title="Sélectionner"
                     >
                         <Brush size={16} />
                     </button>
                     <button 
                         onClick={() => setTool('eraser')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${tool === 'eraser' ? 'bg-white shadow text-red-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${tool === 'eraser' ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow text-red-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                         title="Effacer"
                     >
                         <Eraser size={16} />
                     </button>
                 </div>
-                {tool !== 'move' && <p className="text-[10px] text-center text-slate-400">Le déplacement carte est désactivé en mode Pinceau</p>}
+                {tool !== 'move' && <p className="text-[10px] text-center text-[var(--text-muted)]">Le déplacement carte est désactivé en mode Pinceau</p>}
             </div>
 
             {/* Toolbar - Top Right (History/Layer) */}
-            <div className="absolute top-4 right-4 z-[40] bg-white p-2 rounded-xl shadow-lg border border-slate-100">
-                <div className="flex items-center gap-2 px-2 pb-2 mb-2 border-b border-slate-100">
-                    <Layers size={14} className="text-slate-400"/>
-                    <span className="text-xs font-bold text-slate-700 uppercase">Calque de Saturation</span>
+            <div className="absolute top-4 right-4 z-[40] bg-white dark:bg-[var(--bg-card-solid)] p-2 rounded-xl shadow-lg border border-[var(--border-subtle)]">
+                <div className="flex items-center gap-2 px-2 pb-2 mb-2 border-b border-[var(--border-subtle)]">
+                    <Layers size={14} className="text-[var(--text-muted)]"/>
+                    <span className="text-xs font-bold text-[var(--text-primary)] uppercase">Calque de Saturation</span>
                 </div>
                 <div className="flex flex-col gap-1">
                     <button 
                         onClick={() => setSaturationOrg('none')}
-                        className={`px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors ${saturationOrg === 'none' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:bg-slate-50'}`}
+                        className={`px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors ${saturationOrg === 'none' ? 'bg-slate-100 dark:bg-slate-800 text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                     >
                         Aucun (Neutre)
                     </button>
@@ -739,7 +739,7 @@ const ProspectionMap: React.FC<{
                         <button 
                             key={org}
                             onClick={() => setSaturationOrg(org as Organization)}
-                            className={`px-3 py-2 text-xs font-bold rounded-lg text-left uppercase transition-colors flex justify-between items-center ${saturationOrg === org ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'text-slate-500 hover:bg-slate-50'}`}
+                            className={`px-3 py-2 text-xs font-bold rounded-lg text-left uppercase transition-colors flex justify-between items-center ${saturationOrg === org ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                         >
                             <span>Historique {org}</span>
                             {saturationOrg === org && <Check size={12}/>}
@@ -750,22 +750,22 @@ const ProspectionMap: React.FC<{
 
             {/* Legend - Bottom Left */}
             {saturationOrg !== 'none' && (
-                <div className="absolute bottom-6 left-6 z-[40] bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg border border-slate-100 animate-fade-in">
-                    <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Légende Historique</h5>
+                <div className="absolute bottom-6 left-6 z-[40] bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] animate-fade-in">
+                    <h5 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Légende Historique</h5>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
                             <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></span>
-                            <span className="text-xs font-bold text-slate-700">&lt; 6 Mois (Saturé)</span>
+                            <span className="text-xs font-bold text-[var(--text-primary)]">&lt; 6 Mois (Saturé)</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></span>
-                            <span className="text-xs font-bold text-slate-700">6 - 12 Mois (Attention)</span>
+                            <span className="text-xs font-bold text-[var(--text-primary)]">6 - 12 Mois (Attention)</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></span>
-                            <span className="text-xs font-bold text-slate-700">&gt; 1 An / Jamais (Libre)</span>
+                            <span className="text-xs font-bold text-[var(--text-primary)]">&gt; 1 An / Jamais (Libre)</span>
                         </div>
-                        <div className="flex items-center gap-2 pt-1 mt-1 border-t border-slate-100">
+                        <div className="flex items-center gap-2 pt-1 mt-1 border-t border-[var(--border-subtle)]">
                             <span className="w-3 h-3 rounded-full bg-blue-500 shadow-sm border border-white"></span>
                             <span className="text-xs font-bold text-blue-600">Votre Sélection</span>
                         </div>
@@ -773,18 +773,18 @@ const ProspectionMap: React.FC<{
                 </div>
             )}
 
-            <div ref={mapContainerRef} className="h-full w-full z-0 bg-slate-100"></div>
+            <div ref={mapContainerRef} className="h-full w-full z-0 bg-slate-100 dark:bg-slate-800"></div>
 
             {/* Validation Bar - Bottom Center */}
             {selectedStats.count > 0 && (
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[40] bg-slate-900/95 backdrop-blur text-white p-4 rounded-2xl shadow-2xl flex items-center gap-8 animate-fade-in">
                     <div>
-                        <p className="text-slate-400 text-xs font-bold uppercase">Sélection</p>
-                        <p className="text-xl font-black">{selectedStats.count} <span className="text-sm font-medium text-slate-400">communes</span></p>
+                        <p className="text-[var(--text-muted)] text-xs font-bold uppercase">Sélection</p>
+                        <p className="text-xl font-black">{selectedStats.count} <span className="text-sm font-medium text-[var(--text-muted)]">communes</span></p>
                     </div>
                     <div className="w-px bg-white/20 h-8 self-center"></div>
                     <div>
-                        <p className="text-slate-400 text-xs font-bold uppercase">Potentiel Hab.</p>
+                        <p className="text-[var(--text-muted)] text-xs font-bold uppercase">Potentiel Hab.</p>
                         <p className="text-xl font-black text-blue-400">{(selectedStats.pop / 1000).toFixed(1)}k</p>
                     </div>
                     
@@ -1009,25 +1009,25 @@ const CommunesTab: React.FC = () => {
         />
 
         {/* Left List Panel */}
-        <div className="w-full md:w-[480px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-shrink-0 max-h-[60vh] md:max-h-none">
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50 space-y-4">
+        <div className="w-[480px] flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-sm border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+            <div className="p-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-slate-800/30 space-y-4">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+                    <h2 className="text-xl font-extrabold text-[var(--text-primary)] flex items-center gap-2">
                         {mode === 'list' ? <ListIcon className="text-blue-600"/> : <MapIcon className="text-emerald-600"/>} 
                         {mode === 'list' ? 'Liste des Communes' : 'Prospection Carte'}
                     </h2>
                     {/* MODE SWITCHER */}
-                    <div className="flex bg-slate-200 p-1 rounded-lg">
+                    <div className="flex bg-slate-200 dark:bg-slate-700 p-1 rounded-lg">
                         <button 
                             onClick={() => setMode('list')}
-                            className={`p-2 rounded-md transition-all ${mode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`p-2 rounded-md transition-all ${mode === 'list' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-blue-600 shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                             title="Vue Liste"
                         >
                             <ListIcon size={18} />
                         </button>
                         <button 
                             onClick={() => setMode('map')}
-                            className={`p-2 rounded-md transition-all ${mode === 'map' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`p-2 rounded-md transition-all ${mode === 'map' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-emerald-600 shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                             title="Vue Prospection"
                         >
                             <MapIcon size={18} />
@@ -1041,7 +1041,7 @@ const CommunesTab: React.FC = () => {
                          <button
                             key={org}
                             onClick={() => setSelectedOrg(org)}
-                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === org ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === org ? 'bg-slate-800 text-white border-slate-800' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                          >
                              {org}
                          </button>
@@ -1049,14 +1049,14 @@ const CommunesTab: React.FC = () => {
                 </div>
 
                 {/* Filters Section */}
-                <div className="space-y-3 pt-2 border-t border-slate-200/50">
+                <div className="space-y-3 pt-2 border-t border-[var(--border-subtle)]/50">
                     {mode === 'list' && (
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16}/>
                             <input 
                                 type="text" 
                                 placeholder="Rechercher une ville..." 
-                                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-[var(--bg-card-solid)]"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -1095,7 +1095,7 @@ const CommunesTab: React.FC = () => {
                                         className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase border transition-all flex items-center gap-1
                                         ${isSelected 
                                             ? `${conf.bg} ${conf.color} border-${conf.color.split('-')[1]}-200 shadow-sm` 
-                                            : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:border-slate-300 dark:hover:border-slate-500'
                                         }`}
                                     >
                                         {isSelected && <Check size={10} strokeWidth={4}/>}
@@ -1104,7 +1104,7 @@ const CommunesTab: React.FC = () => {
                                 );
                             })}
                             {selectedStatuses.size > 0 && (
-                                <button onClick={() => setSelectedStatuses(new Set())} className="text-[10px] text-slate-400 underline px-1">Reset</button>
+                                <button onClick={() => setSelectedStatuses(new Set())} className="text-[10px] text-[var(--text-muted)] underline px-1">Reset</button>
                             )}
                         </div>
                     )}
@@ -1126,16 +1126,16 @@ const CommunesTab: React.FC = () => {
                                 <div 
                                     key={c.id} 
                                     onClick={() => setSelectedCommune(c)}
-                                    className={`p-3 rounded-xl border transition-all cursor-pointer hover:shadow-md ${selectedCommune?.id === c.id ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-200' : 'bg-white border-slate-100 hover:border-blue-100'}`}
+                                    className={`p-3 rounded-xl border transition-all cursor-pointer hover:shadow-md ${selectedCommune?.id === c.id ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-200' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] hover:border-blue-100'}`}
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-slate-800">{c.nom}</h3>
+                                        <h3 className="font-bold text-[var(--text-primary)]">{c.nom}</h3>
                                         <QuickStatusDropdown 
                                             currentStatus={c.statut} 
                                             onSelect={(newStatus) => handleUpdateCommune(c.id, { statut: newStatus })}
                                         />
                                     </div>
-                                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                                    <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                                         <div className="flex items-center gap-1"><MapPin size={12}/> {c.departement}</div>
                                         <div className="flex items-center gap-1"><Users size={12}/> {c.population.toLocaleString()}</div>
                                         <div className="flex items-center gap-1"><Euro size={12}/> {c.revenue}</div>
@@ -1143,12 +1143,12 @@ const CommunesTab: React.FC = () => {
                                 </div>
                             ))
                         ) : (
-                            <div className="p-8 text-center text-slate-400 text-sm italic">
+                            <div className="p-8 text-center text-[var(--text-muted)] text-sm italic">
                                 Aucune commune ne correspond aux filtres.
                             </div>
                         )}
                     </div>
-                    <div className="p-3 bg-slate-50 border-t border-slate-100 text-center text-xs font-bold text-slate-500">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] text-center text-xs font-bold text-[var(--text-secondary)]">
                         {filteredCommunes.length} Communes affichées
                     </div>
                 </>
@@ -1157,19 +1157,19 @@ const CommunesTab: React.FC = () => {
             {/* HISTORY SIDEBAR FOR MAP MODE */}
             {mode === 'map' && (
                 <div className="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-4">
-                     <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-2">
+                     <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2 mb-2">
                         <History size={16}/> Mes dernières demandes
                      </h3>
                      {pastRequests.map(req => (
-                         <div key={req.id} className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                         <div key={req.id} className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
                              <div className="flex justify-between items-start mb-2">
                                  <div>
-                                     <span className="text-[10px] font-bold text-slate-400 uppercase">{req.date.toLocaleDateString()}</span>
-                                     <div className="font-bold text-slate-800">{req.communeCount} Communes</div>
+                                     <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">{req.date.toLocaleDateString()}</span>
+                                     <div className="font-bold text-[var(--text-primary)]">{req.communeCount} Communes</div>
                                  </div>
                                  <div className="text-right">
                                      <div className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{req.zoneCount} Zones</div>
-                                     <div className="text-[10px] text-slate-400">{(req.totalPop/1000).toFixed(1)}k hab.</div>
+                                     <div className="text-[10px] text-[var(--text-muted)]">{(req.totalPop/1000).toFixed(1)}k hab.</div>
                                  </div>
                              </div>
                              
@@ -1178,7 +1178,7 @@ const CommunesTab: React.FC = () => {
                                  <MiniZoneVisualizer points={req.communesList} />
                              </div>
 
-                             <div className="text-xs text-slate-500 truncate">
+                             <div className="text-xs text-[var(--text-secondary)] truncate">
                                  {req.communesList.slice(0, 3).map(c => c.nom).join(', ')}...
                              </div>
                          </div>
@@ -1188,18 +1188,18 @@ const CommunesTab: React.FC = () => {
         </div>
 
         {/* Right Details & Map Panel */}
-        <div className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
+        <div className="flex-1 flex flex-col gap-6 min-h-0">
             {mode === 'list' ? (
                 <>
                      {selectedCommune ? (
-                        <div className="glass-card p-4 md:p-6 animate-fade-in flex flex-col gap-4 md:gap-6 overflow-y-auto custom-scrollbar max-h-[50vh]">
-                            <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                        <div className="glass-card p-6 animate-fade-in flex flex-col gap-6 overflow-y-auto custom-scrollbar max-h-[50vh]">
+                            <div className="flex justify-between items-start">
                                 <div>
-                                    <h2 className="text-xl md:text-3xl font-black text-slate-800 mb-1">{selectedCommune.nom}</h2>
-                                    <p className="text-slate-500 font-medium text-sm md:text-lg">{departmentMap[selectedCommune.departement]} ({selectedCommune.departement})</p>
+                                    <h2 className="text-3xl font-black text-[var(--text-primary)] mb-1">{selectedCommune.nom}</h2>
+                                    <p className="text-[var(--text-secondary)] font-medium text-lg">{departmentMap[selectedCommune.departement]} ({selectedCommune.departement})</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Statut Actuel</p>
+                                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Statut Actuel</p>
                                     <QuickStatusDropdown 
                                         currentStatus={selectedCommune.statut} 
                                         onSelect={(s) => handleUpdateCommune(selectedCommune.id, { statut: s })}
@@ -1208,33 +1208,33 @@ const CommunesTab: React.FC = () => {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center">
+                                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center">
                                     <Users className="text-blue-500 mb-1" size={20}/>
-                                    <span className="text-lg font-black text-slate-800">{selectedCommune.population.toLocaleString()}</span>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Habitants</span>
+                                    <span className="text-lg font-black text-[var(--text-primary)]">{selectedCommune.population.toLocaleString()}</span>
+                                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Habitants</span>
                                 </div>
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center">
+                                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center">
                                     <Euro className="text-emerald-500 mb-1" size={20}/>
-                                    <span className="text-lg font-black text-slate-800">{selectedCommune.revenue}</span>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Rev. Médian</span>
+                                    <span className="text-lg font-black text-[var(--text-primary)]">{selectedCommune.revenue}</span>
+                                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Rev. Médian</span>
                                 </div>
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center">
+                                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center">
                                     <Clock className="text-purple-500 mb-1" size={20}/>
-                                    <span className="text-lg font-black text-slate-800">{selectedCommune.passage}</span>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Dernier Passage</span>
+                                    <span className="text-lg font-black text-[var(--text-primary)]">{selectedCommune.passage}</span>
+                                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Dernier Passage</span>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <Info size={16}/> Administration
                                 </h3>
-                                <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                                <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-4 space-y-3 shadow-sm">
                                         <div>
-                                            <p className="text-xs text-slate-400 font-bold uppercase">Maire Actuel</p>
-                                            <p className="text-base font-bold text-slate-900">{selectedCommune.maire}</p>
+                                            <p className="text-xs text-[var(--text-muted)] font-bold uppercase">Maire Actuel</p>
+                                            <p className="text-base font-bold text-[var(--text-primary)]">{selectedCommune.maire}</p>
                                         </div>
-                                        <div className="border-t border-slate-100 pt-3 space-y-2">
+                                        <div className="border-t border-[var(--border-subtle)] pt-3 space-y-2">
                                             <EditableField 
                                             icon={Phone} 
                                             value={selectedCommune.phone || ''} 
@@ -1252,21 +1252,21 @@ const CommunesTab: React.FC = () => {
                             </div>
 
                             <div className="pt-2">
-                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <History size={16}/> Historique des Passages
                                 </h3>
                                 {selectedCommune.historiquePassages ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {Object.entries(selectedCommune.historiquePassages).map(([org, dates]) => (
-                                            <div key={org} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm">
-                                                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-200">
+                                            <div key={org} className="bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-subtle)] rounded-xl p-3 shadow-sm">
+                                                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[var(--border-subtle)]">
                                                     <div className={`w-2 h-2 rounded-full ${org === 'msf' ? 'bg-red-500' : org === 'unicef' ? 'bg-blue-500' : org === 'wwf' ? 'bg-green-500' : 'bg-indigo-500'}`}></div>
-                                                    <span className="text-xs font-black uppercase text-slate-700">{org}</span>
+                                                    <span className="text-xs font-black uppercase text-[var(--text-primary)]">{org}</span>
                                                 </div>
                                                 <div className="space-y-1.5">
                                                     {dates.map((date, idx) => (
-                                                        <div key={idx} className="flex items-center gap-2 text-xs text-slate-600 bg-white px-2 py-1 rounded border border-slate-100">
-                                                            <Calendar size={12} className="text-slate-400"/>
+                                                        <div key={idx} className="flex items-center gap-2 text-xs text-[var(--text-secondary)] bg-white dark:bg-[var(--bg-card-solid)] px-2 py-1 rounded border border-[var(--border-subtle)]">
+                                                            <Calendar size={12} className="text-[var(--text-muted)]"/>
                                                             <span className="font-medium">{date}</span>
                                                         </div>
                                                     ))}
@@ -1275,19 +1275,19 @@ const CommunesTab: React.FC = () => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm italic">
+                                    <div className="text-center py-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-[var(--border-subtle)] text-[var(--text-muted)] text-sm italic">
                                         Aucun historique de passage enregistré pour cette commune.
                                     </div>
                                 )}
                             </div>
                         </div>
                     ) : (
-                        <div className="glass-card p-8 flex items-center justify-center text-slate-400 font-medium">
+                        <div className="glass-card p-8 flex items-center justify-center text-[var(--text-muted)] font-medium">
                             Sélectionnez une commune pour voir les détails
                         </div>
                     )}
 
-                    <div className="flex-grow rounded-2xl overflow-hidden shadow-sm border border-slate-200 relative">
+                    <div className="flex-grow rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)] relative">
                         <div ref={mapContainerRef} className="absolute inset-0 z-0"></div>
                     </div>
                 </>

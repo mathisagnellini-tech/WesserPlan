@@ -34,10 +34,10 @@ const DropZone: React.FC<{ title: string; description: string; icon: React.Eleme
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`flex justify-center w-full h-32 px-4 transition bg-white/50 border-2 ${isDragOver ? 'border-highlight-text' : 'border-gray-300'} border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none`}>
+                className={`flex justify-center w-full h-32 px-4 transition bg-white/50 dark:bg-[var(--bg-card-solid)]/50 border-2 ${isDragOver ? 'border-highlight-text' : 'border-gray-300 dark:border-slate-600'} border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none`}>
                 <span className="flex items-center space-x-2">
-                    <UploadCloud className={`mx-auto h-10 w-10 ${isDragOver ? 'text-highlight-text' : 'text-gray-600'}`} />
-                    <span className="font-medium text-gray-600">
+                    <UploadCloud className={`mx-auto h-10 w-10 ${isDragOver ? 'text-highlight-text' : 'text-[var(--text-secondary)]'}`} />
+                    <span className="font-medium text-[var(--text-secondary)]">
                         Glissez et déposez vos fichiers ici, ou{' '}
                         <span className="text-blue-600 underline">parcourez</span>
                     </span>

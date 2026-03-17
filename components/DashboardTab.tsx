@@ -29,26 +29,26 @@ const DashboardHeader: React.FC<{ lang: 'en' | 'fr'; onLangChange: () => void; t
   return (
     <header className="flex items-center gap-3 md:gap-6 mb-4 md:mb-6 h-12 md:h-16">
       <div className="relative flex-grow">
-        <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-        <input type="text" placeholder={t('searchPlaceholder')} className="w-full bg-white/50 pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl border border-transparent focus:border-gray-200 focus:ring-1 focus:ring-gray-200 outline-none transition-all shadow-sm text-sm md:text-base" />
+        <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+        <input type="text" placeholder={t('searchPlaceholder')} className="w-full bg-white/50 dark:bg-[var(--input-bg)] pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl border border-transparent focus:border-gray-200 dark:focus:border-[var(--input-border)] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[var(--input-border)] outline-none transition-all shadow-sm text-sm md:text-base dark:text-[var(--text-primary)] dark:placeholder-[var(--text-muted)]" />
       </div>
 
-      <div className="hidden md:flex flex-col items-end justify-center px-4 border-r border-gray-200/50">
-        <div className="text-3xl font-black text-slate-800 leading-none tracking-tight">
+      <div className="hidden md:flex flex-col items-end justify-center px-4 border-r border-gray-200/50 dark:border-[var(--border-subtle)]">
+        <div className="text-3xl font-black text-[var(--text-primary)] leading-none tracking-tight">
             {timeString}
         </div>
-        <div className="text-xs font-bold text-slate-500 uppercase tracking-wide first-letter:uppercase">
+        <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide first-letter:uppercase">
             {dateString}
         </div>
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-        <button onClick={onLangChange} className="hidden sm:flex items-center gap-2 text-slate-600 font-bold bg-white px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
+        <button onClick={onLangChange} className="hidden sm:flex items-center gap-2 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
           {lang.toUpperCase()} <ChevronDown size={16} />
         </button>
-        <button className="relative p-2 md:p-2.5 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors text-slate-600">
+        <button className="relative p-2 md:p-2.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-[var(--text-secondary)]">
           <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 md:top-2 md:right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+          <span className="absolute top-1.5 right-1.5 md:top-2 md:right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[var(--bg-card-solid)]"></span>
         </button>
       </div>
     </header>
@@ -138,12 +138,12 @@ const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walki
             {/* Left: Stats */}
             <div className="flex flex-col justify-between z-10 flex-shrink-0">
                 <div>
-                     <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Météo Moyenne</h4>
+                     <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">Météo Moyenne</h4>
                      <div className="flex items-end gap-2">
-                         <span className="text-4xl font-black text-slate-800 leading-none">{avgTemp}°</span>
+                         <span className="text-4xl font-black text-[var(--text-primary)] leading-none">{avgTemp}°</span>
                          <div className="flex flex-col">
-                             <span className="text-xs font-bold text-slate-500">{condition}</span>
-                             <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                             <span className="text-xs font-bold text-[var(--text-secondary)]">{condition}</span>
+                             <span className="text-[10px] text-[var(--text-muted)] font-medium flex items-center gap-1">
                                 <TrendingUp size={10} /> +2° vs Hier
                              </span>
                          </div>
@@ -161,7 +161,7 @@ const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walki
 
             {/* Right: Chart */}
             <div className="flex-grow relative min-w-[80px] h-full">
-                <div className="absolute top-0 right-0 text-[10px] font-bold text-slate-300 uppercase">24h</div>
+                <div className="absolute top-0 right-0 text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase">24h</div>
                 <div className="h-full w-full pt-2">
                     <canvas ref={chartRef}></canvas>
                 </div>
@@ -214,13 +214,13 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
-             <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative z-10 animate-fade-in">
-                 <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><X size={20}/></button>
-                 <h3 className="text-lg font-bold text-slate-800 mb-4">Ajouter un événement</h3>
+             <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-xl w-full max-w-sm p-6 relative z-10 animate-fade-in">
+                 <button onClick={onClose} className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><X size={20}/></button>
+                 <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4">Ajouter un événement</h3>
                  <form onSubmit={handleSubmit} className="space-y-4">
                      <div>
-                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Type</label>
-                         <select value={type} onChange={e => setType(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-slate-50 font-medium">
+                         <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Type</label>
+                         <select value={type} onChange={e => setType(e.target.value)} className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)] font-medium">
                              <option value="housing">Logement</option>
                              <option value="refusal">Refus Mairie</option>
                              <option value="done">Mission Terminée</option>
@@ -228,17 +228,17 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
                          </select>
                      </div>
                      <div>
-                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
-                         <input type="text" value={text} onChange={e => setText(e.target.value)} placeholder="Ex: Logement validé à Lyon" className="w-full border border-slate-200 rounded-lg p-2 text-sm" required autoFocus/>
+                         <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Description</label>
+                         <input type="text" value={text} onChange={e => setText(e.target.value)} placeholder="Ex: Logement validé à Lyon" className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)] dark:placeholder-[var(--text-muted)]" required autoFocus/>
                      </div>
                      <div className="grid grid-cols-2 gap-3">
                          <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Heure</label>
-                            <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm"/>
+                            <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Heure</label>
+                            <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)]"/>
                          </div>
                          <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Jour</label>
-                            <select value={dateMode} onChange={e => setDateMode(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-slate-50">
+                            <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Jour</label>
+                            <select value={dateMode} onChange={e => setDateMode(e.target.value)} className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)]">
                                 <option value="today">Aujourd'hui</option>
                                 <option value="yesterday">Hier</option>
                                 <option value="specific">Date...</option>
@@ -247,7 +247,7 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
                      </div>
                      {dateMode === 'specific' && (
                          <div>
-                             <input type="date" value={specificDate} onChange={e => setSpecificDate(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm" required/>
+                             <input type="date" value={specificDate} onChange={e => setSpecificDate(e.target.value)} className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)]" required/>
                          </div>
                      )}
                      <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">Ajouter</button>
@@ -275,7 +275,7 @@ const ActivityFeed: React.FC = () => {
             case 'housing': return <Home size={14} className="text-blue-600"/>;
             case 'refusal': return <Ban size={14} className="text-red-600"/>;
             case 'done': return <CheckCircle2 size={14} className="text-emerald-600"/>;
-            default: return <Activity size={14} className="text-slate-600"/>;
+            default: return <Activity size={14} className="text-slate-600 dark:text-slate-400"/>;
         }
     };
 
@@ -283,13 +283,13 @@ const ActivityFeed: React.FC = () => {
         <div className="glass-card p-0 flex flex-col h-full overflow-hidden relative">
             <AddEventModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddEvent} />
             
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <div className="p-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+                <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
                     <Activity size={18} className="text-blue-600"/> Activité Récente
                 </h3>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-500">Live</span>
-                    <button onClick={() => setIsModalOpen(true)} className="p-1 hover:bg-slate-200 rounded text-slate-500 hover:text-blue-600 transition-colors">
+                    <span className="text-[10px] font-bold bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] px-2 py-0.5 rounded text-[var(--text-secondary)]">Live</span>
+                    <button onClick={() => setIsModalOpen(true)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-[var(--text-secondary)] hover:text-blue-600 transition-colors">
                         <Plus size={16} />
                     </button>
                 </div>
@@ -299,18 +299,18 @@ const ActivityFeed: React.FC = () => {
                 {activities.map((act) => (
                     <div key={act.id} className="flex gap-3 items-start group animate-fade-in">
                         <div className="flex flex-col items-center gap-1 min-w-[35px]">
-                            <span className="text-[10px] font-bold text-slate-400">{act.time}</span>
-                            <span className="text-[8px] font-bold text-slate-300 uppercase">{act.date}</span>
-                            <div className="h-full w-px bg-slate-100 group-last:hidden"></div>
+                            <span className="text-[10px] font-bold text-[var(--text-secondary)]">{act.time}</span>
+                            <span className="text-[8px] font-bold text-slate-300 dark:text-slate-600 uppercase">{act.date}</span>
+                            <div className="h-full w-px bg-slate-100 dark:bg-slate-700 group-last:hidden"></div>
                         </div>
-                        <div className="bg-white border border-slate-100 p-2.5 rounded-xl shadow-sm flex-grow hover:shadow-md transition-shadow">
+                        <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] p-2.5 rounded-xl shadow-sm flex-grow hover:shadow-md transition-shadow">
                             <div className="flex items-center gap-2 mb-1">
-                                <div className={`p-1 rounded-md ${act.type === 'refusal' ? 'bg-red-50' : act.type === 'housing' ? 'bg-blue-50' : act.type === 'done' ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+                                <div className={`p-1 rounded-md ${act.type === 'refusal' ? 'bg-red-50 dark:bg-red-900/30' : act.type === 'housing' ? 'bg-blue-50 dark:bg-blue-900/30' : act.type === 'done' ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-slate-50 dark:bg-slate-800'}`}>
                                     {getIcon(act.type)}
                                 </div>
-                                <span className="text-xs font-bold text-slate-700">{act.text}</span>
+                                <span className="text-xs font-bold text-[var(--text-primary)]">{act.text}</span>
                             </div>
-                            <p className="text-[10px] text-slate-400 pl-8">Par {act.author}</p>
+                            <p className="text-[10px] text-[var(--text-muted)] pl-8">Par {act.author}</p>
                         </div>
                     </div>
                 ))}
@@ -449,43 +449,57 @@ const FranceMap: React.FC<{ setGlobalWeather: (w: any) => void }> = ({ setGlobal
                 });
 
                 const popupContent = `
+                  <style>
+                    .dark .leaflet-popup-content-wrapper { background: var(--bg-card-solid) !important; color: var(--text-primary) !important; }
+                    .dark .leaflet-popup-tip { background: var(--bg-card-solid) !important; }
+                    .dark .wp-popup-border { border-color: #334155 !important; }
+                    .dark .wp-popup-heading { color: var(--text-primary) !important; }
+                    .dark .wp-popup-sub { color: var(--text-secondary) !important; }
+                    .dark .wp-popup-label { color: var(--text-muted) !important; }
+                    .dark .wp-popup-value { color: var(--text-primary) !important; }
+                    .dark .wp-popup-icon-bg { background: #1e293b !important; color: var(--text-secondary) !important; }
+                    .dark .wp-popup-car-badge { background: #334155 !important; color: var(--text-primary) !important; }
+                    .dark .wp-popup-weather-box { background: #1e293b !important; border-color: #334155 !important; }
+                    .dark .wp-popup-weather-label { color: var(--text-secondary) !important; }
+                    .dark .wp-popup-weather-temp { color: var(--text-primary) !important; }
+                  </style>
                   <div style="font-family: 'Inter', sans-serif; min-width: 240px; padding: 4px;">
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #f1f5f9;">
+                    <div class="wp-popup-border" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #f1f5f9;">
                         <div style="background:${team.color}; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             ${team.icon.replace('width="20"', 'width="18"').replace('height="20"', 'height="18"')}
                         </div>
                         <div>
-                            <h3 style="font-weight: 800; margin:0; color: #1e293b; font-size:15px; letter-spacing: -0.02em;">${team.name}</h3>
-                            <span style="font-size: 11px; color:#64748b; font-weight:600; text-transform:uppercase;">Lead: ${team.leader}</span>
+                            <h3 class="wp-popup-heading" style="font-weight: 800; margin:0; color: #1e293b; font-size:15px; letter-spacing: -0.02em;">${team.name}</h3>
+                            <span class="wp-popup-sub" style="font-size: 11px; color:#64748b; font-weight:600; text-transform:uppercase;">Lead: ${team.leader}</span>
                         </div>
                     </div>
-                    
+
                     <div style="display:flex; flex-direction:column; gap:12px;">
                         <div style="display:flex; align-items:start; gap:10px;">
-                            <div style="background:#f1f5f9; padding:6px; border-radius:8px; color:#64748b;">
+                            <div class="wp-popup-icon-bg" style="background:#f1f5f9; padding:6px; border-radius:8px; color:#64748b;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                             </div>
                             <div style="flex:1;">
-                                <p style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Logement</p>
-                                <p style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; line-height:1.3;">${team.housing}</p>
+                                <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Logement</p>
+                                <p class="wp-popup-value" style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; line-height:1.3;">${team.housing}</p>
                             </div>
                         </div>
 
                         <div style="display:flex; align-items:start; gap:10px;">
-                            <div style="background:#f1f5f9; padding:6px; border-radius:8px; color:#64748b;">
+                            <div class="wp-popup-icon-bg" style="background:#f1f5f9; padding:6px; border-radius:8px; color:#64748b;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                             </div>
                             <div style="flex:1;">
-                                <p style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Véhicule</p>
-                                <p style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; font-family:monospace; background:#e2e8f0; display:inline-block; padding:2px 6px; border-radius:4px;">${team.car}</p>
+                                <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Véhicule</p>
+                                <p class="wp-popup-car-badge" style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; font-family:monospace; background:#e2e8f0; display:inline-block; padding:2px 6px; border-radius:4px;">${team.car}</p>
                             </div>
                         </div>
 
-                        <div style="background-color:#f8fafc; padding:10px; border-radius:10px; display:flex; align-items:center; justify-content:space-between; margin-top:4px; border:1px solid #e2e8f0;">
-                            <span style="font-size:11px; font-weight:600; color:#475569;">Météo locale</span>
+                        <div class="wp-popup-weather-box" style="background-color:#f8fafc; padding:10px; border-radius:10px; display:flex; align-items:center; justify-content:space-between; margin-top:4px; border:1px solid #e2e8f0;">
+                            <span class="wp-popup-weather-label" style="font-size:11px; font-weight:600; color:#475569;">Météo locale</span>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:18px;">${team.weather.icon}</span>
-                                <span style="font-size:14px; font-weight:800; color:#1e293b;">${team.weather.t}°C</span>
+                                <span class="wp-popup-weather-temp" style="font-size:14px; font-weight:800; color:#1e293b;">${team.weather.t}°C</span>
                             </div>
                         </div>
                     </div>
@@ -498,7 +512,7 @@ const FranceMap: React.FC<{ setGlobalWeather: (w: any) => void }> = ({ setGlobal
     }, [setGlobalWeather]);
 
     return (
-        <div id="france-map" ref={mapContainerRef} className="h-full w-full rounded-2xl shadow-inner bg-slate-100 z-0 relative"></div>
+        <div id="france-map" ref={mapContainerRef} className="h-full w-full rounded-2xl shadow-inner bg-slate-100 dark:bg-slate-800 z-0 relative"></div>
     );
 };
 
@@ -514,16 +528,16 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ isActive }) => {
       <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 min-h-0">
           {/* Main Map Area */}
           <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6">
-              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-slate-200 shadow-sm h-[50vh] md:h-[60vh] lg:h-auto lg:flex-grow">
+              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm h-[50vh] md:h-[60vh] lg:h-auto lg:flex-grow">
                   <FranceMap setGlobalWeather={setGlobalWeather} />
 
                   {/* Floating Overlay Title */}
-                  <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-white/90 backdrop-blur-md px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-lg border border-slate-100 z-[400]">
-                      <h2 className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest mb-0.5">Vue d'ensemble</h2>
+                  <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur-md px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-lg border border-[var(--border-subtle)] z-[400]">
+                      <h2 className="text-[10px] md:text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-0.5">Vue d'ensemble</h2>
                       <div className="flex items-center gap-1.5 md:gap-2">
                           <MapPin size={14} className="text-blue-600 md:hidden"/>
                           <MapPin size={18} className="text-blue-600 hidden md:block"/>
-                          <h3 className="font-black text-slate-800 text-sm md:text-lg">Déploiement National</h3>
+                          <h3 className="font-black text-[var(--text-primary)] text-sm md:text-lg">Déploiement National</h3>
                       </div>
                   </div>
               </div>
