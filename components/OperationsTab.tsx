@@ -310,54 +310,64 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
   const [carsData, setCarsData] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- Supabase: Load data ---
+  // --- Supabase: Load data with fallback ---
   const loadData = useCallback(async () => {
     setIsLoading(true);
-    const [housingsRes, carsRes] = await Promise.all([
-      supabase.from('housings').select('*').order('date_start', { ascending: false }),
-      supabase.from('cars').select('*').order('created_at', { ascending: false }),
-    ]);
+    try {
+      const [housingsRes, carsRes] = await Promise.all([
+        supabase.from('housings').select('*').order('date_start', { ascending: false }),
+        supabase.from('cars').select('*').order('km', { ascending: false }),
+      ]);
 
-    if (housingsRes.data) {
-      setHousingData(housingsRes.data.map((h: any) => ({
-        id: String(h.id),
-        name: h.name || '',
-        date: h.date_start || '',
-        lead: h.lead || '',
-        region: h.region || '',
-        dept: h.dept || '',
-        org: h.org || '',
-        people: h.people || 0,
-        nights: h.nights || 0,
-        cost: Number(h.cost_total) || 0,
-        channel: h.channel || '',
-        address: h.address || '',
-        owner: '',
-        ownerName: '',
-        rating: 0,
-        comment: h.team_note || '',
-        lat: h.lat || 0,
-        lng: h.lng || 0,
-        amenities: [],
-      })));
+      const hasHousings = housingsRes.data && housingsRes.data.length > 0;
+      const hasCars = carsRes.data && carsRes.data.length > 0;
+
+      if (hasHousings) {
+        setHousingData(housingsRes.data.map((h: any) => ({
+          id: String(h.id),
+          name: h.name || '',
+          date: h.date_start || '',
+          lead: h.lead || '',
+          region: h.region || '',
+          dept: h.dept || '',
+          org: h.org || '',
+          people: h.people || 0,
+          nights: h.nights || 0,
+          cost: Number(h.cost_total) || 0,
+          channel: h.channel || '',
+          address: h.address || '',
+          owner: '',
+          ownerName: '',
+          rating: 0,
+          comment: h.team_note || '',
+          lat: h.lat || 0,
+          lng: h.lng || 0,
+          amenities: [],
+        })));
+      }
+
+      if (hasCars) {
+        setCarsData(carsRes.data.map((c: any) => ({
+          id: String(c.id),
+          plate: c.plate,
+          brand: c.brand || 'Non renseigné',
+          where: c.location || '',
+          km: c.km || 0,
+          service: c.next_service || '',
+          owner: c.owner || '',
+          lat: c.lat || 0,
+          lng: c.lng || 0,
+          fuelStats: { declared: c.fuel_declared || 0, tankSize: c.tank_size || 50 },
+          damages: c.damages || [],
+        })));
+      }
+
+      if (!hasHousings && !hasCars) {
+        console.warn('[WesserPlan] Supabase tables vides ou inexistantes. Exécute supabase/setup.sql dans le SQL Editor.');
+      }
+    } catch (err) {
+      console.error('[WesserPlan] Erreur Supabase:', err);
     }
-
-    if (carsRes.data) {
-      setCarsData(carsRes.data.map((c: any) => ({
-        id: String(c.id),
-        plate: c.plate,
-        brand: c.brand,
-        where: c.location || '',
-        km: c.km || 0,
-        service: c.next_service || '',
-        owner: c.owner || '',
-        lat: c.lat,
-        lng: c.lng,
-        fuelStats: { declared: c.fuel_declared || 0, tankSize: c.tank_size || 50 },
-        damages: c.damages || [],
-      })));
-    }
-
     setIsLoading(false);
   }, []);
 
