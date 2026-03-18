@@ -126,3 +126,47 @@ INSERT INTO housings (week, zone, name, lead, region, org, people, nights, date_
 ('S12', 'S12 8k D Yamila', 'Le Duplex by Leslodgespa - Loft moderne et confortable', 'Yamila', 'Alsace', 'Unicef', 5, 7, '2026-03-15', '2026-03-22', 554.02, 0, FALSE, 554.02, FALSE, NULL, 2, 'Honorée', 0, 554.02, '18 rue de Buschwiller Hésingue, France 68220'),
 ('S12', 'S12 F w1/2 Anastasie', 'Gîtes d''Illfurth', 'Anastasie G', 'Alsace', 'Unicef', 5, 7, '2026-03-15', '2026-03-22', 717.00, 0, FALSE, 717.00, FALSE, NULL, 2, 'Honorée', 0, 717.00, '23A Rue Saint-Brice Illfurth, France 68720'),
 ('S12', NULL, 'Studio RM', 'Melvin Streicher', 'Aquitaine', 'MSF', 1, 7, '2026-03-15', '2026-03-22', 300.56, 0, FALSE, 300.56, FALSE, NULL, 4, 'Honorée', 0, 300.56, '6 Chemin de Ruby Saint-Loubès, France 33450');
+
+
+-- ============================================
+-- Véhicules - Dernières données connues par plaque
+-- Issues du Google Sheet "Voitures"
+-- ============================================
+
+TRUNCATE cars RESTART IDENTITY;
+
+INSERT INTO cars (plate, brand, location, km, owner, lat, lng) VALUES
+-- Aquitaine (coord. approx Bordeaux: 44.8378, -0.5792)
+('HF-420-SH', 'Non renseigné', 'Aquitaine', 7856, 'Valentin Grobey', 44.8378, -0.5792),
+('HF-421-DN', 'Non renseigné', 'Aquitaine', 13547, 'Jérémie Etheve', 44.8378, -0.5792),
+('HD-099-HQ', 'Non renseigné', 'Aquitaine', 17804, 'Melvin Streicher', 44.8378, -0.5792),
+('HF-998-VX', 'Non renseigné', 'Aquitaine', 5988, 'Théo Bastard', 44.8378, -0.5792),
+('HG-357-JD', 'Non renseigné', 'Aquitaine', 3198, 'Théo Bastard', 44.8378, -0.5792),
+('HF-310-SH', 'Non renseigné', 'Aquitaine', 14833, 'Antoine Loust', 44.8378, -0.5792),
+('HG-016-PP', 'Non renseigné', 'Aquitaine', 11908, 'Thomas Jesupret', 44.8378, -0.5792),
+('HG-066-QR', 'Non renseigné', 'Aquitaine', 10278, 'Melvin Streicher', 44.8378, -0.5792),
+('HF-919-TT', 'Non renseigné', 'Aquitaine', 8132, 'Thayan Israël', 44.8378, -0.5792),
+('HD-514-JX', 'Non renseigné', 'Aquitaine', 14127, 'Raphaël Larzillière', 44.8378, -0.5792),
+
+-- Franche-Comté (coord. approx Besançon: 47.2378, 6.0241)
+('HF-880-FZ', 'Non renseigné', 'Franche Comté', 11710, 'Laura Le Bon', 47.2378, 6.0241),
+('HG-073-CL', 'Non renseigné', 'Franche Comté', 12420, 'Louanne Fontaine', 47.2378, 6.0241),
+('HF-206-FY', 'Non renseigné', 'Franche Comté', 12597, 'Marouane El Massoudi', 47.2378, 6.0241),
+('HE-328-WP', 'Non renseigné', 'Franche Comté', 18536, 'Marwan Zeghoudi', 47.2378, 6.0241),
+('HF-746-FL', 'Non renseigné', 'Franche Comté', 17697, 'Mélissa Henry', 47.2378, 6.0241),
+
+-- PACA (coord. approx Nice: 43.7102, 7.2620)
+('HF-328-SH', 'Non renseigné', 'PACA', 11551, 'Sarah Fuentes', 43.7102, 7.2620),
+('HE-500-SY', 'Non renseigné', 'PACA', 10910, 'Alexandre Robert', 43.7102, 7.2620),
+('HG-104-NT', 'Non renseigné', 'PACA', 8264, 'Melvin Streicher', 43.7102, 7.2620),
+('HG-445-WS', 'Non renseigné', 'PACA', 6814, 'Andy Hadri', 43.7102, 7.2620),
+('HF-389-DN', 'Non renseigné', 'PACA', 2026, 'Sarah Fuentes', 43.7102, 7.2620),
+('HJ-286-AZ', 'Non renseigné', 'PACA', 89, 'Mickaël Picard', 43.7102, 7.2620),
+
+-- Alsace (coord. approx Strasbourg: 48.5734, 7.7521)
+('HF-882-TT', 'Non renseigné', 'Alsace', 10801, 'Marouane El Masoudi', 48.5734, 7.7521),
+('HF-649-SK', 'Non renseigné', 'Alsace', 15664, 'Yamila Dembar', 48.5734, 7.7521),
+('HD-729-VA', 'Non renseigné', 'Alsace', 2443, 'Chloé Tanchoux', 48.5734, 7.7521),
+('HH-131-QY', 'Non renseigné', 'Alsace', 3531, 'Chloé Tanchoux', 48.5734, 7.7521),
+('HF-310-DN', 'Non renseigné', 'Alsace', 12439, 'Grégoire Faure', 48.5734, 7.7521),
+('HG-216-RK', 'Non renseigné', 'Aquitaine', 0, 'Antoine Loust', 44.8378, -0.5792);
