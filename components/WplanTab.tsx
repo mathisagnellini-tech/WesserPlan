@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { MapPin, Target, Layers, ArrowLeft, X, Library, Search, Check, Lightbulb, AlertTriangle, Ban, CheckCircle2, Radar, Shuffle, TrendingUp, Euro, Users, Building2, Vote, Briefcase, UserPlus, Sprout, Heart, Clock, CloudRain, Fingerprint, Activity } from 'lucide-react';
 import { eventData, dataLibraryData } from '../constants';
+import { getMetricScore, formatMetricValue, getDepartmentData } from '../data/insee-departments';
 
 declare const L: any;
 declare const Chart: any;
@@ -511,9 +512,11 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
 
     const generateDataForItem = (item: any) => {
         if (!item) return { signatures: 412, contacts: 8420, conversion: 4.9, retention: [92, 86, 78], revenue: 27500 };
-        const factor = item.properties.code ? (parseInt(item.properties.code.slice(0, 2)) / 95) : 0.5;
+        const code = item.properties?.code || '';
+        const insee = getDepartmentData(code);
+        const factor = code ? (parseInt(code.slice(0, 2)) / 95) : 0.5;
         const signatures = Math.floor(20 + factor * 100);
-        const revenue = rand(19000, 38000);
+        const revenue = insee ? insee.medianIncome : rand(19000, 38000);
         return {
             signatures,
             contacts: Math.floor(signatures * (18 + rand(0, 5))),
@@ -550,10 +553,15 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
 
     // --- MAP LOGIC ---
     const getMetricColor = useCallback((code: string, metric: MapMetric) => {
+        // Use real INSEE data when available
+        const inseeScore = getMetricScore(code, metric);
+        if (inseeScore !== null) {
+            return METRICS_CONFIG[metric].getValueColor(inseeScore);
+        }
+        // Fallback: hash-based for departments not yet in dataset
         let hash = 0;
         for (let i = 0; i < code.length; i++) hash = code.charCodeAt(i) + ((hash << 5) - hash);
         const val = Math.abs(hash) % 100;
-        
         return METRICS_CONFIG[metric].getValueColor(val);
     }, []);
 
@@ -651,17 +659,23 @@ const WplanTab: React.FC<WplanTabProps> = ({ isActive }) => {
         };
         
         const onEachFeature = (feature: any, layer: any) => {
-            layer.bindPopup(
-                `<div class="text-sm font-sans">
-                    <b class="text-base">${feature.properties.nom}</b><br>
-                    <span class="text-gray-500">${feature.properties.code || ''}</span>
-                    <hr class="my-1 border-gray-200"/>
-                    <div class="flex justify-between items-center">
-                        <span>${METRICS_CONFIG[activeMetric].label}</span>
-                        <b class="text-orange-600">${Math.floor(Math.random()*100)}</b>
-                    </div>
-                </div>`
-            );
+            const deptCode = feature.properties.code || '';
+            const inseeInfo = getDepartmentData(deptCode);
+            const metricDisplay = formatMetricValue(deptCode, activeMetric);
+            const popLines = inseeInfo ? [
+                `<b class="text-base">${feature.properties.nom}</b> <span class="text-gray-400">(${deptCode})</span>`,
+                `<hr class="my-1 border-gray-200"/>`,
+                `<div style="display:flex;justify-content:space-between"><span>${METRICS_CONFIG[activeMetric].label}</span><b class="text-orange-600">${metricDisplay}</b></div>`,
+                `<div style="display:flex;justify-content:space-between;margin-top:2px"><span>Population</span><b>${inseeInfo.population.toLocaleString('fr-FR')}</b></div>`,
+                `<div style="display:flex;justify-content:space-between;margin-top:2px"><span>Revenu médian</span><b>${inseeInfo.medianIncome.toLocaleString('fr-FR')} €</b></div>`,
+                `<div style="display:flex;justify-content:space-between;margin-top:2px"><span>Chômage</span><b>${inseeInfo.unemploymentRate}%</b></div>`,
+            ] : [
+                `<b class="text-base">${feature.properties.nom}</b><br>`,
+                `<span class="text-gray-500">${deptCode}</span>`,
+                `<hr class="my-1 border-gray-200"/>`,
+                `<div style="display:flex;justify-content:space-between"><span>${METRICS_CONFIG[activeMetric].label}</span><span class="text-gray-400">—</span></div>`,
+            ];
+            layer.bindPopup(`<div class="text-sm font-sans">${popLines.join('')}</div>`);
             layer.on({
                 mouseover: highlightFeature,
                 mouseout: resetHighlight,
