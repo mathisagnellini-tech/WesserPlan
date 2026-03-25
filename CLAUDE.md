@@ -19,32 +19,69 @@ npm run preview  # Preview production build
 
 - **React 19** + **TypeScript 5.8** + **Vite 6**
 - **Tailwind CSS v4** (via `@tailwindcss/vite` plugin)
-- **Supabase** for database (PostgreSQL)
+- **React Router v7** for URL-based routing
+- **Zustand** for global state management (theme, UI state)
+- **Supabase** for database (PostgreSQL) — client initialized, not yet wired to components
 - **Google Gemini API** for AI analysis (zone-maker clustering)
-- **Leaflet.js** + Leaflet Draw for maps (loaded as externals in index.html)
-- **Chart.js** for charts (loaded as external in index.html)
+- **Leaflet** + **react-leaflet** + Leaflet Draw for maps (bundled via npm, CSS via CDN)
+- **Chart.js** + **react-chartjs-2** for charts (bundled via npm)
 - **Lucide React** for icons
 - Deployed on **Vercel**
 
 ## Architecture
 
+### Source Structure
+
+All source code lives under `src/` with a layer-based organization:
+
+```
+src/
+├── app/                    — App shell, router, layouts
+│   ├── App.tsx             — BrowserRouter + RouterProvider
+│   ├── routes.tsx          — Route definitions (lazy-loaded pages)
+│   └── layouts/
+│       └── MainLayout.tsx  — Navbar + Outlet + mobile nav
+│
+├── components/             — UI components organized by domain
+│   ├── ui/                 — Shared: ErrorBoundary
+│   ├── navigation/         — TopNavbar, MobileSidebar, MobileBottomNav, MobileHeader, navConfig
+│   ├── communes/           — CommunesTab (commune list, map, editor)
+│   ├── dashboard/          — DashboardTab (KPIs, charts, map)
+│   ├── mairie/             — MairieTab (city hall relations)
+│   ├── wplan/              — WplanTab (data analysis, charts)
+│   ├── operations/         — OperationsTab (housing, vehicles)
+│   ├── settings/           — SettingsTab, UploadTab
+│   ├── team-planner/       — Self-contained Kanban module (types, constants, 13 sub-components)
+│   └── zone-maker/         — Geographic clustering module (types, constants, MapCanvas)
+│
+├── pages/                  — Route-level components (thin wrappers, lazy-loaded)
+├── hooks/                  — Shared custom hooks (empty, ready for extraction)
+├── stores/                 — Zustand stores (themeStore, uiStore)
+├── services/               — Data access layer (clusteringService, geminiService)
+├── types/                  — Type definitions (commune.ts, navigation.ts)
+├── constants/              — Static data (communes, departments, status, regions, dataLibrary)
+├── mocks/                  — Mock data generators (ready for future use)
+├── lib/                    — Third-party client init (supabase.ts)
+├── main.tsx                — Entry point
+└── styles.css              — Tailwind import
+```
+
 ### Navigation & Routing
 
-No React Router. Tab-based SPA controlled by `activeTab` state in `App.tsx`. Tabs render via a `switch` in `renderTabContent()`. Nine main tabs: dashboard, communes, mairie, wplan, zone-maker, team-planner, operations, upload, settings.
+React Router v7 with `createBrowserRouter`. Routes defined in `src/app/routes.tsx`. All pages are lazy-loaded via `React.lazy()` for code splitting.
 
-Desktop uses a top navbar with pill buttons; mobile uses a sidebar drawer + bottom nav bar. The team-planner tab renders full-screen (hides the main navbar).
+- `MainLayout` wraps all routes except team-planner (provides navbar + `<Outlet />`)
+- Team-planner renders full-screen at `/team-planner` (outside MainLayout)
+- Desktop: top navbar with pill buttons
+- Mobile: sidebar drawer + bottom nav bar
+
+Routes: `/` (dashboard), `/communes`, `/mairie`, `/wplan`, `/zone-maker`, `/team-planner`, `/operations`, `/upload`, `/settings`
 
 ### State Management
 
-No global state library. Each tab manages its own local state via `useState`. Theme (dark mode) is persisted to `localStorage` key `wesserplan-theme`. Supabase client in `lib/supabase.ts` handles database calls.
-
-### Component Structure
-
-- `App.tsx` — main shell: navbar, tab routing, theme toggle
-- `components/` — one large file per tab (CommunesTab, MairieTab, OperationsTab are 57-75KB each)
-- `components/team-planner/` — self-contained team scheduling module with its own types, constants, and sub-components (Kanban board, inspector panel, map view, command palette)
-- `components/zone-maker/` — geographic clustering module with clustering algorithm (`clusteringService.ts`) and Gemini AI integration (`geminiService.ts`)
-- `types.ts` + `constants.ts` — shared type definitions and data constants (communes, departments, organizations)
+- **Zustand** stores for shared state: `useThemeStore` (dark mode), `useUiStore` (mobile menu)
+- Each tab component manages its own local state via `useState` (domain stores planned for future)
+- Theme persisted to `localStorage` key `wesserplan-theme`
 
 ### Theming
 
@@ -52,16 +89,16 @@ CSS variables defined in `index.html` for light/dark modes. Accent color is `#FF
 
 ### Path Alias
 
-`@/*` maps to the project root (configured in both `vite.config.ts` and `tsconfig.json`).
+`@/*` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.json`).
 
 ### Database
 
-Schema in `supabase/schema.sql`: tables for `communes`, `housings`, `cars` with row-level security. Seed data in `supabase/seed.sql`. Auto-updated `updated_at` timestamps via triggers.
+Schema in `supabase/schema.sql`: tables for `communes`, `housings`, `cars` with row-level security. Seed data in `supabase/seed.sql`. Client in `src/lib/supabase.ts`. Components currently use mock data — Supabase integration is next phase.
 
 ### Environment Variables
 
 Required: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `GEMINI_API_KEY` (injected via Vite's `define`).
 
-### External Libraries (CDN)
+### External Libraries
 
-Leaflet, Leaflet Draw, and Chart.js are loaded via `<script>` tags in `index.html`, not bundled. They are available as globals.
+Leaflet CSS and Leaflet Draw CSS are loaded via CDN in `index.html`. All JavaScript libraries are bundled via npm (leaflet, react-leaflet, chart.js, react-chartjs-2, etc.).

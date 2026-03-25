@@ -33,9 +33,7 @@ const TopNavbar: React.FC = () => {
 
           {/* Logo */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center text-white font-black text-lg shadow-lg shadow-[var(--accent-primary)]/20">
-              W
-            </div>
+            <img src="/logo.png" alt="Wesser Plan" className="w-9 h-9 object-contain" />
             <span className="font-extrabold text-lg tracking-tight text-[var(--text-primary)] whitespace-nowrap">
               Wesser Plan
             </span>

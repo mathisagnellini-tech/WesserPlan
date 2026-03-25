@@ -42,9 +42,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="h-20 px-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center text-white font-black text-lg shadow-lg">
-              W
-            </div>
+            <img src="/logo.png" alt="Wesser Plan" className="w-9 h-9 object-contain" />
             <div className="flex flex-col">
               <span className="font-extrabold text-lg text-[var(--text-primary)]">Wesser Plan</span>
               <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Suite v5.0</span>
