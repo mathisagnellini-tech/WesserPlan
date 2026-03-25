@@ -1,0 +1,38 @@
+import { DepartmentMap } from '@/types';
+
+export const departmentMap: DepartmentMap = { '06': 'Alpes-Maritimes', '11': 'Aude', '13': 'Bouches-du-Rh\u00f4ne', '17': 'Charente-Maritime', '22': "C\u00f4tes-d'Armor", '29': 'Finist\u00e8re', '30': 'Gard', '31': 'Haute-Garonne', '33': 'Gironde', '34': 'H\u00e9rault', '35': 'Ille-et-Vilaine', '44': 'Loire-Atlantique', '50': 'Manche', '56': 'Morbihan', '59': 'Nord', '66': "Pyr\u00e9n\u00e9es-Orientales", '67': 'Bas-Rhin', '69': 'Rh\u00f4ne', '73': 'Savoie', '74': 'Haute-Savoie', '75': 'Paris', '76': 'Seine-Maritime', '77': 'Seine-et-Marne', '78': 'Yvelines', '79': 'Deux-S\u00e8vres', '83': 'Var', '84': 'Vaucluse', '91': 'Essonne', '92': 'Hauts-de-Seine', '93': 'Seine-Saint-Denis', '94': 'Val-de-Marne', '95': "Val-d'Oise" };
+
+export const departmentToRegionMap: { [key: string]: string } = {
+  '69': 'Auvergne-Rh\u00f4ne-Alpes',
+  '73': 'Auvergne-Rh\u00f4ne-Alpes',
+  '74': 'Auvergne-Rh\u00f4ne-Alpes',
+  '22': 'Bretagne',
+  '29': 'Bretagne',
+  '35': 'Bretagne',
+  '56': 'Bretagne',
+  '67': 'Grand Est',
+  '59': 'Hauts-de-France',
+  '75': '\u00cele-de-France',
+  '77': '\u00cele-de-France',
+  '78': '\u00cele-de-France',
+  '91': '\u00cele-de-France',
+  '92': '\u00cele-de-France',
+  '93': '\u00cele-de-France',
+  '94': '\u00cele-de-France',
+  '95': '\u00cele-de-France',
+  '50': 'Normandie',
+  '76': 'Normandie',
+  '17': 'Nouvelle-Aquitaine',
+  '33': 'Nouvelle-Aquitaine',
+  '79': 'Nouvelle-Aquitaine',
+  '11': 'Occitanie',
+  '30': 'Occitanie',
+  '31': 'Occitanie',
+  '34': 'Occitanie',
+  '66': 'Occitanie',
+  '44': 'Pays de la Loire',
+  '06': "Provence-Alpes-C\u00f4te d'Azur",
+  '13': "Provence-Alpes-C\u00f4te d'Azur",
+  '83': "Provence-Alpes-C\u00f4te d'Azur",
+  '84': "Provence-Alpes-C\u00f4te d'Azur",
+};
