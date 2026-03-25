@@ -1,3 +1,5 @@
+import DashboardTab from '@/components/dashboard/DashboardTab';
+
 export default function DashboardPage() {
-  return <div>Dashboard - coming soon</div>;
+  return <DashboardTab />;
 }

@@ -1,3 +1,5 @@
+import UploadTab from '@/components/settings/UploadTab';
+
 export default function UploadPage() {
-  return <div>Upload - coming soon</div>;
+  return <UploadTab />;
 }

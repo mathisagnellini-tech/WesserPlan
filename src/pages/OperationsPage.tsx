@@ -1,3 +1,5 @@
+import OperationsTab from '@/components/operations/OperationsTab';
+
 export default function OperationsPage() {
-  return <div>Operations - coming soon</div>;
+  return <OperationsTab />;
 }

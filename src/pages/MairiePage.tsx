@@ -1,3 +1,5 @@
+import MairieTab from '@/components/mairie/MairieTab';
+
 export default function MairiePage() {
-  return <div>Mairie - coming soon</div>;
+  return <MairieTab />;
 }

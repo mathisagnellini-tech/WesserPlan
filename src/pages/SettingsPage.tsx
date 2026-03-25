@@ -1,3 +1,5 @@
+import SettingsTab from '@/components/settings/SettingsTab';
+
 export default function SettingsPage() {
-  return <div>Settings - coming soon</div>;
+  return <SettingsTab />;
 }
