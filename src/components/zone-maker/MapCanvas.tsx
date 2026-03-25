@@ -47,7 +47,21 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const map = L.map(mapContainerRef.current, {
+    // Ensure container has dimensions before initializing Leaflet
+    const container = mapContainerRef.current;
+    if (container.clientWidth === 0 || container.clientHeight === 0) {
+      const observer = new ResizeObserver((entries) => {
+        if (entries[0].contentRect.width > 0 && entries[0].contentRect.height > 0) {
+          observer.disconnect();
+          // Re-trigger effect by forcing a state update
+          setMousePos(prev => ({ ...prev }));
+        }
+      });
+      observer.observe(container);
+      return () => observer.disconnect();
+    }
+
+    const map = L.map(container, {
         zoomControl: false,
         attributionControl: false
     }).setView([47.1, 6.4], 9);
@@ -69,6 +83,9 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
     labelLayerRef.current = L.layerGroup().addTo(map);
     routeLayerRef.current = L.layerGroup().addTo(map);
 
+    // Ensure map renders correctly after container is ready
+    setTimeout(() => map.invalidateSize(), 100);
+
     const handleMouseMove = (e: MouseEvent) => {
         setMousePos({ x: e.clientX, y: e.clientY });
     };
@@ -86,7 +103,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
 
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map) return;
+    if (!map || !map.getPane('overlayPane')) return;
     if (geoJsonLayerRef.current) map.removeLayer(geoJsonLayerRef.current);
     labelLayerRef.current?.clearLayers();
     routeLayerRef.current?.clearLayers();

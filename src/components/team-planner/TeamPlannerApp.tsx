@@ -12,7 +12,7 @@ import { DynamicIsland } from './components/DynamicIsland';
 import { CommandPalette } from './components/CommandPalette';
 import { AlumniView } from './components/AlumniView'; // New Import
 import { MapView } from './components/MapView';
-import { LayoutGrid, Rows, GitMerge, Grip, Maximize, Minimize, MapPin, Handshake, Flame, Zap } from 'lucide-react';
+import { LayoutGrid, Rows, GitMerge, Grip, Maximize, Minimize, MapPin, Handshake, Flame, Zap, BarChart2, User, Briefcase } from 'lucide-react';
 
 export type ViewMode = 'performance' | 'identity' | 'hr';
 export type ViewDensity = 'standard' | 'compact' | 'tiny';
@@ -761,9 +761,10 @@ export default function App() {
                 )}
 
                 {!isCinemaMode && (
-                    <div className="flex justify-between items-end mb-4 z-10 sticky left-0 px-2 w-[calc(100vw-48px)]">
-                        <div className={`flex flex-col transition-opacity duration-500 ${isFocusMode ? 'opacity-40 blur-[1px]' : 'opacity-100'}`}>
-                            <h2 className="text-slate-900 dark:text-white font-black text-3xl tracking-tight">Vue d'ensemble</h2>
+                    <div className="mb-4 z-10 sticky left-0 px-2 w-[calc(100vw-48px)]">
+                        {/* Title */}
+                        <div className={`transition-opacity duration-500 ${isFocusMode ? 'opacity-40 blur-[1px]' : 'opacity-100'}`}>
+                            <h2 className="text-slate-900 dark:text-white font-black text-3xl tracking-tight">Team Planner</h2>
                             <span className="text-slate-500 text-sm font-medium mt-1">
                                 {searchQuery ? `Recherche: "${searchQuery}"` : (
                                 <>
@@ -774,43 +775,63 @@ export default function App() {
                                 )}
                             </span>
                         </div>
-                        
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setShowRelationships(!showRelationships)}
-                                className={`
-                                    relative group overflow-hidden px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 border flex items-center gap-2
-                                    ${showRelationships 
-                                        ? 'bg-orange-600 border-orange-500 text-white shadow-lg shadow-orange-500/30' 
-                                        : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 shadow-sm'
-                                    }
-                                `}
-                            >
-                                <GitMerge size={14} className={`transition-transform duration-300 ${showRelationships ? 'scale-110' : 'group-hover:scale-110'}`} />
-                                <span>Relations</span>
-                            </button>
 
-                            <div className="bg-white dark:bg-[var(--bg-card-solid)] p-1 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 shadow-sm">
-                                <button 
+                        {/* Board toolbar — single unified bar */}
+                        <div className="flex items-center gap-2 mt-3 flex-wrap">
+                            {/* View mode */}
+                            <div className="flex bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-200/50 dark:border-slate-700/50 p-1 gap-0.5 shadow-sm">
+                                <button
+                                    onClick={() => setViewMode('performance')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'performance' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                >
+                                    <BarChart2 size={12} /> Perf
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('identity')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'identity' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                >
+                                    <User size={12} /> Profil
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('hr')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'hr' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                >
+                                    <Briefcase size={12} /> RH
+                                </button>
+                            </div>
+
+                            {/* Density + Relations — grouped */}
+                            <div className="flex bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-200/50 dark:border-slate-700/50 p-1 gap-0.5 shadow-sm items-center">
+                                <button
                                     onClick={() => setDensity('standard')}
-                                    className={`p-2 rounded-lg transition-all duration-200 ${density === 'standard' ? 'bg-slate-100 text-slate-900 shadow-inner' : 'text-slate-400 hover:text-slate-700'}`}
+                                    className={`p-1.5 rounded-full transition-all duration-200 ${density === 'standard' ? 'bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white shadow-inner' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                                     title="Vue Détaillée"
                                 >
-                                    <LayoutGrid size={16} />
+                                    <LayoutGrid size={14} />
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setDensity('compact')}
-                                    className={`p-2 rounded-lg transition-all duration-200 ${density === 'compact' ? 'bg-slate-100 text-slate-900 shadow-inner' : 'text-slate-400 hover:text-slate-700'}`}
+                                    className={`p-1.5 rounded-full transition-all duration-200 ${density === 'compact' ? 'bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white shadow-inner' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                                     title="Vue Compacte"
                                 >
-                                    <Rows size={16} />
+                                    <Rows size={14} />
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setDensity('tiny')}
-                                    className={`p-2 rounded-lg transition-all duration-200 ${density === 'tiny' ? 'bg-slate-100 text-slate-900 shadow-inner' : 'text-slate-400 hover:text-slate-700'}`}
+                                    className={`p-1.5 rounded-full transition-all duration-200 ${density === 'tiny' ? 'bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white shadow-inner' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                                     title="Vue Ultra Compacte"
                                 >
-                                    <Grip size={16} />
+                                    <Grip size={14} />
+                                </button>
+                                <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5" />
+                                <button
+                                    onClick={() => setShowRelationships(!showRelationships)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${showRelationships
+                                        ? 'bg-orange-600 text-white shadow-sm'
+                                        : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                    }`}
+                                >
+                                    <GitMerge size={12} /> Relations
                                 </button>
                             </div>
                         </div>
@@ -827,8 +848,8 @@ export default function App() {
                 )}
 
                 <div className={`
-                    flex flex-row gap-6 h-full pb-4
-                    ${isFocusMode ? 'opacity-90' : 'opacity-100'} 
+                    flex flex-row gap-6 pb-4 items-stretch flex-1
+                    ${isFocusMode ? 'opacity-90' : 'opacity-100'}
                 `}>
                 {currentData.columnOrder.map((colId) => {
                     const column = currentData.columns[colId];

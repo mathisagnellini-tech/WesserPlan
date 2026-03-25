@@ -268,18 +268,14 @@ export const PersonCard = memo<PersonCardProps>(({
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className={`
-            relative group flex items-center gap-3 p-2 pl-4 rounded-xl transition-all duration-200 select-none overflow-hidden
-            ${isHeatmapMode ? heatmapClass : 'bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'}
+            relative group flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 select-none overflow-hidden
+            ${isHeatmapMode ? heatmapClass : `bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-50 dark:hover:bg-slate-800 border-2 ${seniorityColors.border}`}
             ${isDragging ? 'opacity-50 scale-95 shadow-none' : 'shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5'}
             ${isSelected ? 'ring-2 ring-orange-500 z-10' : ''}
             ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 cursor-crosshair' : ''}
             ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 z-20 scale-105' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
           `}
         >
-            {/* Seniority Strip */}
-            {!isHeatmapMode && (
-                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${seniorityColors.bg}`} />
-            )}
 
             <div className="relative flex-shrink-0">
                 <img 
@@ -350,7 +346,7 @@ export const PersonCard = memo<PersonCardProps>(({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       className={`
-        relative group rounded-[24px] p-4 pl-6 transition-all duration-300 select-none overflow-hidden
+        relative group rounded-2xl p-4 transition-all duration-300 select-none overflow-hidden
         ${isHeatmapMode ? heatmapClass : `bg-gradient-to-b from-white/90 to-white/50 dark:from-slate-800/90 dark:to-slate-800/50 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]`}
         ${isDragging ? 'opacity-40 scale-95 rotate-2 shadow-none' : 'hover:-translate-y-1 hover:scale-[1.02]'}
         ${isSelected ? 'ring-2 ring-orange-500 z-10' : ''}
@@ -360,10 +356,6 @@ export const PersonCard = memo<PersonCardProps>(({
         ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 z-20 scale-105 shadow-xl' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
       `}
     >
-      {/* Seniority Strip */}
-      {!isHeatmapMode && (
-          <div className={`absolute left-0 top-0 bottom-0 w-2 ${seniorityColors.bg} ${person.isNewArrival ? 'animate-pulse' : ''}`} />
-      )}
       
       {/* New Arrival Badge */}
       {person.isNewArrival && !isHeatmapMode && (
@@ -375,7 +367,7 @@ export const PersonCard = memo<PersonCardProps>(({
       {/* Top Section: Avatar & Info */}
       <div className="flex items-start gap-4 mb-4 relative z-10">
         <div className="relative">
-             <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border-2 border-white group-hover:shadow-xl transition-shadow">
+             <div className="w-14 h-14 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:shadow-xl transition-shadow">
                 <img 
                     src={person.photoUrl} 
                     alt={person.name} 
@@ -401,7 +393,7 @@ export const PersonCard = memo<PersonCardProps>(({
             <div className="flex flex-wrap gap-1">
                 {/* Alert Badge */}
                 {alertConfig && !isHeatmapMode && (
-                    <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${alertConfig.color}`}>
+                    <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border flex items-center gap-1 ${alertConfig.color}`}>
                         <alertConfig.icon size={8} />
                         {alertConfig.label}
                     </div>
@@ -409,18 +401,18 @@ export const PersonCard = memo<PersonCardProps>(({
 
                 {/* NGO Experience Warning */}
                 {showNgoWarning && !isHeatmapMode && (
-                     <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border bg-orange-50 text-orange-600 border-orange-200 flex items-center gap-1" title="Jamais travaillé avec cette asso">
+                     <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg border bg-orange-50 text-orange-600 border-orange-200 flex items-center gap-1" title="Jamais travaillé avec cette asso">
                         <Info size={8} />
                         New Asso
                     </div>
                 )}
 
                 {person.tags.slice(0, 1).map((tag, i) => (
-                    <span 
-                        key={i} 
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border 
-                           ${forceWhiteText 
-                               ? 'bg-white/20 border-white/30 text-white' 
+                    <span
+                        key={i}
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border
+                           ${forceWhiteText
+                               ? 'bg-white/20 border-white/30 text-white'
                                : (tag === 'Senior' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-slate-100 text-slate-500 border-slate-200')}
                            flex items-center gap-1
                         `}

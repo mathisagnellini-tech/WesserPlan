@@ -238,8 +238,8 @@ export const BoardColumn = memo<BoardColumnProps>(({
   const ghostHeight = density === 'compact' ? 'h-[64px]' : (density === 'tiny' ? 'h-10 w-10 rounded-full' : 'h-[120px]');
 
   const widthClass = density === 'compact' ? 'min-w-[220px] w-[220px]' : (density === 'tiny' ? 'min-w-[72px] w-[72px]' : 'min-w-[360px] w-[360px]');
-  const gapClass = density === 'compact' ? 'gap-2' : (density === 'tiny' ? 'gap-0' : 'gap-3');
-  const overflowClass = (density === 'standard') ? 'overflow-y-auto custom-scrollbar-light' : 'overflow-hidden';
+  const gapClass = density === 'compact' ? 'gap-2' : (density === 'tiny' ? 'gap-2' : 'gap-3');
+  const overflowClass = 'overflow-y-auto custom-scrollbar-light';
 
   return (
     <div 
@@ -380,11 +380,11 @@ export const BoardColumn = memo<BoardColumnProps>(({
       {/* --- SCROLLABLE BODY --- */}
       <div 
         ref={scrollContainerRef}
-        className={`flex-1 overflow-x-hidden ${overflowClass} ${density === 'tiny' ? 'p-1 px-2 items-center flex flex-col' : (density === 'compact' ? 'p-2' : 'p-4')}`}
+        className={`flex-1 overflow-x-hidden ${overflowClass} ${density === 'tiny' ? 'p-1 px-2 flex flex-col items-center' : (density === 'compact' ? 'p-2' : 'p-4')}`}
       >
-          <div 
-            style={{ transform: `scale(${zoomScale})`, transformOrigin: 'top center', width: `${100 / zoomScale}%` }}
-            className={`flex flex-col w-full transition-transform duration-300 ease-out ${gapClass}`}
+          <div
+            style={{ transform: `scale(${zoomScale})`, transformOrigin: 'top center', width: density === 'tiny' ? 'auto' : `${100 / zoomScale}%` }}
+            className={`flex flex-col transition-transform duration-300 ease-out ${gapClass} ${density === 'tiny' ? 'items-center' : 'w-full'}`}
           >
               {cards.map((card, index) => {
                   const isFeatured = index === 0 && (card.role === 'Teamleader');
