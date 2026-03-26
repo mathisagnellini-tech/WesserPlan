@@ -253,10 +253,10 @@ export const BoardColumn = memo<BoardColumnProps>(({
         ${density === 'tiny' ? 'rounded-full' : 'rounded-[32px]'}
         
         /* Column Container Glass Effect */
-        bg-slate-100/40 backdrop-blur-xl border border-white/40
+        bg-slate-100/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/40 dark:border-slate-700/40
         shadow-[0_4px_30px_rgba(0,0,0,0.03)]
-        
-        ${isOver ? (conflictData.hasConflict ? 'ring-2 ring-red-500 bg-red-50/80 scale-[1.01]' : 'ring-2 ring-orange-500/50 scale-[1.005] bg-orange-50/50') : ''}
+
+        ${isOver ? (conflictData.hasConflict ? 'ring-2 ring-red-500 bg-red-50/80 dark:bg-red-900/30 scale-[1.01]' : 'ring-2 ring-orange-500/50 scale-[1.005] bg-orange-50/50 dark:bg-orange-900/30') : ''}
         ${isDimmed ? 'opacity-50 blur-[1px]' : 'opacity-100'}
         ${isDraggingColumn ? 'opacity-30 scale-95' : 'opacity-100'}
       `}
@@ -415,7 +415,7 @@ export const BoardColumn = memo<BoardColumnProps>(({
               {isOver && draggingCardId && !cards.find(c => c.id === draggingCardId) && (
                   <div className={`
                     border-2 border-dashed rounded-[20px] flex-shrink-0 animate-pulse flex items-center justify-center
-                    ${conflictData.draggingConflict ? 'border-red-400 bg-red-50 text-red-500' : (conflictData.draggingAffinity ? 'border-emerald-400 bg-emerald-50 text-emerald-500' : 'border-slate-300/60 bg-slate-50/50')}
+                    ${conflictData.draggingConflict ? 'border-red-400 bg-red-50 dark:bg-red-900/30 text-red-500' : (conflictData.draggingAffinity ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500' : 'border-slate-300/60 dark:border-slate-600/60 bg-slate-50/50 dark:bg-slate-800/50')}
                     ${ghostHeight}
                     ${density === 'tiny' ? 'my-1' : ''}
                   `}>
@@ -427,10 +427,10 @@ export const BoardColumn = memo<BoardColumnProps>(({
               {/* Add Button */}
               {showAddButton && density !== 'tiny' && (
                   <button className={`
-                      group relative border border-dashed border-slate-300/60 hover:border-orange-500/50 hover:bg-orange-50/50 transition-all duration-300 flex items-center justify-center flex-shrink-0
+                      group relative border border-dashed border-slate-300/60 dark:border-slate-600/60 hover:border-orange-500/50 hover:bg-orange-50/50 dark:hover:bg-orange-900/30 transition-all duration-300 flex items-center justify-center flex-shrink-0
                       ${density === 'compact' ? 'w-full h-8 rounded-xl' : 'w-full h-[70px] rounded-[24px]'}
                   `}>
-                       <div className="flex items-center gap-2 text-slate-400 group-hover:text-orange-600 font-bold transition-transform group-hover:scale-110">
+                       <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 group-hover:text-orange-600 dark:group-hover:text-orange-400 font-bold transition-transform group-hover:scale-110">
                            <UserPlus size={density === 'compact' ? 14 : 20} />
                        </div>
                   </button>

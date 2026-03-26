@@ -85,7 +85,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
         onClick={(e) => e.stopPropagation()}
       >
           {/* --- HERO HEADER --- */}
-          <div className="relative h-64 flex-shrink-0 group overflow-hidden bg-slate-100 rounded-t-[36px]">
+          <div className="relative h-64 flex-shrink-0 group overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-[36px]">
                <div className="absolute inset-0">
                    <img src={zone.mapImage} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Map" />
                    <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 via-white/40 dark:via-slate-900/40 to-transparent" />
@@ -111,15 +111,15 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
               <div className="absolute bottom-6 left-8 right-8 flex items-end justify-between z-10">
                   <div className="w-2/3">
                       {isEditing ? (
-                          <div className="flex flex-col gap-2 bg-white/50 backdrop-blur-md p-2 rounded-xl">
-                             <input 
-                                className="text-xs font-bold uppercase tracking-wider bg-white/50 border border-white/50 rounded px-2 py-1 w-full" 
+                          <div className="flex flex-col gap-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md p-2 rounded-xl">
+                             <input
+                                className="text-xs font-bold uppercase tracking-wider bg-white/50 dark:bg-slate-700/50 border border-white/50 dark:border-slate-600 rounded px-2 py-1 w-full dark:text-white"
                                 value={editForm.zoneName}
                                 onChange={e => setEditForm({...editForm, zoneName: e.target.value})}
                                 placeholder="Zone"
                              />
-                             <input 
-                                className="text-2xl font-black bg-white/50 border border-white/50 rounded px-2 py-1 w-full" 
+                             <input
+                                className="text-2xl font-black bg-white/50 dark:bg-slate-700/50 border border-white/50 dark:border-slate-600 rounded px-2 py-1 w-full dark:text-white"
                                 value={editForm.title}
                                 onChange={e => setEditForm({...editForm, title: e.target.value})}
                                 placeholder="Titre de l'équipe"
@@ -127,7 +127,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           </div>
                       ) : (
                         <>
-                            <div className="flex items-center gap-1.5 text-orange-700 font-bold uppercase tracking-wider text-[10px] mb-2 bg-orange-100/90 backdrop-blur-md px-2.5 py-1 rounded-lg w-fit shadow-sm border border-orange-200/50">
+                            <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-300 font-bold uppercase tracking-wider text-[10px] mb-2 bg-orange-100/90 dark:bg-orange-900/60 backdrop-blur-md px-2.5 py-1 rounded-lg w-fit shadow-sm border border-orange-200/50 dark:border-orange-700/50">
                                 <MapPin size={10} strokeWidth={3} /> {zone.name}
                             </div>
                             <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none drop-shadow-sm line-clamp-2">{column.title}</h2>
@@ -185,51 +185,51 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                   <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       
                       <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-orange-50 rounded-[28px] p-5 border border-orange-100/50 hover:bg-orange-100/50 transition-colors cursor-pointer group flex flex-col justify-between h-40">
+                          <div className="bg-orange-50 dark:bg-orange-900/30 rounded-[28px] p-5 border border-orange-100/50 dark:border-orange-800/50 hover:bg-orange-100/50 dark:hover:bg-orange-900/50 transition-colors cursor-pointer group flex flex-col justify-between h-40">
                               <div className="flex justify-between items-start">
-                                  <div className="p-3 bg-white rounded-2xl text-orange-600 shadow-sm"><Navigation size={20} /></div>
+                                  <div className="p-3 bg-white dark:bg-slate-800 rounded-2xl text-orange-600 shadow-sm"><Navigation size={20} /></div>
                                   <ChevronRight size={20} className="text-orange-300 group-hover:text-orange-600 transition-colors" />
                               </div>
                               <div>
-                                  <div className="text-[10px] text-orange-400 font-bold uppercase tracking-wider mb-1">Trajet</div>
+                                  <div className="text-[10px] text-orange-400 dark:text-orange-300 font-bold uppercase tracking-wider mb-1">Trajet</div>
                                   <div className="text-slate-900 dark:text-white font-bold text-xl leading-tight">Secteur<br/>Nord</div>
                               </div>
                           </div>
                           
-                          <div className="bg-amber-50 rounded-[28px] p-5 border border-amber-100/50 hover:bg-amber-100/50 transition-colors cursor-pointer group flex flex-col justify-between h-40">
+                          <div className="bg-amber-50 dark:bg-amber-900/30 rounded-[28px] p-5 border border-amber-100/50 dark:border-amber-800/50 hover:bg-amber-100/50 dark:hover:bg-amber-900/50 transition-colors cursor-pointer group flex flex-col justify-between h-40">
                               <div className="flex justify-between items-start">
-                                  <div className="p-3 bg-white rounded-2xl text-amber-500 shadow-sm"><Wind size={20} /></div>
+                                  <div className="p-3 bg-white dark:bg-slate-800 rounded-2xl text-amber-500 shadow-sm"><Wind size={20} /></div>
                                   <ChevronRight size={20} className="text-amber-300 group-hover:text-amber-600 transition-colors" />
                               </div>
                               <div>
-                                  <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-1">Météo</div>
+                                  <div className="text-[10px] text-amber-400 dark:text-amber-300 font-bold uppercase tracking-wider mb-1">Météo</div>
                                   <div className="text-slate-900 dark:text-white font-bold text-xl leading-tight">Vent<br/>Faible</div>
                               </div>
                           </div>
                       </div>
 
-                      <div className="bg-slate-50 rounded-[28px] p-6 border border-slate-100">
+                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[28px] p-6 border border-slate-100 dark:border-slate-700">
                           <h3 className="text-slate-900 dark:text-white font-bold mb-4 flex items-center gap-2 text-xs uppercase tracking-widest pl-1">
                               Résumé Mission
                           </h3>
                           <div className="space-y-1">
                               <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 shadow-sm">
                                   <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Home size={16} /></div>
+                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-400"><Home size={16} /></div>
                                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Logement</span>
                                   </div>
                                   <span className="text-sm text-slate-900 dark:text-white font-black">{housing.type}</span>
                               </div>
                               <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 shadow-sm">
                                   <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Car size={16} /></div>
+                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-400"><Car size={16} /></div>
                                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Véhicule</span>
                                   </div>
                                   <span className="text-sm text-slate-900 dark:text-white font-black">{car.model}</span>
                               </div>
                               <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 shadow-sm">
                                   <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><CalendarClock size={16} /></div>
+                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-400"><CalendarClock size={16} /></div>
                                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Fin Mission</span>
                                   </div>
                                   <span className="text-sm text-slate-900 dark:text-white font-black">{housing.checkOut}</span>
@@ -242,7 +242,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
               {activeTab === 'housing' && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       
-                      <div className="relative h-48 rounded-[28px] overflow-hidden border border-slate-100 shadow-md group">
+                      <div className="relative h-48 rounded-[28px] overflow-hidden border border-slate-100 dark:border-slate-700 shadow-md group">
                           <img src={housing.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Housing" />
                           <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1 shadow-sm">
                              <div className="text-amber-400">★</div> {housing.rating}
@@ -262,10 +262,10 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           </div>
                       </div>
 
-                      <div className="bg-slate-50 rounded-[28px] p-2 border border-slate-100">
+                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[28px] p-2 border border-slate-100 dark:border-slate-700">
                           <div className="p-4 flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60">
                               <div className="flex items-center gap-4">
-                                  <div className="bg-orange-100 p-3 rounded-2xl text-orange-600"><Wifi size={20}/></div>
+                                  <div className="bg-orange-100 dark:bg-orange-900/40 p-3 rounded-2xl text-orange-600"><Wifi size={20}/></div>
                                   <div>
                                       <div className="text-[10px] uppercase text-slate-400 font-bold">Réseau Wifi</div>
                                       <div className="text-slate-900 dark:text-white font-mono text-sm font-bold">{housing.wifiDetails?.split('/')[0] || 'Unknown'}</div>
@@ -275,10 +275,10 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           </div>
                           <div className="p-4 flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                  <div className="bg-purple-100 p-3 rounded-2xl text-purple-600"><Key size={20}/></div>
+                                  <div className="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-2xl text-purple-600 dark:text-purple-400"><Key size={20}/></div>
                                   <div>
                                       <div className="text-[10px] uppercase text-slate-400 font-bold">Code d'accès</div>
-                                      <div className="text-slate-900 font-mono text-sm font-bold tracking-widest">{housing.accessCode || 'N/A'}</div>
+                                      <div className="text-slate-900 dark:text-white font-mono text-sm font-bold tracking-widest">{housing.accessCode || 'N/A'}</div>
                                   </div>
                               </div>
                               <button className="p-2 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-purple-600 transition-colors" title="Copier"><Copy size={18}/></button>
@@ -289,12 +289,12 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           <div className="bg-white dark:bg-[var(--bg-card-solid)] p-5 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-sm text-center">
                               <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Arrivée</div>
                               <div className="text-2xl font-black text-slate-900 dark:text-white">{housing.checkIn}</div>
-                              <div className="text-xs text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded-full inline-block">17:00</div>
+                              <div className="text-xs text-slate-500 font-bold mt-1 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full inline-block">17:00</div>
                           </div>
                           <div className="bg-white dark:bg-[var(--bg-card-solid)] p-5 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-sm text-center">
                               <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Départ</div>
                               <div className="text-2xl font-black text-slate-900 dark:text-white">{housing.checkOut}</div>
-                              <div className="text-xs text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded-full inline-block">10:00</div>
+                              <div className="text-xs text-slate-500 font-bold mt-1 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full inline-block">10:00</div>
                           </div>
                       </div>
 
@@ -353,7 +353,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           </div>
                       </div>
 
-                      <div className="bg-slate-50 rounded-[28px] p-2 border border-slate-100">
+                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[28px] p-2 border border-slate-100 dark:border-slate-700">
                           <button className="w-full p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 rounded-t-[20px] transition-all text-left group">
                               <div>
                                   <div className="text-sm font-bold text-slate-900 dark:text-white">Déclarer un incident</div>

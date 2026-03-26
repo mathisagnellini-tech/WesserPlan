@@ -69,19 +69,19 @@ export const PersonCard = memo<PersonCardProps>(({
       
       // New Arrival Override
       if (person.isNewArrival) {
-          return { bg: 'bg-cyan-400', border: 'border-cyan-400', text: 'text-cyan-600' };
+          return { bg: 'bg-cyan-400', border: 'border-cyan-400', text: 'text-cyan-600 dark:text-cyan-400' };
       }
 
       // Leader always gets Gold
-      if (isLeader) return { bg: 'bg-amber-400', border: 'border-amber-400', text: 'text-amber-500' };
+      if (isLeader) return { bg: 'bg-amber-400', border: 'border-amber-400', text: 'text-amber-500 dark:text-amber-400' };
 
       const weeks = person.weeksOfExperience || 1;
       switch(weeks) {
-          case 1: return { bg: 'bg-yellow-400', border: 'border-yellow-400', text: 'text-yellow-500' };
-          case 2: return { bg: 'bg-orange-500', border: 'border-orange-500', text: 'text-orange-600' };
-          case 3: return { bg: 'bg-purple-500', border: 'border-purple-500', text: 'text-purple-600' };
-          case 4: return { bg: 'bg-rose-500', border: 'border-rose-500', text: 'text-rose-600' };
-          default: return { bg: 'bg-slate-200', border: 'border-slate-400', text: 'text-slate-400' }; // 5+ weeks: Visible border
+          case 1: return { bg: 'bg-yellow-400', border: 'border-yellow-400', text: 'text-yellow-500 dark:text-yellow-400' };
+          case 2: return { bg: 'bg-orange-500', border: 'border-orange-500', text: 'text-orange-600 dark:text-orange-400' };
+          case 3: return { bg: 'bg-purple-500', border: 'border-purple-500', text: 'text-purple-600 dark:text-purple-400' };
+          case 4: return { bg: 'bg-rose-500', border: 'border-rose-500', text: 'text-rose-600 dark:text-rose-400' };
+          default: return { bg: 'bg-slate-200 dark:bg-slate-600', border: 'border-slate-400 dark:border-slate-500', text: 'text-slate-400 dark:text-slate-300' }; // 5+ weeks: Visible border
       }
   };
   const seniorityColors = getSeniorityColor();
@@ -90,7 +90,7 @@ export const PersonCard = memo<PersonCardProps>(({
   const getHeatmapStyle = () => {
     if (!isHeatmapMode) return '';
     if (person.drRate >= 20) return 'bg-emerald-500 border-emerald-400 text-white';
-    if (person.drRate >= 15) return 'bg-emerald-100 border-emerald-200';
+    if (person.drRate >= 15) return 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-700';
     if (person.drRate >= 12) return 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-200 dark:border-slate-700';
     return 'bg-red-500 border-red-400 text-white';
   };
@@ -112,11 +112,11 @@ export const PersonCard = memo<PersonCardProps>(({
   const getAlertConfig = () => {
       if (!person.alertType && !person.isWarning) return null;
       switch(person.alertType) {
-          case 'absent': return { label: 'Absent', color: 'bg-red-100 text-red-700 border-red-200', icon: UserX };
-          case 'performance': return { label: 'Perf.', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: TrendingDown };
-          case 'admin': return { label: 'Admin', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: FileWarning };
-          case 'medical': return { label: 'Médical', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: HeartPulse };
-          default: return { label: 'Alerte', color: 'bg-red-100 text-red-700 border-red-200', icon: AlertTriangle };
+          case 'absent': return { label: 'Absent', color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800', icon: UserX };
+          case 'performance': return { label: 'Perf.', color: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800', icon: TrendingDown };
+          case 'admin': return { label: 'Admin', color: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800', icon: FileWarning };
+          case 'medical': return { label: 'Médical', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800', icon: HeartPulse };
+          default: return { label: 'Alerte', color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800', icon: AlertTriangle };
       }
   };
   const alertConfig = getAlertConfig();
@@ -150,7 +150,7 @@ export const PersonCard = memo<PersonCardProps>(({
                 <div className={`text-[9px] uppercase font-bold ${forceWhiteText ? 'text-white/70' : 'text-slate-400'} mb-0.5 flex items-center justify-end gap-1`}>
                     <PhoneCall size={10} /> Contact
                 </div>
-                <div className={`text-[10px] font-bold ${forceWhiteText ? 'text-white/90 bg-white/10' : 'text-slate-500 bg-slate-100/50'} px-2 py-0.5 rounded-full`}>
+                <div className={`text-[10px] font-bold ${forceWhiteText ? 'text-white/90 bg-white/10' : 'text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50'} px-2 py-0.5 rounded-full`}>
                     {person.lastContact}
                 </div>
             </div>
@@ -198,16 +198,16 @@ export const PersonCard = memo<PersonCardProps>(({
               return (
                   <div className="flex flex-col items-end justify-center h-full gap-1">
                         <div className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${person.contractStatus === 'Signed' 
-                            ? (forceWhiteText ? 'bg-white/20 text-white border-white/30' : 'bg-emerald-50 text-emerald-600 border-emerald-100') 
-                            : (forceWhiteText ? 'bg-white/20 text-white border-white/30' : 'bg-amber-50 text-amber-600 border-amber-100')
+                            ? (forceWhiteText ? 'bg-white/20 text-white border-white/30' : 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800')
+                            : (forceWhiteText ? 'bg-white/20 text-white border-white/30' : 'bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800')
                         }`}>
                             {person.contractStatus === 'Signed' ? 'Contrat OK' : 'En Attente'}
                         </div>
                         <div className="flex items-center gap-1">
-                             <div className={`p-1 rounded-full ${person.hasLicense ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-500') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 text-slate-300')}`}>
+                             <div className={`p-1 rounded-full ${person.hasLicense ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-orange-50 dark:bg-orange-900/40 text-orange-500 dark:text-orange-400') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 dark:bg-slate-700 text-slate-300 dark:text-slate-500')}`}>
                                  <Car size={10} />
                              </div>
-                             <div className={`p-1 rounded-full ${person.medicalVisit ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-purple-50 text-purple-500') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 text-slate-300')}`}>
+                             <div className={`p-1 rounded-full ${person.medicalVisit ? (forceWhiteText ? 'bg-white/20 text-white' : 'bg-purple-50 dark:bg-purple-900/40 text-purple-500 dark:text-purple-400') : (forceWhiteText ? 'bg-white/10 text-white/50' : 'bg-slate-100 dark:bg-slate-700 text-slate-300 dark:text-slate-500')}`}>
                                  <HeartPulse size={10} />
                              </div>
                         </div>
@@ -272,8 +272,8 @@ export const PersonCard = memo<PersonCardProps>(({
             ${isHeatmapMode ? heatmapClass : `bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-50 dark:hover:bg-slate-800 border-2 ${seniorityColors.border}`}
             ${isDragging ? 'opacity-50 scale-95 shadow-none' : 'shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5'}
             ${isSelected ? 'ring-2 ring-orange-500 z-10' : ''}
-            ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 cursor-crosshair' : ''}
-            ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 z-20 scale-105' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
+            ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 cursor-crosshair' : ''}
+            ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 dark:bg-purple-900/30 z-20 scale-105' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
           `}
         >
 
@@ -292,9 +292,9 @@ export const PersonCard = memo<PersonCardProps>(({
             
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
-                    <h3 className={`font-bold text-sm pr-2 ${forceWhiteText ? 'text-white' : 'text-slate-900'}`}>{person.name}</h3>
+                    <h3 className={`font-bold text-sm pr-2 ${forceWhiteText ? 'text-white' : 'text-slate-900 dark:text-slate-100'}`}>{person.name}</h3>
                 </div>
-                <div className={`text-xs truncate ${forceWhiteText ? 'text-white/80' : 'text-slate-500'}`}>{person.role}</div>
+                <div className={`text-xs truncate ${forceWhiteText ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>{person.role}</div>
             </div>
 
             <div className="flex-shrink-0">
@@ -350,10 +350,10 @@ export const PersonCard = memo<PersonCardProps>(({
         ${isHeatmapMode ? heatmapClass : `bg-gradient-to-b from-white/90 to-white/50 dark:from-slate-800/90 dark:to-slate-800/50 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]`}
         ${isDragging ? 'opacity-40 scale-95 rotate-2 shadow-none' : 'hover:-translate-y-1 hover:scale-[1.02]'}
         ${isSelected ? 'ring-2 ring-orange-500 z-10' : ''}
-        ${(person.isWarning || alertConfig) && !isHeatmapMode ? 'ring-1 ring-red-400/50 bg-red-50/50' : ''}
+        ${(person.isWarning || alertConfig) && !isHeatmapMode ? 'ring-1 ring-red-400/50 bg-red-50/50 dark:bg-red-900/20' : ''}
         ${!isHeatmapMode && !isSelected ? `border-2 ${seniorityColors.border}` : ''}
-        ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 cursor-crosshair' : ''}
-        ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 z-20 scale-105 shadow-xl' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
+        ${showRelationships && !isDragging ? 'hover:ring-2 hover:ring-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 cursor-crosshair' : ''}
+        ${isLinkingMode ? (isLinkSource ? 'ring-4 ring-purple-500 bg-purple-50 dark:bg-purple-900/30 z-20 scale-105 shadow-xl' : (canBeLinkTarget ? 'hover:ring-4 hover:ring-purple-300 hover:scale-105 cursor-crosshair' : 'opacity-60 grayscale-[0.5]')) : 'cursor-grab active:cursor-grabbing'}
       `}
     >
       
@@ -383,7 +383,7 @@ export const PersonCard = memo<PersonCardProps>(({
 
         <div className="flex-1 min-w-0 py-0.5">
             {/* Name - No Truncation */}
-            <h3 className={`font-[800] text-[13px] leading-tight mb-0.5 whitespace-normal break-words ${forceWhiteText ? 'text-white' : 'text-slate-800'}`}>
+            <h3 className={`font-[800] text-[13px] leading-tight mb-0.5 whitespace-normal break-words ${forceWhiteText ? 'text-white' : 'text-slate-800 dark:text-slate-100'}`}>
                 {person.name}
             </h3>
             <div className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${forceWhiteText ? 'text-white/80' : 'text-slate-400'}`}>
@@ -401,7 +401,7 @@ export const PersonCard = memo<PersonCardProps>(({
 
                 {/* NGO Experience Warning */}
                 {showNgoWarning && !isHeatmapMode && (
-                     <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg border bg-orange-50 text-orange-600 border-orange-200 flex items-center gap-1" title="Jamais travaillé avec cette asso">
+                     <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg border bg-orange-50 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800 flex items-center gap-1" title="Jamais travaillé avec cette asso">
                         <Info size={8} />
                         New Asso
                     </div>
@@ -413,7 +413,7 @@ export const PersonCard = memo<PersonCardProps>(({
                         className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border
                            ${forceWhiteText
                                ? 'bg-white/20 border-white/30 text-white'
-                               : (tag === 'Senior' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-slate-100 text-slate-500 border-slate-200')}
+                               : (tag === 'Senior' ? 'bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600')}
                            flex items-center gap-1
                         `}
                     >
@@ -444,7 +444,7 @@ export const PersonCard = memo<PersonCardProps>(({
                          <div className={`text-[9px] font-bold uppercase ${forceWhiteText ? 'text-white/70' : 'text-slate-400'} mb-1`}>
                              {person.tags.includes('Student') ? 'Étudiant' : 'Ancien'}
                          </div>
-                         <div className={`text-xs font-bold ${forceWhiteText ? 'text-white bg-white/20' : 'text-slate-700 bg-slate-100/50'} px-2 py-1 rounded-md w-fit`}>
+                         <div className={`text-xs font-bold ${forceWhiteText ? 'text-white bg-white/20' : 'text-slate-700 dark:text-slate-200 bg-slate-100/50 dark:bg-slate-700/50'} px-2 py-1 rounded-md w-fit`}>
                              {person.tags.includes('Student') ? 'Vivier' : 'Indép.'}
                          </div>
                     </div>
@@ -456,7 +456,7 @@ export const PersonCard = memo<PersonCardProps>(({
                          {viewMode === 'identity' && (
                              <div className="flex -space-x-2">
                                  {[1,2,3].map(i => (
-                                     <div key={i} className={`w-6 h-6 rounded-full border-2 ${forceWhiteText ? 'border-white/20 bg-white/20' : 'border-white bg-slate-100'} flex items-center justify-center text-[8px] font-bold text-slate-400`}>
+                                     <div key={i} className={`w-6 h-6 rounded-full border-2 ${forceWhiteText ? 'border-white/20 bg-white/20' : 'border-white dark:border-slate-700 bg-slate-100 dark:bg-slate-700'} flex items-center justify-center text-[8px] font-bold text-slate-400 dark:text-slate-500`}>
                                          <Clock size={10} />
                                      </div>
                                  ))}
@@ -471,7 +471,7 @@ export const PersonCard = memo<PersonCardProps>(({
                          {viewMode === 'performance' && (
                             <div className="flex flex-col">
                                 <span className={`text-[9px] font-bold uppercase ${forceWhiteText ? 'text-white/70' : 'text-slate-400'}`}>Objectif</span>
-                                <div className={`h-1.5 w-16 rounded-full mt-1 ${forceWhiteText ? 'bg-white/30' : 'bg-slate-100'} overflow-hidden`}>
+                                <div className={`h-1.5 w-16 rounded-full mt-1 ${forceWhiteText ? 'bg-white/30' : 'bg-slate-100 dark:bg-slate-700'} overflow-hidden`}>
                                     <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min((person.drRate / objective) * 100, 100)}%` }}></div>
                                 </div>
                             </div>

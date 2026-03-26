@@ -30,7 +30,7 @@ const FilterGroup: React.FC<{
                 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 flex items-center gap-1.5
                 ${isActive 
                   ? `${colorClass} text-white border-transparent shadow-md transform scale-105` 
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-700'
                 }
               `}
             >
@@ -48,7 +48,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, onFilterChange, o
   const hasActiveFilters = Object.values(filters).some((arr) => (arr as string[]).length > 0);
 
   return (
-    <div className="w-full bg-white/60 backdrop-blur-xl border-b border-white/50 animate-in slide-in-from-top-2 duration-300 z-40 sticky top-16">
+    <div className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 animate-in slide-in-from-top-2 duration-300 z-40 sticky top-16">
       <div className="px-6 py-4 flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between overflow-x-auto custom-scrollbar-light">
         
         <div className="flex gap-8 items-start">
@@ -61,7 +61,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, onFilterChange, o
                 colorClass="bg-purple-600"
             />
 
-            <div className="w-px bg-slate-200/60 self-stretch my-1"></div>
+            <div className="w-px bg-slate-200/60 dark:bg-slate-700/60 self-stretch my-1"></div>
 
             {/* Status */}
             <FilterGroup 
@@ -72,7 +72,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, onFilterChange, o
                 colorClass="bg-emerald-600"
             />
 
-            <div className="w-px bg-slate-200/60 self-stretch my-1"></div>
+            <div className="w-px bg-slate-200/60 dark:bg-slate-700/60 self-stretch my-1"></div>
 
             {/* Tags */}
             <FilterGroup 
@@ -83,7 +83,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, onFilterChange, o
                 colorClass="bg-amber-500"
             />
 
-            <div className="w-px bg-slate-200/60 self-stretch my-1"></div>
+            <div className="w-px bg-slate-200/60 dark:bg-slate-700/60 self-stretch my-1"></div>
 
              {/* NGOs */}
              <FilterGroup 
@@ -96,16 +96,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, onFilterChange, o
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 ml-auto pl-4 border-l border-slate-200/60 h-full">
+        <div className="flex items-center gap-3 ml-auto pl-4 border-l border-slate-200/60 dark:border-slate-700/60 h-full">
             {hasActiveFilters && (
                 <button 
                     onClick={onClear}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
                 >
                     <X size={14} /> Effacer
                 </button>
             )}
-            <div className="px-3 py-1.5 bg-slate-100 rounded-lg text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <div className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 Filtres Actifs: {Object.values(filters).reduce((acc: number, curr) => acc + (curr as string[]).length, 0)}
             </div>
         </div>

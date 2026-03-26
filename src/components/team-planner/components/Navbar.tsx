@@ -146,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={onToggleLinking}
-              className={`p-1.5 rounded-md transition-colors ${isLinkingMode ? 'bg-purple-100 text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+              className={`p-1.5 rounded-md transition-colors ${isLinkingMode ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
               title="Mode Liaison"
             >
               <Zap size={14} />
@@ -201,7 +201,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onToggleFilter}
                 className={`relative p-1.5 rounded-md transition-all ${isFilterOpen || activeFilterCount > 0
-                  ? 'bg-orange-50 text-orange-600'
+                  ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700'
                 }`}
                 title="Filtres"

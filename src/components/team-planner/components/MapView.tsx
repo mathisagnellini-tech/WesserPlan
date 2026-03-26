@@ -40,23 +40,23 @@ export const MapView: React.FC<MapViewProps> = ({ data }) => {
     const columns = Object.values(data.columns) as Column[];
 
     return (
-        <div className="flex-1 bg-slate-100 relative overflow-hidden flex items-center justify-center p-8 h-full">
-            <div className="relative w-full max-w-5xl aspect-[1.4/1] bg-white rounded-3xl shadow-xl border border-slate-200 p-8 flex flex-col">
-                <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-2">
+        <div className="flex-1 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex items-center justify-center p-8 h-full">
+            <div className="relative w-full max-w-5xl aspect-[1.4/1] bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 p-8 flex flex-col">
+                <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-6 flex items-center gap-2">
                     <MapPin className="text-orange-600" /> Carte des Missions
                 </h2>
                 
                 {/* Map Container */}
-                <div className="relative flex-1 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                <div className="relative flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
                      {/* Simplified France Map SVG Background */}
                      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" preserveAspectRatio="none">
-                        <path d="M45,95 L55,95 L65,85 L85,85 L90,75 L85,25 L75,15 L55,5 L45,5 L25,25 L15,35 L15,55 L25,75 L45,95 Z" fill="#64748b" />
+                        <path d="M45,95 L55,95 L65,85 L85,85 L90,75 L85,25 L75,15 L55,5 L45,5 L25,25 L15,35 L15,55 L25,75 L45,95 Z" className="fill-slate-500 dark:fill-slate-400" />
                      </svg>
                      
                      {/* Grid Lines */}
-                     <div className="absolute inset-0 pointer-events-none" 
+                     <div className="absolute inset-0 pointer-events-none"
                         style={{
-                            backgroundImage: `linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px)`,
+                            backgroundImage: `linear-gradient(${document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0'} 1px, transparent 1px), linear-gradient(90deg, ${document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0'} 1px, transparent 1px)`,
                             backgroundSize: '40px 40px'
                         }}
                      />
@@ -82,7 +82,7 @@ export const MapView: React.FC<MapViewProps> = ({ data }) => {
                              >
                                  {/* Pin Marker */}
                                  <div className={`
-                                    w-6 h-6 rounded-full ${col.color} ring-4 ring-white shadow-lg 
+                                    w-6 h-6 rounded-full ${col.color} ring-4 ring-white dark:ring-slate-800 shadow-lg 
                                     flex items-center justify-center text-[10px] font-bold text-white
                                     group-hover:scale-125 transition-transform duration-300
                                  `}>
@@ -93,19 +93,19 @@ export const MapView: React.FC<MapViewProps> = ({ data }) => {
                                  <div className={`absolute inset-0 rounded-full ${col.color} opacity-40 animate-ping -z-10`}></div>
 
                                  {/* Tooltip */}
-                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-white px-3 py-2 rounded-xl shadow-xl border border-slate-100 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none min-w-[140px] transform translate-y-2 group-hover:translate-y-0">
-                                     <div className="text-xs font-black text-slate-800 uppercase tracking-tight mb-0.5">{col.title}</div>
+                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none min-w-[140px] transform translate-y-2 group-hover:translate-y-0">
+                                     <div className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight mb-0.5">{col.title}</div>
                                      <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
                                          <MapPin size={10} /> {city}
                                      </div>
                                      <div className="mt-2 flex items-center gap-1">
                                          {col.cardIds.slice(0, 3).map((_, i) => (
-                                             <div key={i} className="w-4 h-4 rounded-full bg-slate-200 border border-white"></div>
+                                             <div key={i} className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 border border-white dark:border-slate-800"></div>
                                          ))}
                                          {col.cardIds.length > 3 && <span className="text-[9px] text-slate-400">+{col.cardIds.length - 3}</span>}
                                      </div>
                                      {/* Arrow */}
-                                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-white"></div>
+                                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-white dark:border-t-slate-900"></div>
                                  </div>
                              </div>
                          );
