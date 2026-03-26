@@ -6,11 +6,6 @@
       "src": "/logo.png",
       "sizes": "500x500",
       "type": "image/png"
-    },
-    {
-      "src": "/logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
     }
   ],
   "theme_color": "#E31E24",

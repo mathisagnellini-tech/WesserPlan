@@ -1,21 +1,33 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Commune, Organization, CommuneStatus } from '@/types';
+import { Commune } from '@/types';
 import { communesData, departmentMap, departmentToRegionMap } from '@/constants';
 import { MapCommuneFeature, ProspectHistoryItem } from '@/components/communes/types';
+import { useCommunesStore } from '@/stores/communesStore';
 
 export function useCommunesData() {
-    const [selectedOrg, setSelectedOrg] = useState<Organization>('msf');
-    const [search, setSearch] = useState('');
-    const [mode, setMode] = useState<'list' | 'map'>('list');
+    // Read from Zustand store instead of local state
+    const selectedOrg = useCommunesStore((s) => s.selectedOrg);
+    const setSelectedOrg = useCommunesStore((s) => s.setSelectedOrg);
+    const search = useCommunesStore((s) => s.search);
+    const setSearch = useCommunesStore((s) => s.setSearch);
+    const mode = useCommunesStore((s) => s.mode);
+    const setMode = useCommunesStore((s) => s.setMode);
 
-    // Filters
-    const [selectedRegions, setSelectedRegions] = useState<Set<string>>(new Set());
-    const [selectedDepts, setSelectedDepts] = useState<Set<string>>(new Set());
-    const [selectedStatuses, setSelectedStatuses] = useState<Set<CommuneStatus>>(new Set());
+    // Filters from store
+    const selectedRegions = useCommunesStore((s) => s.selectedRegions);
+    const setSelectedRegions = useCommunesStore((s) => s.setSelectedRegions);
+    const selectedDepts = useCommunesStore((s) => s.selectedDepts);
+    const setSelectedDepts = useCommunesStore((s) => s.setSelectedDepts);
+    const selectedStatuses = useCommunesStore((s) => s.selectedStatuses);
+    const toggleStatus = useCommunesStore((s) => s.toggleStatus);
+    const resetStatuses = useCommunesStore((s) => s.resetStatuses);
+
+    // Selected commune from store
+    const selectedCommuneId = useCommunesStore((s) => s.selectedCommuneId);
+    const setSelectedCommuneId = useCommunesStore((s) => s.setSelectedCommuneId);
 
     // Data
     const [localCommunes, setLocalCommunes] = useState<Commune[]>([]);
-    const [selectedCommune, setSelectedCommune] = useState<Commune | null>(null);
     const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([
         {
             id: 'req-1',
@@ -35,16 +47,17 @@ export function useCommunesData() {
     // Init local data on mount or org change
     useEffect(() => {
         setLocalCommunes(communesData[selectedOrg]);
-        setSelectedCommune(null);
     }, [selectedOrg]);
 
-    // Update selected commune if local data changes
-    useEffect(() => {
-        if (selectedCommune) {
-            const updated = localCommunes.find(c => c.id === selectedCommune.id);
-            if (updated) setSelectedCommune(updated);
-        }
-    }, [localCommunes]);
+    // Derive selectedCommune from store's selectedCommuneId
+    const selectedCommune = useMemo(() => {
+        if (selectedCommuneId === null) return null;
+        return localCommunes.find(c => c.id === selectedCommuneId) || null;
+    }, [localCommunes, selectedCommuneId]);
+
+    const setSelectedCommune = (commune: Commune | null) => {
+        setSelectedCommuneId(commune ? commune.id : null);
+    };
 
     const handleUpdateCommune = (id: number, updates: Partial<Commune>) => {
         setLocalCommunes(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
@@ -115,18 +128,6 @@ export function useCommunesData() {
         const regions = new Set<string>(Object.values(departmentToRegionMap));
         return Array.from(regions).sort().map(r => ({ value: r, label: r }));
     }, []);
-
-    const toggleStatus = (status: CommuneStatus) => {
-        const newSet = new Set(selectedStatuses);
-        if (newSet.has(status)) {
-            newSet.delete(status);
-        } else {
-            newSet.add(status);
-        }
-        setSelectedStatuses(newSet);
-    };
-
-    const resetStatuses = () => setSelectedStatuses(new Set());
 
     const filteredCommunes = useMemo(() => {
         return localCommunes.filter(c => {

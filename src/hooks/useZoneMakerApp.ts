@@ -3,6 +3,7 @@ import { generateClusters, recalculateSchedule } from '@/services/clusteringServ
 import { analyzeCluster } from '@/services/geminiService';
 import { Cluster, ClusteringResult, Commune, GeoFeature, MoveConfirmation, CommuneStatus, ScheduleChangeConfirmation, ScheduleImpact } from '@/components/zone-maker/types';
 import { TARGET_POPULATION, API_GEO_URL, DEFAULT_MAX_POP_FILTER, RAW_CSV_DATA } from '@/components/zone-maker/constants';
+import { useZoneStore } from '@/stores/zoneStore';
 
 // Helper to parse CSV (simple version)
 const parseCSV = (csv: string): Map<string, number> => {
@@ -51,13 +52,25 @@ const getFlattenedCoordinates = (geometry: any): string[] => {
 };
 
 export function useZoneMakerApp() {
+  const selectedClusterId = useZoneStore((s) => s.selectedClusterId);
+  const setSelectedClusterId = useZoneStore((s) => s.setSelectedClusterId);
+
   const [data, setData] = useState<ClusteringResult | null>(null);
   const [communes, setCommunes] = useState<Commune[]>([]);
-  const [selectedCluster, setSelectedCluster] = useState<Cluster | null>(null);
   const [analysis, setAnalysis] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Derive selectedCluster from store's selectedClusterId
+  const selectedCluster = useMemo(() => {
+    if (!selectedClusterId || !data) return null;
+    return data.clusters.find(c => c.id === selectedClusterId) ?? null;
+  }, [selectedClusterId, data]);
+
+  const setSelectedCluster = useCallback((cluster: Cluster | null) => {
+    setSelectedClusterId(cluster?.id ?? null);
+  }, [setSelectedClusterId]);
 
   // Settings & Filters
   const [targetPop, setTargetPop] = useState(TARGET_POPULATION);

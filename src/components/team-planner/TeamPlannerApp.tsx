@@ -17,6 +17,7 @@ import { RelationshipModal } from './components/RelationshipModal';
 import { useTeamBoard } from './hooks/useTeamBoard';
 import { useTeamFilters } from './hooks/useTeamFilters';
 import { useTeamRelationships } from './hooks/useTeamRelationships';
+import { useTeamStore } from '@/stores/teamStore';
 import { LayoutGrid, Rows, GitMerge, Grip, Maximize, Minimize, MapPin } from 'lucide-react';
 
 export type ViewMode = 'performance' | 'identity' | 'hr';
@@ -30,14 +31,21 @@ export default function App() {
   const board = useTeamBoard();
   const filtering = useTeamFilters(board.currentData);
 
-  // Page Mode (Board vs Alumni vs Map)
-  const [pageMode, setPageMode] = useState<PageMode>('board');
+  // Persisted state from Zustand store
+  const pageMode = useTeamStore((s) => s.pageMode) as PageMode;
+  const setPageMode = useTeamStore((s) => s.setPageMode);
+  const density = useTeamStore((s) => s.density) as ViewDensity;
+  const setDensity = useTeamStore((s) => s.setDensity);
+  const viewMode = useTeamStore((s) => s.viewMode) as ViewMode;
+  const setViewMode = useTeamStore((s) => s.setViewMode);
+  const setStoreSelectedPersonId = useTeamStore((s) => s.setSelectedPersonId);
 
-  // Density & View
-  const [density, setDensity] = useState<ViewDensity>('standard');
-  const [viewMode, setViewMode] = useState<ViewMode>('performance');
+  // Sync selectedPerson with store
+  useEffect(() => {
+    setStoreSelectedPersonId(board.selectedPerson?.id ?? null);
+  }, [board.selectedPerson, setStoreSelectedPersonId]);
 
-  // Power User Features
+  // Power User Features (ephemeral)
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isHeatmapMode, setIsHeatmapMode] = useState(false);
   const [isCinemaMode, setIsCinemaMode] = useState(false);

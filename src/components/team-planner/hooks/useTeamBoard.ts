@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initialData, generateIncomingPeople } from '../constants';
 import { BoardData, Person, Column, Relationship } from '../types';
 import type { PageMode } from '../components/Navbar';
+import { useTeamStore } from '@/stores/teamStore';
 
 export const getWeekDateRange = (weekOffset: number) => {
     const baseDate = new Date(2025, 0, 19);
@@ -28,8 +29,11 @@ export const getWeekDateRange = (weekOffset: number) => {
 };
 
 export function useTeamBoard() {
+  const storeWeekIndex = useTeamStore((s) => s.currentWeekIndex);
+  const setStoreWeekIndex = useTeamStore((s) => s.setCurrentWeekIndex);
+
   const [weeksData, setWeeksData] = useState<Record<number, BoardData>>({ 0: initialData });
-  const [currentWeekIndex, setCurrentWeekIndex] = useState<number>(0);
+  const [currentWeekIndex, setCurrentWeekIndexLocal] = useState<number>(storeWeekIndex);
   const [incomingPeople, setIncomingPeople] = useState<Person[]>(generateIncomingPeople(8));
   const [departingPeople, setDepartingPeople] = useState<Person[]>([]);
 
@@ -43,6 +47,17 @@ export function useTeamBoard() {
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
   const [highlightedCardId, setHighlightedCardId] = useState<string | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
+
+  // Sync local weekIndex to store whenever it changes
+  const setCurrentWeekIndex = (index: number) => {
+    setCurrentWeekIndexLocal(index);
+    setStoreWeekIndex(index);
+  };
+
+  // Sync from store to local when store changes externally
+  useEffect(() => {
+    setCurrentWeekIndexLocal(storeWeekIndex);
+  }, [storeWeekIndex]);
 
   const currentData = weeksData[currentWeekIndex] || initialData;
 

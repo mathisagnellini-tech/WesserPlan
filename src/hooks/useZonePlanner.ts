@@ -4,6 +4,7 @@ import { Cluster, ClusteringResult, Commune, GeoFeature, CommuneStatus } from '@
 import {
   API_GEO_URL, TARGET_COMMUNES_LIST, DEPT_CODE, CLUSTER_COLORS, MIN_1W
 } from '@/components/zone-maker/constants';
+import { useZoneStore } from '@/stores/zoneStore';
 
 export const ASSOCIATIONS = [
   { id: 'MSF', label: 'MSF', color: '#ee0000' },
@@ -19,14 +20,27 @@ export const ASSOCIATIONS = [
 export const CURRENT_WEEK = 2;
 
 export function useZonePlanner() {
-  const [selectedNGO, setSelectedNGO] = useState(ASSOCIATIONS[0].id);
+  const selectedNGO = useZoneStore((s) => s.selectedNGO);
+  const setSelectedNGO = useZoneStore((s) => s.setSelectedNGO);
+  const selectedClusterId = useZoneStore((s) => s.selectedClusterId);
+  const setSelectedClusterId = useZoneStore((s) => s.setSelectedClusterId);
+
   const [ngoStates, setNgoStates] = useState<Record<string, ClusteringResult>>({});
 
   const [data, setData] = useState<ClusteringResult>({ clusters: [], unclustered: [] });
   const [history, setHistory] = useState<ClusteringResult[]>([]);
   const [communes, setCommunes] = useState<Commune[]>([]);
-  const [selectedCluster, setSelectedCluster] = useState<Cluster | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Derive selectedCluster from store's selectedClusterId
+  const selectedCluster = useMemo(() => {
+    if (!selectedClusterId) return null;
+    return data.clusters.find(c => c.id === selectedClusterId) ?? null;
+  }, [selectedClusterId, data.clusters]);
+
+  const setSelectedCluster = useCallback((cluster: Cluster | null) => {
+    setSelectedClusterId(cluster?.id ?? null);
+  }, [setSelectedClusterId]);
 
   const [defaultTeamCount, setDefaultTeamCount] = useState(2);
   const [weekOverrides, setWeekOverrides] = useState<Record<number, number>>({});

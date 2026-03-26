@@ -11,6 +11,7 @@ import { HousingList } from './HousingList';
 import { HousingMap } from './HousingMap';
 import { SmartMatcher } from './SmartMatcher';
 import { VehicleSection } from './VehicleSection';
+import { useOperationsStore } from '@/stores/operationsStore';
 
 // --- INITIAL DATA ---
 const INITIAL_HOUSINGS: Housing[] = [
@@ -28,16 +29,16 @@ const INITIAL_CARS: CarType[] = [
 ];
 
 const OperationsTab: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'housing' | 'cars' | 'stats'>('housing');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const { activeSubTab, setActiveSubTab, viewMode, setViewMode, selectedHousingId, setSelectedHousingId, reportingCarId, setReportingCarId } = useOperationsStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalMode, setAddModalMode] = useState<'manual'|'scan'>('manual');
   const [smartZoneId, setSmartZoneId] = useState<string>("");
   const [housingData, setHousingData] = useState<Housing[]>(INITIAL_HOUSINGS);
   const [carsData, setCarsData] = useState<CarType[]>(INITIAL_CARS);
-  const [selectedHousing, setSelectedHousing] = useState<Housing | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [reportingCar, setReportingCar] = useState<CarType | null>(null);
+
+  const selectedHousing = useMemo(() => selectedHousingId ? housingData.find(h => h.id === selectedHousingId) ?? null : null, [selectedHousingId, housingData]);
+  const reportingCar = useMemo(() => reportingCarId ? carsData.find(c => c.id === reportingCarId) ?? null : null, [reportingCarId, carsData]);
 
   const filteredHousing = useMemo(() => {
       let data = [...housingData];
@@ -71,7 +72,7 @@ const OperationsTab: React.FC = () => {
       if (reportingCar) {
           const newDamage = { date: new Date().toISOString(), description: desc, author: "Moi" };
           setCarsData(carsData.map(c => c.id === reportingCar.id ? { ...c, damages: [...(c.damages || []), newDamage] } : c));
-          setReportingCar(null);
+          setReportingCarId(null);
       }
   };
 
@@ -87,14 +88,14 @@ const OperationsTab: React.FC = () => {
       setIsAddModalOpen(true);
   };
 
-  const handleSelectHousing = useCallback((h: Housing) => setSelectedHousing(h), []);
+  const handleSelectHousing = useCallback((h: Housing) => setSelectedHousingId(h.id), [setSelectedHousingId]);
 
   return (
     <div className="min-h-screen pb-10 relative">
         {/* Modals */}
-        <HousingDetailModal housing={selectedHousing} onClose={() => setSelectedHousing(null)} />
+        <HousingDetailModal housing={selectedHousing} onClose={() => setSelectedHousingId(null)} />
         <AddHousingModal isOpen={isAddModalOpen} initialMode={addModalMode} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddNewHousing} />
-        {reportingCar && <ReportDamageModal car={reportingCar} onClose={() => setReportingCar(null)} onReport={handleReportDamage} />}
+        {reportingCar && <ReportDamageModal car={reportingCar} onClose={() => setReportingCarId(null)} onReport={handleReportDamage} />}
 
         {/* Logistics Dashboard */}
         <LogisticsDashboard housings={housingData} cars={carsData} />
@@ -128,7 +129,7 @@ const OperationsTab: React.FC = () => {
         )}
 
         {/* CARS TAB */}
-        {activeSubTab === 'cars' && <VehicleSection cars={carsData} onReportDamage={setReportingCar} />}
+        {activeSubTab === 'cars' && <VehicleSection cars={carsData} onReportDamage={(car) => setReportingCarId(car.id)} />}
 
         {/* STATS TAB */}
         {activeSubTab === 'stats' && (
