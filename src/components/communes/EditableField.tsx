@@ -27,7 +27,7 @@ export const EditableField: React.FC<{
                         if (e.key === 'Escape') { setTempValue(value); setIsEditing(false); }
                     }}
                 />
-                <button onClick={() => { onSave(tempValue); setIsEditing(false); }} className="p-1 bg-orange-100 text-orange-600 rounded hover:bg-orange-200"><Save size={14}/></button>
+                <button onClick={() => { onSave(tempValue); setIsEditing(false); }} className="p-1 bg-orange-100 dark:bg-orange-500/20 text-orange-600 rounded hover:bg-orange-200 dark:hover:bg-orange-500/30"><Save size={14}/></button>
             </div>
         );
     }

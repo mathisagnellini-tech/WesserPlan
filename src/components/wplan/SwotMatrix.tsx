@@ -9,7 +9,7 @@ const SwotMatrix: React.FC<SwotMatrixProps> = ({ regionName }) => {
     return (
         <div className="grid grid-cols-1 gap-6 mt-6 relative z-0">
             <div className="glass-card p-6 flex flex-col">
-                <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                     <Lightbulb className="text-yellow-500" size={20} />
                     Matrice SWOT : {regionName || 'France Entière'}
                 </h3>

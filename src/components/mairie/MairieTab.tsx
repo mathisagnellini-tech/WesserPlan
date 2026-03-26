@@ -7,20 +7,7 @@ import { getISOWeek, getCalculatedWeekString, standardHoraires, ORGS_CONFIG } fr
 import { Toast, DocRequiredModal, ContactEditModal, MairieDetailModal } from './MairieModals';
 import { ZoneCard } from './ZoneCard';
 import { MairieCard } from './MairieCard';
-
-// --- MOCK DATA ---
-const initialZones: Zone[] = [
-    { id: 'z1', name: 'Zone A (Nord)', leader: 'Thomas R.', organization: 'msf', defaultDuration: 2, startWeek: 45 },
-    { id: 'z2', name: 'Centre-Ville', leader: 'Sarah L.', organization: 'unicef', defaultDuration: 1, startWeek: 48 },
-];
-
-const initialMairieData: Mairie[] = [
-    { id: 1, nom: 'Saint-Herblain', region: 'Pays de la Loire', departement: '44', organization: 'msf', contact: { email: 'contact@saint-herblain.fr', tel: '02 28 25 20 00', nomContact: 'Mme. Dupont', fonctionContact: 'Secrétariat Général'}, infos: { adresse: '2 Rue de l\'Hôtel de Ville, 44800 Saint-Herblain', maire: 'Bertrand Affilé', parking: 'Oui, derrière le bâtiment', etage: '1er étage, porte gauche' }, horaires: standardHoraires, population: 46603, semaineDemandee: '2025-W45', dateDemande: '2025-10-27', etapeProgression: 2, statutGeneral: 'Action requise', commentaires: [ { id: 'c1', date: '2024-09-15T10:30:00', texte: 'Rappeler impérativement le 12/10, la secrétaire est absente le lundi.', isFavorite: true }, { id: 'c2', date: '2024-09-10T14:00:00', texte: 'Premier mail envoyé, pas de réponse.' } ], zoneId: 'z1', serieId: 'serie-1' },
-    { id: 2, nom: 'Rezé', region: 'Pays de la Loire', departement: '44', organization: 'unicef', contact: { email: 'mairie@mairie-reze.fr', tel: '02 40 84 42 00', nomContact: 'Accueil', fonctionContact: 'Standard'}, infos: { adresse: 'Place Jean-Baptiste Daviais, 44400 Rezé', maire: 'Agnès Bourgeais', digicode: 'A45B (Portail arrière)' }, horaires: { ...standardHoraires, sa: ["09:00-12:00"] }, population: 42998, semaineDemandee: '2025-W46', dateDemande: '2025-11-03', etapeProgression: 4, statutGeneral: 'Validé', commentaires: [ { id: 'c3', date: '2024-10-01T09:00:00', texte: 'Accord verbal reçu ce matin !' } ], zoneId: 'z1', serieId: 'serie-1' },
-    { id: 3, nom: 'Nantes', region: 'Pays de la Loire', departement: '44', organization: 'wwf', contact: { email: 'contact@nantesmetropole.fr', tel: '02 40 41 90 00'}, infos: { adresse: '2 Rue de l\'Hôtel de Ville, 44000 Nantes', maire: 'Johanna Rolland' }, horaires: standardHoraires, population: 318808, semaineDemandee: '2025-W48', dateDemande: '2025-11-17', etapeProgression: 1, statutGeneral: 'En cours', commentaires: [], zoneId: 'z2' },
-    { id: 4, nom: 'Strasbourg', region: 'Grand Est', departement: '67', organization: 'msf', contact: { email: 'autorisations@strasbourg.eu', tel: '03 68 98 50 00' }, infos: { adresse: '1 Parc de l\'Étoile, 67000 Strasbourg', maire: 'Jeanne Barseghian' }, horaires: standardHoraires, population: 291313, semaineDemandee: '2025-W40', dateDemande: '2025-09-29', etapeProgression: 1, statutGeneral: 'En cours', commentaires: [] },
-    { id: 5, nom: 'Colmar', region: 'Grand Est', departement: '68', organization: 'msf', contact: { email: 'contact@colmar.fr', tel: '03 89 20 68 68' }, infos: { adresse: '1 Place de la Mairie, 68000 Colmar', maire: 'Eric Straumann' }, horaires: standardHoraires, population: 67000, semaineDemandee: '2025-W40', dateDemande: '2025-09-29', etapeProgression: 0, statutGeneral: 'À traiter', commentaires: [] },
-];
+import { initialZones, initialMairieData } from '@/mocks/mairieMocks';
 
 export default function MairieTab() {
     const [zones, setZones] = useState<Zone[]>(initialZones);
@@ -92,7 +79,7 @@ export default function MairieTab() {
                 </div>
 
                 <div className="flex gap-1 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-[var(--border-subtle)] w-fit">
-                     <button onClick={() => setSelectedOrgFilter('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 text-white shadow-md' : 'text-[var(--text-secondary)] hover:bg-white hover:shadow-sm'}`}> TOUTES </button>
+                     <button onClick={() => setSelectedOrgFilter('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 text-white shadow-md' : 'text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}> TOUTES </button>
                     {Object.entries(ORGS_CONFIG).map(([key, conf]) => ( <button key={key} onClick={() => setSelectedOrgFilter(key as Organization)} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all uppercase ${selectedOrgFilter === key ? `${conf.bg.replace('50', '500')} text-white shadow-md` : `text-[var(--text-secondary)] hover:${conf.bg}`}`}> {conf.label} </button> ))}
                 </div>
             </header>

@@ -28,7 +28,7 @@ export const SmartMatcher: React.FC<SmartMatcherProps> = ({ smartZoneId, viewMod
                 </select>
             </div>
             {smartZoneId && (
-                <div className="flex items-center gap-4 px-4 py-2 bg-orange-50 rounded-xl border border-orange-100 text-sm text-orange-800 animate-fade-in">
+                <div className="flex items-center gap-4 px-4 py-2 bg-orange-50 dark:bg-orange-900/30 rounded-xl border border-orange-100 dark:border-orange-500/20 text-sm text-orange-800 dark:text-orange-300 animate-fade-in">
                     <Zap size={20} className="text-yellow-500 fill-current"/>
                     <div>
                         <span className="font-bold block">Tri Intelligent Actif</span>

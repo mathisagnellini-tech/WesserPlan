@@ -145,7 +145,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                     )}
 
                     {mode === 'map' && (
-                        <div className="p-3 bg-orange-50 rounded-lg border border-orange-100 text-xs text-orange-800 dark:text-orange-300">
+                        <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg border border-orange-100 dark:border-orange-500/20 text-xs text-orange-800 dark:text-orange-300">
                             <p className="font-bold flex items-center gap-1"><MousePointer2 size={12}/> Mode Prospection</p>
                             <p className="opacity-80 mt-1">Sélectionnez les départements ci-dessus pour charger la carte, puis utilisez le pinceau pour sélectionner des communes.</p>
                         </div>
@@ -161,7 +161,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 <div
                                     key={c.id}
                                     onClick={() => setSelectedCommune(c)}
-                                    className={`p-3 rounded-xl border transition-all cursor-pointer hover:shadow-md ${selectedCommune?.id === c.id ? 'bg-orange-50 border-orange-200 ring-1 ring-orange-200' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] hover:border-orange-100'}`}
+                                    className={`p-3 rounded-xl border transition-all cursor-pointer hover:shadow-md ${selectedCommune?.id === c.id ? 'bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-500/20 ring-1 ring-orange-200 dark:ring-orange-500/20' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] hover:border-orange-100 dark:hover:border-orange-500/30'}`}
                                 >
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="font-bold text-[var(--text-primary)]">{c.nom}</h3>
@@ -203,7 +203,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                      <div className="font-bold text-[var(--text-primary)]">{req.communeCount} Communes</div>
                                  </div>
                                  <div className="text-right">
-                                     <div className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded">{req.zoneCount} Zones</div>
+                                     <div className="text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded">{req.zoneCount} Zones</div>
                                      <div className="text-[10px] text-[var(--text-muted)]">{(req.totalPop/1000).toFixed(1)}k hab.</div>
                                  </div>
                              </div>

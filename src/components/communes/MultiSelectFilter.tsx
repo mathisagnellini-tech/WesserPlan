@@ -65,7 +65,7 @@ export const MultiSelectFilter: React.FC<{
                                     key={opt.value}
                                     onClick={() => toggleOption(opt.value)}
                                     className={`flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-xs font-medium mb-0.5
-                                    ${isSelected ? 'bg-orange-50 text-orange-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-[var(--text-primary)]'}`}
+                                    ${isSelected ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-[var(--text-primary)]'}`}
                                 >
                                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors
                                         ${isSelected ? 'bg-orange-600 border-orange-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[var(--bg-card-solid)]'}`}>

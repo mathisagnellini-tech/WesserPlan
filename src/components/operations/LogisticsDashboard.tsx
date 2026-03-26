@@ -25,7 +25,7 @@ export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[]
                 <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Coût Moyen / Nuit</h4>
                 <div className="flex items-end gap-2 mt-2">
                     <span className="text-3xl font-black text-[var(--text-primary)]">{avgCostPerNight}€</span>
-                    <span className="text-xs font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mb-1 flex items-center gap-1">
+                    <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded mb-1 flex items-center gap-1">
                         <TrendingDown size={10} /> -5%
                     </span>
                 </div>
@@ -39,7 +39,7 @@ export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[]
                 <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Taux d'Occupation</h4>
                 <div className="flex items-end gap-2 mt-2">
                     <span className="text-3xl font-black text-[var(--text-primary)]">{occupancyRate}%</span>
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded mb-1 ${occupancyRate < 70 ? 'text-red-600 bg-red-50' : 'text-orange-600 bg-orange-50'}`}>
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded mb-1 ${occupancyRate < 70 ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30' : 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'}`}>
                         {occupancyRate < 70 ? 'Sous-optimisé' : 'Optimal'}
                     </span>
                 </div>

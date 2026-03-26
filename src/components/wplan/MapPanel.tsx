@@ -91,8 +91,8 @@ const MapPanel: React.FC<MapPanelProps> = ({
                             </>
                         )}
                     </h3>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition h-[32px] border border-transparent">
-                        <span className="text-text-secondary text-xs font-medium px-1">Events</span>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition h-[32px] border border-transparent">
+                        <span className="text-[var(--text-secondary)] text-xs font-medium px-1">Events</span>
                         <input
                             type="checkbox"
                             checked={showEvents}
@@ -122,8 +122,8 @@ const MapPanel: React.FC<MapPanelProps> = ({
                 </div>
             </div>
 
-            <div className="relative flex-grow min-h-[350px] sm:min-h-[500px] rounded-xl overflow-hidden border border-border-color z-0">
-                <div id="wplan-map" ref={mapContainerRef} className="absolute inset-0 bg-gray-100 dark:bg-slate-800"></div>
+            <div className="relative flex-grow min-h-[350px] sm:min-h-[500px] rounded-xl overflow-hidden border border-[var(--border-subtle)] z-0">
+                <div id="wplan-map" ref={mapContainerRef} className="absolute inset-0 bg-slate-100 dark:bg-slate-800"></div>
                 {(!regionGeoJSON || !departmentGeoJSON) && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10 text-[var(--text-primary)]">
                         Chargement de la carte...

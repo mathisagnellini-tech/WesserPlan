@@ -51,7 +51,7 @@ export const VehicleSection: React.FC<VehicleSectionProps> = ({ cars, onReportDa
                                     </div>
 
                                     {/* Damage Status */}
-                                    <div className={`mt-4 p-3 rounded-xl border flex items-center gap-3 ${hasDamages ? 'bg-red-50 border-red-100 text-red-800' : 'bg-green-50 border-green-100 text-green-800'}`}>
+                                    <div className={`mt-4 p-3 rounded-xl border flex items-center gap-3 ${hasDamages ? 'bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-500/20 text-red-800 dark:text-red-300' : 'bg-green-50 dark:bg-green-900/30 border-green-100 dark:border-green-500/20 text-green-800 dark:text-green-300'}`}>
                                         {hasDamages ? <AlertTriangle size={20}/> : <ShieldCheck size={20}/>}
                                         <div>
                                             <p className="text-xs font-bold uppercase">{hasDamages ? 'Sinistre Signalé' : 'État conforme'}</p>
@@ -64,7 +64,7 @@ export const VehicleSection: React.FC<VehicleSectionProps> = ({ cars, onReportDa
                                 <div className="flex flex-col gap-3 justify-center">
                                     <button
                                         onClick={() => onReportDamage(car)}
-                                        className="w-full py-3 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+                                        className="w-full py-3 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 border border-orange-200 dark:border-orange-500/20 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors"
                                     >
                                         <Camera size={18}/> Déclarer Choc
                                     </button>

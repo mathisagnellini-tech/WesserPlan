@@ -71,8 +71,8 @@ export const QuickStatusDropdown: React.FC<{
                                 onSelect(key as CommuneStatus);
                                 setIsOpen(false);
                             }}
-                            className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center justify-between transition-colors border-b border-slate-50 last:border-0
-                            ${key === currentStatus ? 'bg-orange-50 text-orange-600' : 'text-[var(--text-secondary)]'}`}
+                            className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-700 last:border-0
+                            ${key === currentStatus ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600' : 'text-[var(--text-secondary)]'}`}
                         >
                             <span>{conf.text}</span>
                             {key === currentStatus && <Check size={12}/>}

@@ -19,7 +19,7 @@ const ChartPanel: React.FC<ChartPanelProps> = ({ chartTitle, chartConfig, isComp
         <div className="space-y-6">
             <div className="glass-card p-4">
                 <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-bold text-text-primary">{chartTitle}</h3>
+                    <h3 className="font-bold text-[var(--text-primary)]">{chartTitle}</h3>
                     {isComparing && <Radar size={16} className="text-orange-500" />}
                 </div>
                 <div className="h-[200px]">
@@ -37,19 +37,19 @@ const ChartPanel: React.FC<ChartPanelProps> = ({ chartTitle, chartConfig, isComp
                 </div>
             </div>
             {/* Placeholder for Retention Chart */}
-            <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-gray-50 dark:bg-slate-800/50 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
-                <div className="p-4 bg-gray-100 dark:bg-slate-800 rounded-full mb-3">
+            <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-3">
                     <TrendingUp size={24} className="text-[var(--text-muted)]" />
                 </div>
-                <h3 className="font-semibold text-text-secondary">Chart possible</h3>
+                <h3 className="font-semibold text-[var(--text-secondary)]">Chart possible</h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Emplacement réservé</p>
             </div>
             {/* Placeholder for Correlation Chart */}
-            <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-gray-50 dark:bg-slate-800/50 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
-                <div className="p-4 bg-gray-100 dark:bg-slate-800 rounded-full mb-3">
+            <div className="glass-card p-4 flex flex-col items-center justify-center h-[250px] bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-3">
                     <Shuffle size={24} className="text-[var(--text-muted)]" />
                 </div>
-                <h3 className="font-semibold text-text-secondary">Chart possible</h3>
+                <h3 className="font-semibold text-[var(--text-secondary)]">Chart possible</h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Emplacement réservé</p>
             </div>
         </div>

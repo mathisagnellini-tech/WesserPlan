@@ -65,7 +65,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
       >
         <div className="flex items-center gap-3 overflow-hidden">
           <div
-            className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}
+            className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' : 'bg-slate-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}
           >
             {icon}
           </div>
@@ -115,7 +115,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                     key={value}
                     onClick={() => onSelectionChange(value)}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 border border-transparent
-                    ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 border-orange-100 dark:border-orange-800' : 'hover:bg-gray-50 dark:hover:bg-slate-800/50 text-[var(--text-secondary)] hover:border-gray-100 dark:hover:border-slate-700'}`}
+                    ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 border-orange-100 dark:border-orange-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 text-[var(--text-secondary)] hover:border-slate-100 dark:hover:border-slate-700'}`}
                   >
                     <div
                       className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0
@@ -134,7 +134,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
             )}
           </div>
           {selected.size > 0 && (
-            <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] flex justify-between items-center">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] flex justify-between items-center">
               <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide ml-1">
                 {selected.size} sélectionné(s)
               </span>

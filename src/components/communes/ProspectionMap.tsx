@@ -339,7 +339,7 @@ export const ProspectionMap: React.FC<{
                 <div className="flex flex-col gap-1">
                     <button
                         onClick={() => setSaturationOrg('none')}
-                        className={`px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors ${saturationOrg === 'none' ? 'bg-slate-100 dark:bg-slate-800 text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                        className={`px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors ${saturationOrg === 'none' ? 'bg-slate-100 dark:bg-slate-800 text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
                     >
                         Aucun (Neutre)
                     </button>
@@ -347,7 +347,7 @@ export const ProspectionMap: React.FC<{
                         <button
                             key={org}
                             onClick={() => setSaturationOrg(org as Organization)}
-                            className={`px-3 py-2 text-xs font-bold rounded-lg text-left uppercase transition-colors flex justify-between items-center ${saturationOrg === org ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                            className={`px-3 py-2 text-xs font-bold rounded-lg text-left uppercase transition-colors flex justify-between items-center ${saturationOrg === org ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-100 dark:border-orange-500/20' : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
                         >
                             <span>Historique {org}</span>
                             {saturationOrg === org && <Check size={12}/>}

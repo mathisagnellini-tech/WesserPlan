@@ -34,22 +34,22 @@ export const ProspectValidationModal: React.FC<{
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 text-center">
-                            <span className="block text-2xl font-black text-orange-700">{stats.count}</span>
+                        <div className="bg-orange-50 dark:bg-orange-900/30 p-4 rounded-xl border border-orange-100 dark:border-orange-500/20 text-center">
+                            <span className="block text-2xl font-black text-orange-700 dark:text-orange-400">{stats.count}</span>
                             <span className="text-xs font-bold text-orange-400 uppercase">Communes</span>
                         </div>
-                        <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20 text-center">
-                            <span className="block text-2xl font-black text-emerald-700">{(stats.pop / 1000).toFixed(1)}k</span>
+                        <div className="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20 text-center">
+                            <span className="block text-2xl font-black text-emerald-700 dark:text-emerald-400">{(stats.pop / 1000).toFixed(1)}k</span>
                             <span className="text-xs font-bold text-emerald-400 uppercase">Habitants</span>
                         </div>
-                        <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 dark:border-purple-500/20 text-center">
+                        <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-100 dark:border-purple-500/20 text-center">
                             <span className="block text-2xl font-black text-purple-700 dark:text-purple-400">{stats.zones}</span>
                             <span className="text-xs font-bold text-purple-400 uppercase">Zones Estimées</span>
                         </div>
                     </div>
 
                     {/* Warning Box */}
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                    <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
                         <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={20}/>
                         <div>
                             <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm uppercase mb-1">Confirmation d'envoi automatique</h4>
