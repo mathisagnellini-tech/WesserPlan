@@ -68,7 +68,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           <Search className="w-5 h-5 text-slate-400 mr-3" />
           <input
             ref={inputRef}
-            className="flex-1 bg-transparent border-none outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-lg font-medium"
+            className="flex-1 !bg-transparent !border-none outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-lg font-medium"
             placeholder="Tapez une commande..."
             value={query}
             onChange={e => {

@@ -17,6 +17,10 @@ import { LayoutGrid, Rows, GitMerge, Grip, Maximize, Minimize, MapPin, Handshake
 export type ViewMode = 'performance' | 'identity' | 'hr';
 export type ViewDensity = 'standard' | 'compact' | 'tiny';
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+const mod = isMac ? '⌘' : 'Ctrl';
+const modKey = (key: string) => `${mod}+${key}`;
+
 const getWeekDateRange = (weekOffset: number) => {
     const baseDate = new Date(2025, 0, 19); 
     const targetDate = new Date(baseDate);
@@ -703,8 +707,8 @@ export default function App() {
             { id: 'heatmap', label: isHeatmapMode ? 'Désactiver Heatmap' : 'Activer Heatmap', icon: Grip, perform: () => setIsHeatmapMode(!isHeatmapMode), shortcut: 'Shift+H' },
             { id: 'filters', label: 'Effacer les filtres', icon: Rows, perform: handleClearFilters },
             { id: 'relations', label: showRelationships ? 'Masquer Relations' : 'Afficher Relations', icon: GitMerge, perform: () => setShowRelationships(!showRelationships) },
-            { id: 'undo', label: 'Annuler', icon: GitMerge, perform: handleUndo, shortcut: 'Ctrl+Z' },
-            { id: 'redo', label: 'Rétablir', icon: GitMerge, perform: handleRedo, shortcut: 'Ctrl+Y' },
+            { id: 'undo', label: 'Annuler', icon: GitMerge, perform: handleUndo, shortcut: modKey('Z') },
+            { id: 'redo', label: 'Rétablir', icon: GitMerge, perform: handleRedo, shortcut: modKey('Y') },
             { id: 'compact', label: 'Vue Compacte', icon: Rows, perform: () => setDensity('compact') },
             { id: 'standard', label: 'Vue Standard', icon: LayoutGrid, perform: () => setDensity('standard') },
             { id: 'tiny', label: 'Vue Ultra Compacte', icon: Grip, perform: () => setDensity('tiny') },

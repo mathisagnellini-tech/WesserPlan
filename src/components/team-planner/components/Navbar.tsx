@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Copy, History, Undo2, Redo2, BarChart2, User, Briefcase, Search, ListFilter, Zap, Monitor, Activity, Users, LayoutDashboard, MapPin, ArrowLeft } from 'lucide-react';
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+const modSymbol = isMac ? '⌘' : 'Ctrl+';
+
 export type ViewMode = 'performance' | 'identity' | 'hr';
 export type PageMode = 'board' | 'alumni' | 'map';
 
@@ -190,10 +193,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={onSearchClick}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all"
-            title="Rechercher (⌘K)"
+            title={`Rechercher (${modSymbol}K)`}
           >
             <Search size={14} />
-            <span className="text-[10px] font-bold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded px-1 py-0.5">⌘K</span>
+            <span className="text-[10px] font-bold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded px-1 py-0.5">{modSymbol}K</span>
           </button>
           {pageMode === 'board' && (
             <>

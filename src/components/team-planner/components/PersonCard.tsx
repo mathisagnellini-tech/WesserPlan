@@ -465,7 +465,7 @@ export const PersonCard = memo<PersonCardProps>(({
                          {viewMode === 'hr' && (
                             <div className="text-[10px] font-medium text-slate-400 leading-tight">
                                 Contrat<br/>
-                                <span className={forceWhiteText ? 'text-white' : 'text-slate-900'}>{person.startDate}</span>
+                                <span className={forceWhiteText ? 'text-white' : 'text-slate-900 dark:text-white'}>{person.startDate}</span>
                             </div>
                          )}
                          {viewMode === 'performance' && (
