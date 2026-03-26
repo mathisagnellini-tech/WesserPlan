@@ -13,18 +13,33 @@ import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip);
 
-export const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walkingScore: 'Excellente' | 'Bonne' | 'Difficile' | 'Extreme' }> = ({ avgTemp, condition, walkingScore }) => {
+export const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walkingScore: 'Excellente' | 'Bonne' | 'Difficile' | 'Extreme', hourlyTemperatures?: number[], hourlyTimes?: string[] }> = ({ avgTemp, condition, walkingScore, hourlyTemperatures, hourlyTimes }) => {
     const chartData = useMemo(() => {
-        const labels = ['0h', '4h', '8h', '12h', '16h', '20h', '24h'];
-        const dataPoints = [
-            avgTemp - 5,
-            avgTemp - 6,
-            avgTemp - 2,
-            avgTemp + 2,
-            avgTemp + 4,
-            avgTemp + 1,
-            avgTemp - 3
-        ];
+        let labels: string[];
+        let dataPoints: number[];
+
+        if (hourlyTemperatures && hourlyTimes && hourlyTemperatures.length >= 24) {
+            // Use real hourly data — sample every 4 hours for the first 24h
+            labels = [];
+            dataPoints = [];
+            for (let i = 0; i < 24; i += 4) {
+                const date = new Date(hourlyTimes[i]);
+                labels.push(`${date.getHours()}h`);
+                dataPoints.push(hourlyTemperatures[i]);
+            }
+        } else {
+            // Fallback: generate fake offsets from avgTemp
+            labels = ['0h', '4h', '8h', '12h', '16h', '20h', '24h'];
+            dataPoints = [
+                avgTemp - 5,
+                avgTemp - 6,
+                avgTemp - 2,
+                avgTemp + 2,
+                avgTemp + 4,
+                avgTemp + 1,
+                avgTemp - 3
+            ];
+        }
 
         return {
             labels,
@@ -40,7 +55,7 @@ export const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string
                 pointHoverRadius: 4
             }]
         };
-    }, [avgTemp]);
+    }, [avgTemp, hourlyTemperatures, hourlyTimes]);
 
     const chartOptions = useMemo(() => ({
         responsive: true,

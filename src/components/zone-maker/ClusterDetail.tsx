@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Cluster } from './types';
 import { MIN_1W } from './constants';
-import { X, Clock, Users, AlertTriangle, Zap, Check } from 'lucide-react';
+import { X, Clock, Users, AlertTriangle, Zap, Check, CloudSun, Loader2 } from 'lucide-react';
+import { useWeather } from '@/hooks/useWeather';
 
 interface ClusterDetailProps {
   selectedCluster: Cluster;
@@ -20,6 +21,17 @@ const ClusterDetail: React.FC<ClusterDetailProps> = ({
   onPutBackToDraft,
   onDelete,
 }) => {
+  // Compute cluster centroid from commune centroids
+  const centroid = useMemo(() => {
+    const communesWithCentroid = selectedCluster.communes.filter(c => c.centroid);
+    if (communesWithCentroid.length === 0) return undefined;
+    const avgLat = communesWithCentroid.reduce((sum, c) => sum + c.centroid![0], 0) / communesWithCentroid.length;
+    const avgLng = communesWithCentroid.reduce((sum, c) => sum + c.centroid![1], 0) / communesWithCentroid.length;
+    return { lat: avgLat, lng: avgLng };
+  }, [selectedCluster.communes]);
+
+  const { data: weatherData, isLoading: weatherLoading } = useWeather(centroid?.lat, centroid?.lng);
+
   return (
     <div className={`fixed bottom-12 right-12 w-full max-w-lg z-[600] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-x-0 opacity-100 scale-100`}>
       <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl border border-white/50 dark:border-slate-700/50 shadow-[0_45px_100px_-25px_rgba(0,0,0,0.18)] rounded-[3.5rem] overflow-hidden flex flex-col">
@@ -44,6 +56,17 @@ const ClusterDetail: React.FC<ClusterDetailProps> = ({
                   {selectedCluster.totalPopulation.toLocaleString()} hab.
                 </span>
                 <span className="text-[12px] font-black text-white uppercase tracking-widest flex items-center gap-2.5 bg-slate-900 px-4 py-2 rounded-2xl shadow-xl"><Clock size={16} strokeWidth={2.5} className="text-slate-500" /> {selectedCluster.durationWeeks} sem.</span>
+                {/* Weather indicator */}
+                {weatherLoading ? (
+                  <span className="text-[12px] font-black uppercase tracking-widest flex items-center gap-2.5 bg-orange-50 dark:bg-orange-900/30 text-orange-600 px-4 py-2 rounded-2xl border-2 border-orange-100 dark:border-orange-800">
+                    <Loader2 size={16} strokeWidth={2.5} className="animate-spin" />
+                  </span>
+                ) : weatherData ? (
+                  <span className="text-[12px] font-black uppercase tracking-widest flex items-center gap-2.5 bg-orange-50 dark:bg-orange-900/30 text-orange-600 px-4 py-2 rounded-2xl border-2 border-orange-100 dark:border-orange-800" title={weatherData.current.condition}>
+                    <CloudSun size={16} strokeWidth={2.5} className="text-amber-500" />
+                    {Math.round(weatherData.current.temperature)}°C
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>

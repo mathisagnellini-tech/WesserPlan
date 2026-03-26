@@ -1,16 +1,18 @@
 
 import React, { useMemo, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 import { DashboardHeader, translations } from './DashboardHeader';
 import { CompactWeatherWidget } from './WeatherWidget';
 import { ActivityFeed } from './ActivityFeed';
 import { FranceMap, generateTeamsData } from './FranceMap';
+import { useDepartmentWeather } from '@/hooks/useWeather';
 
 const DashboardTab: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'fr'>('fr');
   const t = (key: keyof typeof translations.en) => translations[lang][key];
 
-  const { teams, weather: globalWeather } = useMemo(() => generateTeamsData(), []);
+  const { teams } = useMemo(() => generateTeamsData(), []);
+  const { data: weatherData, isLoading: weatherLoading } = useDepartmentWeather('75');
 
   return (
     <section className="animate-fade-in h-auto lg:h-[calc(100vh-100px)] flex flex-col">
@@ -38,11 +40,19 @@ const DashboardTab: React.FC = () => {
           <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6">
               {/* Compact Weather Top */}
               <div className="h-28 md:h-32 shrink-0">
-                  <CompactWeatherWidget
-                      avgTemp={globalWeather.temp}
-                      condition={globalWeather.condition}
-                      walkingScore={globalWeather.walking}
-                  />
+                  {weatherLoading ? (
+                      <div className="glass-card p-4 flex items-center justify-center h-full">
+                          <Loader2 size={20} className="animate-spin text-[var(--text-muted)]" />
+                      </div>
+                  ) : (
+                      <CompactWeatherWidget
+                          avgTemp={weatherData?.current.temperature ?? 14}
+                          condition={weatherData?.current.condition ?? '...'}
+                          walkingScore={weatherData?.current.walkingScore ?? 'Bonne'}
+                          hourlyTemperatures={weatherData?.hourly.temperature}
+                          hourlyTimes={weatherData?.hourly.time}
+                      />
+                  )}
               </div>
 
               {/* Activity Feed & Calendar Bottom */}

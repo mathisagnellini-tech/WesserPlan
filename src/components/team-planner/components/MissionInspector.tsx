@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Column } from '../types';
-import { X, MapPin, Wind, CloudRain, Sun, Cloud, Car, Home, Wifi, Key, Fuel, Gauge, CalendarClock, Navigation, Copy, ExternalLink, ChevronRight, Edit2, Save } from 'lucide-react';
+import { X, MapPin, Wind, CloudRain, Sun, Cloud, Car, Home, Wifi, Key, Fuel, Gauge, CalendarClock, Navigation, Copy, ExternalLink, ChevronRight, Edit2, Save, Loader2 } from 'lucide-react';
+import { useWeather } from '@/hooks/useWeather';
 
 interface MissionInspectorProps {
   column: Column;
@@ -53,10 +54,28 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
       setIsEditing(false);
   };
 
+  // Real weather from API
+  const zoneLat = column.missionData?.zone.lat;
+  const zoneLng = column.missionData?.zone.lng;
+  const { data: weatherData, isLoading: weatherLoading } = useWeather(zoneLat, zoneLng);
+
   if (!column.missionData) return null;
   const { car, housing, zone } = column.missionData;
 
+  const realTemp = weatherData?.current.temperature ?? zone.weather.temp;
+  const realCondition = weatherData?.current.condition ?? zone.weather.condition;
+
   const WeatherIcon = () => {
+      if (weatherLoading) return <Loader2 size={24} className="text-slate-400 animate-spin" />;
+      if (weatherData) {
+          const icon = weatherData.current.icon;
+          if (icon === 'Sun') return <Sun size={24} className="text-amber-500" strokeWidth={2} />;
+          if (icon === 'CloudSun') return <Sun size={24} className="text-amber-400" strokeWidth={2} />;
+          if (icon === 'CloudRain' || icon === 'CloudDrizzle') return <CloudRain size={24} className="text-orange-500" strokeWidth={2} />;
+          if (icon === 'Cloud' || icon === 'CloudFog') return <Cloud size={24} className="text-slate-500" strokeWidth={2} />;
+          return <Cloud size={24} className="text-slate-500" strokeWidth={2} />;
+      }
+      // Fallback to mock data
       switch (zone.weather.condition) {
           case 'Sunny': return <Sun size={24} className="text-amber-500" strokeWidth={2} />;
           case 'Rainy': return <CloudRain size={24} className="text-orange-500" strokeWidth={2} />;
@@ -140,8 +159,8 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                     <div className="flex items-center gap-3 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-white dark:border-slate-700 shadow-lg">
                         <WeatherIcon />
                         <div>
-                            <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{zone.weather.temp}°</div>
-                            <div className="text-[10px] text-slate-500 font-bold uppercase">{zone.weather.condition}</div>
+                            <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{Math.round(realTemp)}°</div>
+                            <div className="text-[10px] text-slate-500 font-bold uppercase">{realCondition}</div>
                         </div>
                     </div>
                   )}

@@ -130,6 +130,8 @@ export interface HousingDetails {
 export interface ZoneDetails {
     name: string;
     mapImage: string;
+    lat?: number;
+    lng?: number;
     weather: {
         temp: number;
         condition: 'Sunny' | 'Cloudy' | 'Rainy' | 'Stormy';

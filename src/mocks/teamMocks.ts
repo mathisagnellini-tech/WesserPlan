@@ -10,6 +10,34 @@ const CITIES = [
     'Amiens', 'Annecy', 'Limoges', 'Metz', 'Besançon'
 ];
 
+const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+    'Paris': { lat: 48.8566, lng: 2.3522 },
+    'Lyon': { lat: 45.7640, lng: 4.8357 },
+    'Marseille': { lat: 43.2965, lng: 5.3698 },
+    'Bordeaux': { lat: 44.8378, lng: -0.5792 },
+    'Lille': { lat: 50.6292, lng: 3.0573 },
+    'Toulouse': { lat: 43.6047, lng: 1.4442 },
+    'Nantes': { lat: 47.2184, lng: -1.5536 },
+    'Strasbourg': { lat: 48.5734, lng: 7.7521 },
+    'Montpellier': { lat: 43.6108, lng: 3.8767 },
+    'Rennes': { lat: 48.1173, lng: -1.6778 },
+    'Grenoble': { lat: 45.1885, lng: 5.7245 },
+    'Nice': { lat: 43.7102, lng: 7.2620 },
+    'Dijon': { lat: 47.3220, lng: 5.0415 },
+    'Angers': { lat: 47.4784, lng: -0.5632 },
+    'Nîmes': { lat: 43.8367, lng: 4.3601 },
+    'Clermont-Ferrand': { lat: 45.7772, lng: 3.0870 },
+    'Le Mans': { lat: 48.0061, lng: 0.1996 },
+    'Aix-en-Provence': { lat: 43.5297, lng: 5.4474 },
+    'Brest': { lat: 48.3904, lng: -4.4861 },
+    'Tours': { lat: 47.3941, lng: 0.6848 },
+    'Amiens': { lat: 49.8941, lng: 2.2958 },
+    'Annecy': { lat: 45.8992, lng: 6.1294 },
+    'Limoges': { lat: 45.8315, lng: 1.2578 },
+    'Metz': { lat: 49.1193, lng: 6.1757 },
+    'Besançon': { lat: 47.2378, lng: 6.0241 },
+};
+
 const FIRST_NAMES = [
     'Lucas', 'Léa', 'Enzo', 'Manon', 'Hugo', 'Chloé', 'Thomas', 'Camille', 'Nathan', 'Océane',
     'Théo', 'Emma', 'Tom', 'Inès', 'Gabriel', 'Sarah', 'Léo', 'Jade', 'Mathis', 'Lola',
@@ -344,6 +372,8 @@ const generateBoard = (): BoardData => {
                 zone: {
                     name: `${city} ${['Nord', 'Sud', 'Est', 'Ouest', 'Centre'][randomInt(0, 4)]}`,
                     mapImage: `https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&auto=format&fit=crop`,
+                    lat: CITY_COORDS[city]?.lat,
+                    lng: CITY_COORDS[city]?.lng,
                     weather: { temp, condition: condition as any, wind: randomInt(5, 40) }
                 },
                 car: {

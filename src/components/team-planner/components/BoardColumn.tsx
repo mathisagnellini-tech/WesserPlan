@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useRef, useLayoutEffect, memo } from 'react';
 import { Column, Person, Relationship } from '../types';
 import { PersonCard } from './PersonCard';
-import { Plus, MapPin, MoreHorizontal, UserPlus, Sun, Cloud, CloudRain, AlertOctagon, GripVertical, Car, Home, Flame, Handshake, Snowflake, Zap } from 'lucide-react';
+import { Plus, MapPin, MoreHorizontal, UserPlus, Sun, Cloud, CloudRain, AlertOctagon, GripVertical, Car, Home, Flame, Handshake, Snowflake, Zap, Loader2 } from 'lucide-react';
 import { ViewMode, ViewDensity } from '../TeamPlannerApp';
+import { useWeather } from '@/hooks/useWeather';
 
 interface BoardColumnProps {
   column: Column;
@@ -232,7 +233,14 @@ export const BoardColumn = memo<BoardColumnProps>(({
   // Mission Data Helpers
   const zoneName = column.missionData?.zone.name || 'Zone Inconnue';
   const shortZone = zoneName.substring(0, 3).toUpperCase();
-  const weatherTemp = column.missionData?.zone.weather.temp || 0;
+
+  // Real weather from API (uses zone coordinates if available)
+  const zoneLat = column.missionData?.zone.lat;
+  const zoneLng = column.missionData?.zone.lng;
+  const { data: weatherData, isLoading: weatherLoading } = useWeather(zoneLat, zoneLng);
+  const weatherTemp = weatherData?.current.temperature ?? (column.missionData?.zone.weather.temp || 0);
+  const weatherCondition = weatherData?.current.condition ?? '';
+  const weatherIcon = weatherData?.current.icon;
   
   // Height for Ghost Placeholder
   const ghostHeight = density === 'compact' ? 'h-[64px]' : (density === 'tiny' ? 'h-10 w-10 rounded-full' : 'h-[120px]');
@@ -299,6 +307,19 @@ export const BoardColumn = memo<BoardColumnProps>(({
                            </span>
                       </div>
                       
+                      {/* Weather + Vibe */}
+                      <div className="flex items-center gap-1.5">
+                        {weatherLoading ? (
+                          <div className="bg-black/20 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm">
+                            <Loader2 size={10} className="animate-spin text-white/60" />
+                          </div>
+                        ) : weatherData ? (
+                          <div className="flex items-center gap-1 bg-black/20 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm text-[9px] font-bold text-white/90" title={weatherCondition}>
+                            <span>{Math.round(weatherTemp)}°</span>
+                          </div>
+                        ) : null}
+                      </div>
+
                       {/* Vibe Indicator */}
                       <div className="flex items-center gap-1 bg-black/20 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm" title={`Ambiance: ${teamVibe}`}>
                           {teamVibe === 'explosif' && <Flame size={12} className="text-red-400 animate-pulse" />}

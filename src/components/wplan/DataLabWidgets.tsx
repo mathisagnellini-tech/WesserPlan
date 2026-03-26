@@ -1,5 +1,6 @@
 import React from 'react';
-import { Clock, CloudRain, Fingerprint, Activity, UserPlus } from 'lucide-react';
+import { Clock, CloudRain, Fingerprint, Activity, UserPlus, Loader2 } from 'lucide-react';
+import { useDepartmentWeather } from '@/hooks/useWeather';
 
 export const GoldenHourWidget: React.FC = () => {
     return (
@@ -23,14 +24,45 @@ export const GoldenHourWidget: React.FC = () => {
 };
 
 export const WeatherCorrelatorWidget: React.FC = () => {
+    const { data: weatherData, isLoading, error } = useDepartmentWeather('75');
+
+    // Use real daily precipitation data if available, otherwise fall back to mock
+    const barHeights = React.useMemo(() => {
+        if (weatherData?.daily.precipitationSum && weatherData.daily.precipitationSum.length >= 7) {
+            const precip = weatherData.daily.precipitationSum.slice(0, 7);
+            const maxPrecip = Math.max(...precip, 1); // avoid division by zero
+            return precip.map(p => Math.max(5, Math.round((p / maxPrecip) * 90)));
+        }
+        return [40, 60, 30, 80, 20, 90, 50];
+    }, [weatherData]);
+
+    const dayLabels = React.useMemo(() => {
+        if (weatherData?.daily.date && weatherData.daily.date.length >= 7) {
+            const shortDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+            return weatherData.daily.date.slice(0, 7).map(d => shortDays[new Date(d).getDay()]);
+        }
+        return ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+    }, [weatherData]);
+
+    const alertText = React.useMemo(() => {
+        if (error) return 'Données météo indisponibles.';
+        if (weatherData?.daily.precipitationSum) {
+            const maxPrecip = Math.max(...weatherData.daily.precipitationSum.slice(0, 7));
+            if (maxPrecip >= 3) return `Alert: Précipitations jusqu'à ${maxPrecip.toFixed(1)}mm prévues.`;
+            if (maxPrecip > 0) return `Précipitations légères (max ${maxPrecip.toFixed(1)}mm).`;
+            return 'Aucune précipitation prévue cette semaine.';
+        }
+        return 'Chute de 40% dès 3mm de pluie/h.';
+    }, [weatherData, error]);
+
     return (
         <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-orange-500/30 transition-all">
             <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity">
-                <CloudRain size={20} className="text-orange-400" />
+                {isLoading ? <Loader2 size={20} className="text-orange-400 animate-spin" /> : <CloudRain size={20} className="text-orange-400" />}
             </div>
             <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Weather-Correlator</h4>
             <div className="flex-grow flex items-end gap-1 h-32 mt-2">
-                {[40, 60, 30, 80, 20, 90, 50, 45].map((h, i) => (
+                {barHeights.map((h, i) => (
                     <div key={i} className="flex-1 flex flex-col justify-end gap-1 h-full group/bar">
                         <div style={{ height: `${100 - h}%` }} className="bg-orange-500/30 w-full rounded-t-sm relative"></div>
                         <div style={{ height: `${h}%` }} className="bg-amber-400/80 w-full rounded-t-sm shadow-[0_0_10px_rgba(251,191,36,0.3)]"></div>
@@ -38,9 +70,9 @@ export const WeatherCorrelatorWidget: React.FC = () => {
                 ))}
             </div>
             <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-mono">
-                <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                {dayLabels.map((d, i) => <span key={i}>{d}</span>)}
             </div>
-            <p className="text-xs text-slate-300 mt-3"><span className="text-red-400 font-bold">Alert:</span> Chute de 40% dès 3mm de pluie/h.</p>
+            <p className="text-xs text-slate-300 mt-3"><span className="text-red-400 font-bold">{error ? 'Erreur:' : 'Alert:'}</span> {alertText}</p>
         </div>
     );
 };
