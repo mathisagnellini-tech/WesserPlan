@@ -450,7 +450,7 @@ const ZonePlanner: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC] font-sans overflow-hidden" 
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC] dark:bg-slate-950 font-sans overflow-hidden" 
          onDragOver={(e) => e.preventDefault()} 
          onDrop={(e) => { 
            e.preventDefault(); 
@@ -464,7 +464,7 @@ const ZonePlanner: React.FC = () => {
           <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[900] w-full max-w-2xl px-8 pointer-events-none">
               <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl rounded-full p-4 pointer-events-auto flex items-center justify-between border border-orange-200 dark:border-orange-800 ring-4 ring-orange-600/10 animate-in slide-in-from-top duration-500">
                   <div className="flex items-center gap-4 ml-2">
-                      <div className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-100">
+                      <div className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-100 dark:shadow-orange-900/30">
                           <Pencil size={18} className="animate-pulse" />
                       </div>
                       <div className="space-y-0.5">
@@ -492,7 +492,7 @@ const ZonePlanner: React.FC = () => {
               <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col animate-in zoom-in duration-300">
                   <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
                       <div className="flex items-center gap-5">
-                        <div className="p-4 bg-slate-900 text-white rounded-[1.5rem] shadow-xl"><Info size={28} strokeWidth={2.5}/></div>
+                        <div className="p-4 bg-slate-900 dark:bg-slate-700 text-white rounded-[1.5rem] shadow-xl"><Info size={28} strokeWidth={2.5}/></div>
                         <div>
                             <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Information Plan</h3>
                             <p className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">{selectedNGO} • Réglementation & Chiffres</p>
@@ -523,31 +523,31 @@ const ZonePlanner: React.FC = () => {
                       <div className="space-y-6">
                           <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-1 flex items-center gap-3"><Clock size={16}/> Règles de dimensionnement</h4>
                           <div className="space-y-3">
-                              <div className="flex items-center justify-between p-6 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                              <div className="flex items-center justify-between p-6 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 rounded-2xl">
                                   <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-black text-sm">1S</div>
-                                      <span className="text-emerald-900 font-black text-sm">Semaine (Standard)</span>
+                                      <span className="text-emerald-900 dark:text-emerald-200 font-black text-sm">Semaine (Standard)</span>
                                   </div>
-                                  <span className="text-emerald-700 font-bold text-xs">{MIN_1W.toLocaleString()} - {MAX_1W.toLocaleString()} hab.</span>
+                                  <span className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">{MIN_1W.toLocaleString()} - {MAX_1W.toLocaleString()} hab.</span>
                               </div>
-                              <div className="flex items-center justify-between p-6 bg-orange-50 border border-orange-100 rounded-2xl">
+                              <div className="flex items-center justify-between p-6 bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800 rounded-2xl">
                                   <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 bg-orange-600 text-white rounded-xl flex items-center justify-center font-black text-sm">2S</div>
-                                      <span className="text-orange-900 font-black text-sm">Semaine (Double)</span>
+                                      <span className="text-orange-900 dark:text-orange-200 font-black text-sm">Semaine (Double)</span>
                                   </div>
-                                  <span className="text-orange-700 font-bold text-xs">{MIN_2W.toLocaleString()} - {MAX_2W.toLocaleString()} hab.</span>
+                                  <span className="text-orange-700 dark:text-orange-300 font-bold text-xs">{MIN_2W.toLocaleString()} - {MAX_2W.toLocaleString()} hab.</span>
                               </div>
-                              <div className="flex items-center justify-between p-6 bg-purple-50 border border-purple-100 rounded-2xl">
+                              <div className="flex items-center justify-between p-6 bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800 rounded-2xl">
                                   <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-sm">3S</div>
-                                      <span className="text-purple-900 font-black text-sm">Semaine (Triple)</span>
+                                      <span className="text-purple-900 dark:text-purple-200 font-black text-sm">Semaine (Triple)</span>
                                   </div>
-                                  <span className="text-purple-700 font-bold text-xs">{MIN_3W.toLocaleString()} - {MAX_3W.toLocaleString()} hab.</span>
+                                  <span className="text-purple-700 dark:text-purple-300 font-bold text-xs">{MIN_3W.toLocaleString()} - {MAX_3W.toLocaleString()} hab.</span>
                               </div>
                           </div>
-                          <div className="p-6 bg-amber-50 border border-amber-100 rounded-[1.5rem] flex gap-4">
+                          <div className="p-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-[1.5rem] flex gap-4">
                               <AlertCircle className="text-amber-600 shrink-0" size={20}/>
-                              <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                              <p className="text-xs text-amber-800 dark:text-amber-200 font-medium leading-relaxed">
                                   Une zone sous les <span className="font-black">{MIN_1W.toLocaleString()} habitants</span> est considérée comme "Insuffisante". Utilisez le mode <span className="font-black text-orange-600">ZONE BONUS</span> pour absorbé des communes orphelines sans impacter la durée de votre planning.
                               </p>
                           </div>
@@ -555,7 +555,7 @@ const ZonePlanner: React.FC = () => {
                   </div>
 
                   <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                      <button onClick={() => setShowSectorPolicy(false)} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">Compris</button>
+                      <button onClick={() => setShowSectorPolicy(false)} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 dark:shadow-slate-900">Compris</button>
                   </div>
               </div>
           </div>
@@ -567,18 +567,18 @@ const ZonePlanner: React.FC = () => {
               <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in duration-300">
                   <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                       <div className="flex items-center gap-4 mb-2">
-                        <div className="p-3 bg-orange-600 text-white rounded-2xl shadow-lg shadow-orange-100"><Zap size={24}/></div>
+                        <div className="p-3 bg-orange-600 text-white rounded-2xl shadow-lg shadow-orange-100 dark:shadow-orange-900/30"><Zap size={24}/></div>
                         <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Confirmation Zone Bonus</h3>
                       </div>
                       <p className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest text-center">Les communes ajoutées n'augmenteront pas la durée de la zone cible.</p>
                   </div>
                   
                   <div className="p-10 space-y-8 overflow-y-auto max-h-[60vh]">
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-8 flex items-center gap-6">
+                      <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 rounded-[2rem] p-8 flex items-center gap-6">
                         <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg">{selectedCluster?.code}</div>
                         <div className="space-y-1">
-                            <div className="text-emerald-900 font-black text-xl leading-none">+{bonusImpacts.addedPop.toLocaleString()} hab.</div>
-                            <div className="text-emerald-600 text-[10px] font-bold uppercase tracking-wider">Travail additionnel absorbé (Total : {selectedCluster?.durationWeeks} sem.)</div>
+                            <div className="text-emerald-900 dark:text-emerald-200 font-black text-xl leading-none">+{bonusImpacts.addedPop.toLocaleString()} hab.</div>
+                            <div className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Travail additionnel absorbé (Total : {selectedCluster?.durationWeeks} sem.)</div>
                         </div>
                       </div>
 
@@ -589,11 +589,11 @@ const ZonePlanner: React.FC = () => {
                       <div className="space-y-4">
                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Détails des transferts</h4>
                           {bonusImpacts.sources.length > 0 ? bonusImpacts.sources.map((src, i) => (
-                              <div key={i} className={`border rounded-[2rem] p-8 flex items-center justify-between transition-all ${src.isLow ? 'bg-red-50 border-red-200 ring-2 ring-red-100 shadow-sm' : 'bg-slate-50 border-slate-100'}`}>
+                              <div key={i} className={`border rounded-[2rem] p-8 flex items-center justify-between transition-all ${src.isLow ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 ring-2 ring-red-100 dark:ring-red-900/50 shadow-sm' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'}`}>
                                   <div className="flex items-center gap-6">
                                       <div className={`w-14 h-14 text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-lg ${src.isLow ? 'bg-red-600' : 'bg-slate-700'}`}>{src.code}</div>
                                       <div className="space-y-0.5">
-                                          <div className={`font-black text-lg leading-none ${src.isLow ? 'text-red-900' : 'text-slate-900 dark:text-white'}`}>-{src.lostPop.toLocaleString()} hab.</div>
+                                          <div className={`font-black text-lg leading-none ${src.isLow ? 'text-red-900 dark:text-red-200' : 'text-slate-900 dark:text-white'}`}>-{src.lostPop.toLocaleString()} hab.</div>
                                           <div className={`text-[9px] font-bold uppercase tracking-wider ${src.isLow ? 'text-red-400' : 'text-slate-400'}`}>
                                               {src.communes.length} commune(s) transférée(s)
                                           </div>
@@ -601,8 +601,8 @@ const ZonePlanner: React.FC = () => {
                                   </div>
                               </div>
                           )) : (
-                              <div className="bg-orange-50 border border-orange-100 rounded-[2rem] p-8 text-center">
-                                  <p className="text-orange-900 font-black text-xs uppercase tracking-widest">Uniquement des communes non-assignées</p>
+                              <div className="bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800 rounded-[2rem] p-8 text-center">
+                                  <p className="text-orange-900 dark:text-orange-200 font-black text-xs uppercase tracking-widest">Uniquement des communes non-assignées</p>
                               </div>
                           )}
                       </div>
@@ -610,7 +610,7 @@ const ZonePlanner: React.FC = () => {
 
                   <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex gap-4">
                       <button onClick={() => setShowBonusConfirm(false)} className="flex-1 py-5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Annuler</button>
-                      <button onClick={applyBonusTransfer} className="flex-[2] py-5 bg-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl shadow-orange-100 hover:bg-orange-700 transition-all">Confirmer Zone Bonus</button>
+                      <button onClick={applyBonusTransfer} className="flex-[2] py-5 bg-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl shadow-orange-100 dark:shadow-orange-900/30 hover:bg-orange-700 transition-all">Confirmer Zone Bonus</button>
                   </div>
               </div>
           </div>
@@ -646,14 +646,14 @@ const ZonePlanner: React.FC = () => {
         <div className="p-8 border-b border-slate-200/40 dark:border-slate-700/40 flex-none bg-white/20 dark:bg-slate-800/20">
           <div className="flex justify-between items-center mb-10">
             <div className="flex items-center gap-5">
-                <div className="bg-orange-600 text-white p-3 rounded-2xl shadow-2xl shadow-orange-100"><Building2 size={24} strokeWidth={2.5} /></div> 
+                <div className="bg-orange-600 text-white p-3 rounded-2xl shadow-2xl shadow-orange-100 dark:shadow-orange-900/30"><Building2 size={24} strokeWidth={2.5} /></div> 
                 <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{selectedNGO}</h1>
             </div>
             <div className="flex items-center gap-2.5">
-                <button onClick={() => setShowCNFF(!showCNFF)} className={`p-3 rounded-2xl border transition-all ${showCNFF ? 'bg-slate-900 text-white border-slate-900 shadow-xl' : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-100 dark:border-slate-800 text-slate-400 hover:text-orange-600 hover:border-orange-100 shadow-sm'}`} title="Export CNFF">
+                <button onClick={() => setShowCNFF(!showCNFF)} className={`p-3 rounded-2xl border transition-all ${showCNFF ? 'bg-slate-900 text-white border-slate-900 shadow-xl' : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-100 dark:border-slate-800 text-slate-400 hover:text-orange-600 hover:border-orange-100 dark:hover:border-orange-800 shadow-sm'}`} title="Export CNFF">
                     <FileText size={18} strokeWidth={2.2} />
                 </button>
-                <button onClick={() => setShowSectorPolicy(true)} className="p-3 bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-orange-600 hover:border-orange-100 transition-all shadow-sm"><Info size={18} strokeWidth={2.2} /></button>
+                <button onClick={() => setShowSectorPolicy(true)} className="p-3 bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-orange-600 hover:border-orange-100 dark:hover:border-orange-800 transition-all shadow-sm"><Info size={18} strokeWidth={2.2} /></button>
                 <button onClick={handleUndo} disabled={history.length === 0} className={`p-3 rounded-2xl border transition-all ${history.length > 0 ? 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-900 dark:text-white border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm' : 'bg-white/50 dark:bg-slate-800/50 text-slate-200 dark:text-slate-600 border-slate-100 dark:border-slate-800 shadow-none cursor-not-allowed'}`}><Undo2 size={18} strokeWidth={2.2} /></button>
             </div>
           </div>
@@ -690,7 +690,7 @@ const ZonePlanner: React.FC = () => {
                         {draftClusters.map(c => {
                             const isLow = c.totalPopulation < MIN_1W;
                             return (
-                            <div key={c.id} draggable={isEditMode} onDragStart={(e) => e.dataTransfer.setData('clusterId', c.id)} onClick={() => { if(!isBonusMode) setSelectedCluster(c); }} className={`flex-none w-48 bg-white dark:bg-[var(--bg-card-solid)] border rounded-[2rem] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 overflow-hidden ${isEditMode ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${selectedCluster?.id === c.id ? 'ring-[3px] ring-orange-500/20 border-orange-500 shadow-orange-50' : 'border-slate-100 dark:border-slate-800'} ${isLow ? 'border-red-100 ring-2 ring-red-500/5' : ''}`}>
+                            <div key={c.id} draggable={isEditMode} onDragStart={(e) => e.dataTransfer.setData('clusterId', c.id)} onClick={() => { if(!isBonusMode) setSelectedCluster(c); }} className={`flex-none w-48 bg-white dark:bg-[var(--bg-card-solid)] border rounded-[2rem] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 overflow-hidden ${isEditMode ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${selectedCluster?.id === c.id ? 'ring-[3px] ring-orange-500/20 border-orange-500 shadow-orange-50 dark:shadow-orange-900/20' : 'border-slate-100 dark:border-slate-800'} ${isLow ? 'border-red-100 dark:border-red-800 ring-2 ring-red-500/5' : ''}`}>
                                 <div className="p-6 flex flex-col h-full">
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2.5">
@@ -698,7 +698,7 @@ const ZonePlanner: React.FC = () => {
                                             {isLow && <AlertTriangle size={15} className="text-red-500 animate-pulse" strokeWidth={2.5} />}
                                             {c.isBonus && <Zap size={15} className="text-emerald-500" strokeWidth={2.5} />}
                                         </div>
-                                        <button onClick={(e) => { e.stopPropagation(); deleteCluster(c.id); }} className="text-slate-200 hover:text-red-500 transition-colors p-1"><Trash2 size={13} strokeWidth={2.2}/></button>
+                                        <button onClick={(e) => { e.stopPropagation(); deleteCluster(c.id); }} className="text-slate-200 dark:text-slate-600 hover:text-red-500 transition-colors p-1"><Trash2 size={13} strokeWidth={2.2}/></button>
                                     </div>
                                     <div className="h-1.5 w-10 rounded-full mb-8" style={{ backgroundColor: c.color }}></div>
                                     <div className="mt-auto flex items-center justify-between">
@@ -724,7 +724,7 @@ const ZonePlanner: React.FC = () => {
                         {/* BOUTON DE TRAJET RESTAURÉ */}
                         <button 
                           onClick={() => setVisibleTeamPath(visibleTeamPath === i + 1 ? null : i + 1)}
-                          className={`ml-1 p-1.5 rounded-lg transition-all ${visibleTeamPath === i + 1 ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-300 hover:text-orange-500 hover:bg-orange-50'}`}
+                          className={`ml-1 p-1.5 rounded-lg transition-all ${visibleTeamPath === i + 1 ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-300 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30'}`}
                           title="Afficher le trajet sur la carte"
                         >
                           <Route size={10} strokeWidth={2.5} />
@@ -738,16 +738,16 @@ const ZonePlanner: React.FC = () => {
               let weekLabelTheme = "bg-white dark:bg-[var(--bg-card-solid)] border-slate-100 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm";
 
               if (slot.week < CURRENT_WEEK) {
-                  bgThemeClass = "bg-slate-100/30 opacity-60";
+                  bgThemeClass = "bg-slate-100/30 dark:bg-slate-800/30 opacity-60";
                   weekLabelTheme = "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600";
               } else if (slot.week === CURRENT_WEEK) {
                   // VERT (ÉMERAUDE) POUR LE PRÉSENT
-                  bgThemeClass = "bg-gradient-to-r from-emerald-50/50 to-white border-y-emerald-100/50 border-l-4 border-l-emerald-400";
-                  weekLabelTheme = "bg-emerald-100 border-emerald-200 text-emerald-900 shadow-lg shadow-emerald-100/50 ring-2 ring-white";
+                  bgThemeClass = "bg-gradient-to-r from-emerald-50/50 dark:from-emerald-900/30 to-white dark:to-slate-800/40 border-y-emerald-100/50 dark:border-y-emerald-800/50 border-l-4 border-l-emerald-400";
+                  weekLabelTheme = "bg-emerald-100 dark:bg-emerald-900/50 border-emerald-200 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 shadow-lg shadow-emerald-100/50 dark:shadow-emerald-900/50 ring-2 ring-white dark:ring-emerald-800";
               } else if (slot.week === CURRENT_WEEK + 1) {
                   // ROUGE CLAIR DÉGRADÉ POUR LA SEMAINE PROCHAINE
-                  bgThemeClass = "bg-gradient-to-r from-rose-50/40 to-white border-y-rose-100/30 border-l-4 border-l-rose-300";
-                  weekLabelTheme = "bg-rose-50 border-rose-100 text-rose-800 shadow-sm";
+                  bgThemeClass = "bg-gradient-to-r from-rose-50/40 dark:from-rose-900/20 to-white dark:to-slate-800/40 border-y-rose-100/30 dark:border-y-rose-800/30 border-l-4 border-l-rose-300 dark:border-l-rose-600";
+                  weekLabelTheme = "bg-rose-50 dark:bg-rose-900/40 border-rose-100 dark:border-rose-800 text-rose-800 dark:text-rose-200 shadow-sm";
               }
 
               return (
@@ -763,18 +763,18 @@ const ZonePlanner: React.FC = () => {
                       </div>
                   </div>
                   {Array.from({length: maxCapacity}).map((_, idx) => {
-                     if (idx >= slot.capacity) return <div key={idx} className="bg-slate-200/5 rounded-[2rem] border border-dashed border-slate-200/40"></div>;
+                     if (idx >= slot.capacity) return <div key={idx} className="bg-slate-200/5 dark:bg-slate-700/5 rounded-[2rem] border border-dashed border-slate-200/40 dark:border-slate-700/40"></div>;
                      const teamData = slot.teams[idx];
                      const isTarget = dragOverCell?.week === slot.week && dragOverCell?.team === (idx + 1);
                      
-                     if (teamData === null) return <div key={idx} onDragOver={(e) => { if(isEditMode) e.preventDefault(); setDragOverCell({ week: slot.week, team: idx + 1 }); }} onDrop={(e) => { e.preventDefault(); e.stopPropagation(); const cid = e.dataTransfer.getData('clusterId'); if (cid) handleManualMoveRequest(cid, idx + 1, slot.week); }} className={`w-full h-full min-h-[90px] rounded-[2rem] border-2 border-dashed transition-all duration-300 ${isTarget ? 'bg-orange-50/50 border-orange-400 scale-[1.02]' : 'border-slate-200/40 dark:border-slate-700/40 bg-white/20 dark:bg-slate-800/20 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-slate-200 dark:hover:border-slate-700'}`}></div>;
+                     if (teamData === null) return <div key={idx} onDragOver={(e) => { if(isEditMode) e.preventDefault(); setDragOverCell({ week: slot.week, team: idx + 1 }); }} onDrop={(e) => { e.preventDefault(); e.stopPropagation(); const cid = e.dataTransfer.getData('clusterId'); if (cid) handleManualMoveRequest(cid, idx + 1, slot.week); }} className={`w-full h-full min-h-[90px] rounded-[2rem] border-2 border-dashed transition-all duration-300 ${isTarget ? 'bg-orange-50/50 dark:bg-orange-900/20 border-orange-400 scale-[1.02]' : 'border-slate-200/40 dark:border-slate-700/40 bg-white/20 dark:bg-slate-800/20 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-slate-200 dark:hover:border-slate-700'}`}></div>;
 
                      if (teamData) {
                         const { cluster, weekIndex } = teamData;
                         const isLow = cluster.totalPopulation < MIN_1W;
                         return (
                          <div key={idx} onDragOver={(e) => { if(isEditMode) e.preventDefault(); setDragOverCell({ week: slot.week, team: idx + 1 }); }} onDrop={(e) => { e.preventDefault(); e.stopPropagation(); const cid = e.dataTransfer.getData('clusterId'); if (cid) handleManualMoveRequest(cid, idx + 1, slot.week); }} className={`rounded-[2rem] transition-all duration-500 ${isTarget && isEditMode ? 'scale-[1.05] z-40' : ''}`}>
-                            <div onClick={() => { if(!isBonusMode) setSelectedCluster(cluster); }} draggable={isEditMode} onDragStart={(e) => e.dataTransfer.setData('clusterId', cluster.id)} className={`h-full rounded-[2rem] border flex flex-col relative overflow-hidden transition-all duration-500 shadow-[0_15px_35px_-12px_rgba(0,0,0,0.06)] ${selectedCluster?.id === cluster.id ? 'ring-[3px] ring-orange-500/15 border-orange-500 shadow-2xl scale-[1.03] z-20' : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-100/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-xl hover:-translate-y-1'} ${isLow ? 'border-red-200 bg-red-50/10' : ''}`}>
+                            <div onClick={() => { if(!isBonusMode) setSelectedCluster(cluster); }} draggable={isEditMode} onDragStart={(e) => e.dataTransfer.setData('clusterId', cluster.id)} className={`h-full rounded-[2rem] border flex flex-col relative overflow-hidden transition-all duration-500 shadow-[0_15px_35px_-12px_rgba(0,0,0,0.06)] ${selectedCluster?.id === cluster.id ? 'ring-[3px] ring-orange-500/15 border-orange-500 shadow-2xl scale-[1.03] z-20' : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-100/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-xl hover:-translate-y-1'} ${isLow ? 'border-red-200 dark:border-red-800 bg-red-50/10 dark:bg-red-900/10' : ''}`}>
                                   <div className={`${isCompact ? 'p-4' : 'p-6'} pb-3 flex flex-col`}>
                                       <div className="flex justify-between items-start">
                                           <div className="flex items-center gap-3">
@@ -823,7 +823,7 @@ const ZonePlanner: React.FC = () => {
       </aside>
 
       <div 
-        className={`w-1 hover:w-2 bg-slate-200/50 hover:bg-orange-300/50 cursor-col-resize transition-all z-40 relative group hidden md:block ${isResizing ? 'bg-orange-500 w-2' : ''}`}
+        className={`w-1 hover:w-2 bg-slate-200/50 dark:bg-slate-700/50 hover:bg-orange-300/50 dark:hover:bg-orange-600/50 cursor-col-resize transition-all z-40 relative group hidden md:block ${isResizing ? 'bg-orange-500 w-2' : ''}`}
         onMouseDown={startResizing}
       >
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-full p-2 shadow-xl opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
@@ -831,7 +831,7 @@ const ZonePlanner: React.FC = () => {
           </div>
       </div>
 
-      <main className="flex-1 h-screen relative bg-[#F1F5F9] overflow-hidden">
+      <main className="flex-1 h-screen relative bg-[#F1F5F9] dark:bg-slate-950 overflow-hidden">
         {/* VUE CNFF (OVERLAY) */}
         {showCNFF && (
             <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl z-[800] p-12 overflow-y-auto animate-in fade-in slide-in-from-bottom-8 duration-600">
@@ -839,7 +839,7 @@ const ZonePlanner: React.FC = () => {
                     <div className="flex items-center justify-between sticky top-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md z-10 py-8 border-b border-slate-100 dark:border-slate-800">
                         <div>
                             <div className="flex items-center gap-5">
-                                <div className="p-4 bg-slate-900 text-white rounded-[1.5rem] shadow-2xl shadow-slate-200"><FileText size={32} strokeWidth={2.5}/></div>
+                                <div className="p-4 bg-slate-900 text-white rounded-[1.5rem] shadow-2xl shadow-slate-200 dark:shadow-slate-900"><FileText size={32} strokeWidth={2.5}/></div>
                                 <div>
                                     <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Export CNFF</h2>
                                     <div className="flex items-center gap-3 mt-3">
@@ -850,7 +850,7 @@ const ZonePlanner: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex gap-4">
-                            <button onClick={copyToClipboard} className={`flex items-center gap-4 px-12 py-6 rounded-[1.5rem] text-[15px] font-black uppercase tracking-wider transition-all shadow-2xl active:scale-95 ${hasCopied ? 'bg-emerald-600 text-white shadow-emerald-200' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-300'}`}>
+                            <button onClick={copyToClipboard} className={`flex items-center gap-4 px-12 py-6 rounded-[1.5rem] text-[15px] font-black uppercase tracking-wider transition-all shadow-2xl active:scale-95 ${hasCopied ? 'bg-emerald-600 text-white shadow-emerald-200 dark:shadow-emerald-900' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-300 dark:shadow-slate-900'}`}>
                                 {hasCopied ? <Check size={22} strokeWidth={2.5}/> : <Copy size={22} strokeWidth={2.5}/>}
                                 {hasCopied ? 'Copié !' : 'Copier tout'}
                             </button>
@@ -862,16 +862,16 @@ const ZonePlanner: React.FC = () => {
                     
                     <div className="grid gap-10 pb-20">
                         {cnffData.length > 0 ? cnffData.map((w, idx) => (
-                            <div key={idx} className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 rounded-[3rem] p-12 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.04)] group hover:border-orange-200 transition-all duration-400">
+                            <div key={idx} className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 rounded-[3rem] p-12 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.04)] group hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-400">
                                 <div className="flex items-center gap-5 mb-10">
-                                    <div className="px-5 py-2 bg-slate-100 text-slate-500 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em]">Semaine {w.week}</div>
-                                    <div className="h-px flex-grow bg-slate-100 group-hover:bg-orange-50 transition-colors"></div>
+                                    <div className="px-5 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em]">Semaine {w.week}</div>
+                                    <div className="h-px flex-grow bg-slate-100 dark:bg-slate-700 group-hover:bg-orange-50 dark:group-hover:bg-orange-900/30 transition-colors"></div>
                                 </div>
                                 <div className="columns-1 sm:columns-2 md:columns-3 gap-10 space-y-4">
                                     {w.towns.map((town, tIdx) => (
                                         <div key={tIdx} className="flex items-start gap-3">
-                                            <span className="text-slate-200 font-mono mt-0.5">–</span>
-                                            <span className="text-[14px] font-mono font-bold text-slate-700 uppercase tracking-tight selection:bg-orange-100">
+                                            <span className="text-slate-200 dark:text-slate-600 font-mono mt-0.5">–</span>
+                                            <span className="text-[14px] font-mono font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight selection:bg-orange-100 dark:selection:bg-orange-900/50">
                                                 {town}
                                             </span>
                                         </div>
@@ -880,7 +880,7 @@ const ZonePlanner: React.FC = () => {
                             </div>
                         )) : (
                             <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 border-dashed rounded-[4rem] p-32 text-center shadow-inner">
-                                <FileText className="mx-auto mb-8 text-slate-100" size={80} strokeWidth={1.5}/>
+                                <FileText className="mx-auto mb-8 text-slate-100 dark:text-slate-700" size={80} strokeWidth={1.5}/>
                                 <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-3">Aucun déploiement planifié</p>
                                 <p className="text-slate-400 font-bold text-sm uppercase tracking-widest leading-relaxed">Placez des zones dans le calendrier pour générer le rapport CNFF.</p>
                             </div>
@@ -895,21 +895,21 @@ const ZonePlanner: React.FC = () => {
             <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[500] w-full max-w-2xl px-8 pointer-events-none">
                 <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-8 pointer-events-auto ring-1 ring-black/5 flex items-center justify-between animate-in slide-in-from-top-6 duration-600">
                     <div className="flex items-center gap-8">
-                        <div className="w-20 h-20 bg-orange-600 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shadow-orange-200">
+                        <div className="w-20 h-20 bg-orange-600 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shadow-orange-200 dark:shadow-orange-900/30">
                             <Sparkles size={32} strokeWidth={2.5}/>
                         </div>
                         <div className="space-y-1.5">
                             <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
                                 {brushStats.pop.toLocaleString()} hab.
                             </div>
-                            <div className={`text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl inline-block ${brushStats.status.color} bg-slate-50 border border-slate-100/50 shadow-sm`}>
+                            <div className={`text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl inline-block ${brushStats.status.color} bg-slate-50 dark:bg-slate-800 border border-slate-100/50 dark:border-slate-700/50 shadow-sm`}>
                                 {brushStats.status.label} • {brushStats.count} communes
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-5">
-                        <button onClick={() => setBrushSelection(new Set())} className="p-5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-[1.5rem] transition-all" title="Effacer tout"><Eraser size={26} strokeWidth={2.2}/></button>
-                        <button onClick={validateManualZone} disabled={!brushStats.status.valid} className="flex items-center gap-4 px-10 py-6 bg-orange-600 text-white rounded-[1.5rem] text-[14px] font-black uppercase tracking-wider hover:bg-orange-700 disabled:opacity-30 disabled:grayscale transition-all shadow-xl shadow-orange-200 active:scale-95">
+                        <button onClick={() => setBrushSelection(new Set())} className="p-5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-[1.5rem] transition-all" title="Effacer tout"><Eraser size={26} strokeWidth={2.2}/></button>
+                        <button onClick={validateManualZone} disabled={!brushStats.status.valid} className="flex items-center gap-4 px-10 py-6 bg-orange-600 text-white rounded-[1.5rem] text-[14px] font-black uppercase tracking-wider hover:bg-orange-700 disabled:opacity-30 disabled:grayscale transition-all shadow-xl shadow-orange-200 dark:shadow-orange-900/30 active:scale-95">
                             <CheckCircle2 size={20} strokeWidth={2.5}/> Créer Zone
                         </button>
                     </div>
@@ -931,11 +931,11 @@ const ZonePlanner: React.FC = () => {
                                 type="checkbox" 
                                 checked={visibleStatuses.has(status.id as CommuneStatus)} 
                                 onChange={() => toggleStatusVisibility(status.id as CommuneStatus)}
-                                className="w-6 h-6 rounded-lg border-2 border-slate-200 text-orange-600 focus:ring-orange-500/20 transition-all cursor-pointer"
+                                className="w-6 h-6 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-orange-600 focus:ring-orange-500/20 transition-all cursor-pointer"
                             />
                             <div className="flex items-center gap-4 flex-grow">
-                                <div className="w-4 h-4 rounded-full shadow-inner ring-2 ring-white" style={{ background: status.color }}></div>
-                                <span className="text-[13px] font-black text-slate-800 uppercase tracking-wide">{status.label}</span>
+                                <div className="w-4 h-4 rounded-full shadow-inner ring-2 ring-white dark:ring-slate-800" style={{ background: status.color }}></div>
+                                <span className="text-[13px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide">{status.label}</span>
                             </div>
                         </label>
                     ))}
@@ -948,14 +948,14 @@ const ZonePlanner: React.FC = () => {
           <div className="absolute top-12 left-1/2 -translate-x-1/2 z-[400] w-full max-w-xl px-12 pointer-events-none">
               <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-4 flex items-center gap-4 pointer-events-auto ring-1 ring-black/5 hover:bg-white dark:hover:bg-slate-900 hover:shadow-2xl transition-all duration-500">
                   <Search className="ml-6 text-slate-300" size={22} strokeWidth={2.5} />
-                  <input type="text" placeholder="Rechercher une commune..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 placeholder:text-slate-300"/>
+                  <input type="text" placeholder="Rechercher une commune..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-500"/>
               </div>
           </div>
         )}
 
         {isLoading && (
           <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 z-[700] flex flex-col items-center justify-center backdrop-blur-3xl">
-            <div className="w-20 h-20 border-6 border-orange-600/10 border-t-orange-600 rounded-full animate-spin mb-8 shadow-2xl shadow-orange-100"></div>
+            <div className="w-20 h-20 border-6 border-orange-600/10 border-t-orange-600 rounded-full animate-spin mb-8 shadow-2xl shadow-orange-100 dark:shadow-orange-900/30"></div>
             <p className="text-slate-900 dark:text-white font-black text-3xl tracking-tight uppercase">Chargement...</p>
           </div>
         )}
@@ -991,7 +991,7 @@ const ZonePlanner: React.FC = () => {
                             <h2 className="font-black text-5xl text-slate-900 dark:text-white tracking-tighter leading-none">Zone {selectedCluster.code}</h2>
                             <button 
                                 onClick={() => { setIsBonusMode(!isBonusMode); setBonusSelection(new Set()); }} 
-                                className={`px-5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 border-2 shadow-sm ${isBonusMode ? 'bg-orange-600 text-white border-orange-600 shadow-orange-200' : 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-400 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700'} ${selectedCluster.isBonus ? 'text-emerald-600 border-emerald-100 bg-emerald-50/50' : ''}`}
+                                className={`px-5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 border-2 shadow-sm ${isBonusMode ? 'bg-orange-600 text-white border-orange-600 shadow-orange-200 dark:shadow-orange-900/30' : 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-400 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700'} ${selectedCluster.isBonus ? 'text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/30' : ''}`}
                             >
                                 {isBonusMode ? <Check size={14} strokeWidth={3}/> : <Zap size={14} strokeWidth={3}/>}
                                 {isBonusMode ? 'Sélection...' : 'ZONE BONUS'}
@@ -999,7 +999,7 @@ const ZonePlanner: React.FC = () => {
                         </div>
                         <div className="flex gap-5 mt-4">
                             {/* Fix: Added quotes around text-slate-200 */}
-                            <span className={`text-[12px] font-black uppercase tracking-widest flex items-center gap-2.5 px-4 py-2 rounded-2xl border-2 transition-all ${selectedCluster.totalPopulation < MIN_1W ? 'bg-red-50 text-red-600 border-red-100' : 'bg-slate-50/50 text-slate-400 border-slate-100'} ${selectedCluster.isBonus ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : ''}`}>
+                            <span className={`text-[12px] font-black uppercase tracking-widest flex items-center gap-2.5 px-4 py-2 rounded-2xl border-2 transition-all ${selectedCluster.totalPopulation < MIN_1W ? 'bg-red-50 dark:bg-red-900/30 text-red-600 border-red-100 dark:border-red-800' : 'bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 border-slate-100 dark:border-slate-700'} ${selectedCluster.isBonus ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' : ''}`}>
                                 {selectedCluster.totalPopulation < MIN_1W && <AlertTriangle size={16} className="text-red-500 animate-pulse" strokeWidth={2.5}/>}
                                 <Users size={16} strokeWidth={2.5} className={selectedCluster.totalPopulation < MIN_1W ? 'text-red-400' : (selectedCluster.isBonus ? 'text-emerald-500' : 'text-slate-200')}/> 
                                 {selectedCluster.totalPopulation.toLocaleString()} hab.
@@ -1008,24 +1008,24 @@ const ZonePlanner: React.FC = () => {
                         </div>
                       </div>
                   </div>
-                  <button onClick={() => { setSelectedCluster(null); setIsBonusMode(false); setBonusSelection(new Set()); }} className="p-5 bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-[1.5rem] transition-all"><X size={28} strokeWidth={2.5}/></button>
+                  <button onClick={() => { setSelectedCluster(null); setIsBonusMode(false); setBonusSelection(new Set()); }} className="p-5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-[1.5rem] transition-all"><X size={28} strokeWidth={2.5}/></button>
               </div>
-              <div className="p-10 bg-slate-50/10 max-h-[35vh] overflow-y-auto custom-scrollbar">
+              <div className="p-10 bg-slate-50/10 dark:bg-slate-800/10 max-h-[35vh] overflow-y-auto custom-scrollbar">
                  {selectedCluster.isBonus && (
-                     <div className="mb-8 p-6 bg-emerald-50 border-2 border-emerald-100/50 rounded-[2rem] flex gap-5 items-center shadow-sm">
+                     <div className="mb-8 p-6 bg-emerald-50 dark:bg-emerald-900/30 border-2 border-emerald-100/50 dark:border-emerald-800/50 rounded-[2rem] flex gap-5 items-center shadow-sm">
                         <Zap size={28} strokeWidth={2.5} className="text-emerald-600 shrink-0"/>
                         <div className="space-y-1">
-                           <p className="text-[11px] text-emerald-900 font-black uppercase tracking-[0.1em]">Zone optimisée (Bonus)</p>
-                           <p className="text-[11px] text-emerald-600 font-bold uppercase leading-relaxed tracking-tight">Travail additionnel absorbé dans le planning initial.</p>
+                           <p className="text-[11px] text-emerald-900 dark:text-emerald-200 font-black uppercase tracking-[0.1em]">Zone optimisée (Bonus)</p>
+                           <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase leading-relaxed tracking-tight">Travail additionnel absorbé dans le planning initial.</p>
                         </div>
                     </div>
                  )}
                  {selectedCluster.totalPopulation < MIN_1W && (
-                     <div className="mb-8 p-6 bg-red-50 border-2 border-red-100/50 rounded-[2rem] flex gap-5 items-center animate-pulse-subtle shadow-sm">
+                     <div className="mb-8 p-6 bg-red-50 dark:bg-red-900/30 border-2 border-red-100/50 dark:border-red-800/50 rounded-[2rem] flex gap-5 items-center animate-pulse-subtle shadow-sm">
                          <AlertTriangle size={28} strokeWidth={2.5} className="text-red-600 shrink-0"/>
                          <div className="space-y-1">
-                            <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.1em]">Population insuffisante</p>
-                            <p className="text-[11px] text-red-600 font-bold uppercase leading-relaxed tracking-tight">Sous le seuil des {MIN_1W.toLocaleString()} hab. Fusionnez ou complétez.</p>
+                            <p className="text-[11px] text-red-900 dark:text-red-200 font-black uppercase tracking-[0.1em]">Population insuffisante</p>
+                            <p className="text-[11px] text-red-600 dark:text-red-400 font-bold uppercase leading-relaxed tracking-tight">Sous le seuil des {MIN_1W.toLocaleString()} hab. Fusionnez ou complétez.</p>
                          </div>
                      </div>
                  )}
@@ -1039,8 +1039,8 @@ const ZonePlanner: React.FC = () => {
                  </div>
               </div>
               <div className="p-10 bg-white/60 dark:bg-slate-800/60 border-t border-slate-100/60 dark:border-slate-800/60 flex justify-end gap-5">
-                  <button onClick={() => handlePutBackToDraft(selectedCluster.id)} className="px-10 py-5 bg-slate-100 text-slate-500 rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Retirer</button>
-                  <button onClick={() => deleteCluster(selectedCluster.id)} className="px-10 py-5 bg-red-50 text-red-600 rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-red-100 transition-all">Supprimer</button>
+                  <button onClick={() => handlePutBackToDraft(selectedCluster.id)} className="px-10 py-5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Retirer</button>
+                  <button onClick={() => deleteCluster(selectedCluster.id)} className="px-10 py-5 bg-red-50 dark:bg-red-900/30 text-red-600 rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-red-100 dark:hover:bg-red-900/50 transition-all">Supprimer</button>
               </div>
             </div>
            )}
