@@ -3,6 +3,7 @@ import { Commune } from '@/types';
 import { communesData, departmentMap, departmentToRegionMap } from '@/constants';
 import { MapCommuneFeature, ProspectHistoryItem } from '@/components/communes/types';
 import { useCommunesStore } from '@/stores/communesStore';
+import { communesService } from '@/services/communesService';
 
 export function useCommunesData() {
     // Read from Zustand store instead of local state
@@ -28,6 +29,8 @@ export function useCommunesData() {
 
     // Data
     const [localCommunes, setLocalCommunes] = useState<Commune[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
     const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([
         {
             id: 'req-1',
@@ -44,9 +47,34 @@ export function useCommunesData() {
     ]);
     const [validationData, setValidationData] = useState<{ communes: MapCommuneFeature[], stats: any } | null>(null);
 
-    // Init local data on mount or org change
+    // Try Supabase first, fall back to mock data
     useEffect(() => {
-        setLocalCommunes(communesData[selectedOrg]);
+        let cancelled = false;
+        setIsLoading(true);
+
+        communesService.getByOrganization(selectedOrg)
+            .then(data => {
+                if (cancelled) return;
+                if (data.length > 0) {
+                    setLocalCommunes(data);
+                    setDataSource('supabase');
+                } else {
+                    // Supabase returned empty — use mocks
+                    setLocalCommunes(communesData[selectedOrg]);
+                    setDataSource('mock');
+                }
+            })
+            .catch(() => {
+                if (cancelled) return;
+                // Supabase unavailable — use mocks
+                setLocalCommunes(communesData[selectedOrg]);
+                setDataSource('mock');
+            })
+            .finally(() => {
+                if (!cancelled) setIsLoading(false);
+            });
+
+        return () => { cancelled = true; };
     }, [selectedOrg]);
 
     // Derive selectedCommune from store's selectedCommuneId
@@ -162,6 +190,7 @@ export function useCommunesData() {
         localCommunes, filteredCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
+        isLoading, dataSource,
         // Map/Prospection
         pastRequests,
         validationData, setValidationData,

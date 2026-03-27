@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { Plus, LayoutGrid, List as ListIcon, ChevronRight, ChevronLeft, MapPin } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, LayoutGrid, List as ListIcon, ChevronRight, ChevronLeft, MapPin, AlertTriangle, Loader2, Database } from 'lucide-react';
 import { Organization } from '@/types/commune';
 import type { Mairie, Zone, Commentaire, AutreContact, ViewMode } from './types';
 import { getISOWeek, getCalculatedWeekString, standardHoraires, ORGS_CONFIG } from './helpers';
@@ -8,10 +8,41 @@ import { Toast, DocRequiredModal, ContactEditModal, MairieDetailModal } from './
 import { ZoneCard } from './ZoneCard';
 import { MairieCard } from './MairieCard';
 import { initialZones, initialMairieData } from '@/mocks/mairieMocks';
+import { mairieService } from '@/services/mairieService';
 
 export default function MairieTab() {
-    const [zones, setZones] = useState<Zone[]>(initialZones);
-    const [mairies, setMairies] = useState<Mairie[]>(initialMairieData);
+    const [zones, setZones] = useState<Zone[]>([]);
+    const [mairies, setMairies] = useState<Mairie[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
+    const [recordCount, setRecordCount] = useState(0);
+
+    // Load from Supabase, fall back to mock
+    useEffect(() => {
+        let cancelled = false;
+        setIsLoading(true);
+        Promise.all([
+            mairieService.getZones().catch(() => null),
+            mairieService.getMairies().catch(() => null),
+        ]).then(([dbZones, dbMairies]) => {
+            if (cancelled) return;
+            if (dbMairies && dbMairies.length > 0) {
+                setMairies(dbMairies);
+                setRecordCount(dbMairies.length);
+                setDataSource('supabase');
+            } else {
+                setMairies(initialMairieData);
+                setRecordCount(initialMairieData.length);
+            }
+            if (dbZones && dbZones.length > 0) {
+                setZones(dbZones);
+            } else {
+                setZones(initialZones);
+            }
+            setIsLoading(false);
+        });
+        return () => { cancelled = true; };
+    }, []);
     const [selectedMairie, setSelectedMairie] = useState<Mairie | null>(null);
     const [selectedOrgFilter, setSelectedOrgFilter] = useState<Organization | 'all'>('all');
     const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -59,6 +90,15 @@ export default function MairieTab() {
     const visibleZones = useMemo(() => { if (selectedOrgFilter === 'all') return zones; return zones.filter(z => z.organization === selectedOrgFilter); }, [zones, selectedOrgFilter]);
     const unassignedMairies = useMemo(() => { let pool = mairies.filter(m => !m.zoneId); if (selectedOrgFilter !== 'all') { pool = pool.filter(m => m.organization === selectedOrgFilter); } return pool; }, [mairies, selectedOrgFilter]);
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 size={24} className="animate-spin text-[var(--text-muted)]" />
+                <span className="ml-3 text-sm text-[var(--text-secondary)]">Chargement des mairies...</span>
+            </div>
+        );
+    }
+
     return (
         <section className="animate-fade-in h-full flex flex-col relative">
             {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
@@ -69,7 +109,14 @@ export default function MairieTab() {
                 <div className="flex flex-col md:flex-row justify-between md:items-end mt-2 gap-4">
                     <div>
                         <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Relations Mairie</h2>
-                        <p className="text-sm md:text-xl text-[var(--text-secondary)] mt-1 md:mt-2 font-medium">Suivi des prises de contact et organisation des tournées.</p>
+                        <div className="flex items-center gap-3 mt-1 md:mt-2">
+                            <p className="text-sm md:text-xl text-[var(--text-secondary)] font-medium">Suivi des prises de contact et organisation des tournées.</p>
+                            {dataSource === 'supabase' && (
+                                <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                                    <Database size={10} /> {recordCount.toLocaleString()} mairies
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="flex flex-wrap gap-2 md:gap-3 items-center">
                          <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1 flex items-center shadow-sm mr-4"> <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-orange-100 text-orange-600' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Liste"> <ListIcon size={20} /> </button> <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div> <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Grille"> <LayoutGrid size={20} /> </button> </div>

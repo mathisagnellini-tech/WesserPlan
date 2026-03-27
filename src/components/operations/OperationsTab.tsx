@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { Plus, Loader2, AlertTriangle } from 'lucide-react';
 import type { Housing, CarType } from './types';
 import { getDistance, MOCK_ZONES } from './helpers';
 import { LogisticsDashboard } from './LogisticsDashboard';
@@ -12,9 +12,11 @@ import { HousingMap } from './HousingMap';
 import { SmartMatcher } from './SmartMatcher';
 import { VehicleSection } from './VehicleSection';
 import { useOperationsStore } from '@/stores/operationsStore';
+import { housingsService } from '@/services/housingsService';
+import { carsService } from '@/services/carsService';
 
-// --- INITIAL DATA ---
-const INITIAL_HOUSINGS: Housing[] = [
+// --- FALLBACK DATA (used when Supabase is unavailable) ---
+const FALLBACK_HOUSINGS: Housing[] = [
     { id: '1', name: "Appartement Croix-Rousse", date: "2025-10-29", lead: "Aboubacar N.", region: "Rhône-Alpes", dept: "69", org: "MSF", people: 5, nights: 7, cost: 660, channel: "Airbnb Pro", address: "12 Rue de la République, 69001 Lyon", owner: "+33 6 00 00 00 00", ownerName: "M. Dupuis", rating: 4, comment: "Très bon emplacement, parking difficile pour le Trafic.", lat: 45.7640, lng: 4.8357, amenities: ["Wifi Haut Débit", "Cuisine équipée", "Lave-linge"] },
     { id: '2', name: "Maison Alsacienne", date: "2025-11-03", lead: "Mickaël P.", region: "Alsace", dept: "67", org: "UNICEF", people: 5, nights: 7, cost: 610, channel: "Booking", address: "5 Avenue des Vosges, 67000 Strasbourg", owner: "+33 6 11 22 33 44", ownerName: "Sarl ImmoEst", rating: 3, comment: "Correct, un peu bruyant le matin.", lat: 48.5839, lng: 7.7455, amenities: ["Wifi", "TV", "Draps fournis"] },
     { id: '3', name: "Gîte des Vignes", date: "2025-11-10", lead: "Sarah L.", region: "Alsace", dept: "68", org: "WWF", people: 8, nights: 4, cost: 820, channel: "Gîtes de France", address: "Route du Vin, 68000 Colmar", owner: "+33 6 55 44 33 22", ownerName: "Mme. Weber", rating: 5, comment: "Super gîte, grand parking, proprio adorable.", lat: 48.0794, lng: 7.3585, amenities: ["Parking Privé", "Wifi", "Jardin", "Barbecue"] },
@@ -23,7 +25,7 @@ const INITIAL_HOUSINGS: Housing[] = [
     { id: '6', name: "Maison Cronenbourg", date: "2025-11-05", lead: "Moussa D.", region: "Alsace", dept: "67", org: "MSF", people: 6, nights: 7, cost: 580, channel: "Pap", address: "Rue Principale, 67200 Strasbourg (Cronenbourg)", owner: "+33 6 98 76 54 32", ownerName: "Famille Muller", rating: 4, comment: "A 10 min du centre en tram, calme.", lat: 48.5900, lng: 7.7200, amenities: ["Wifi", "Garage", "Lave-vaisselle"] },
 ];
 
-const INITIAL_CARS: CarType[] = [
+const FALLBACK_CARS: CarType[] = [
     { id: 'c1', plate: "GA-123-AB", brand: "Peugeot 2008", where: "Strasbourg", km: 42850, service: "2026-01-10", owner: "Léa", lat: 48.5734, lng: 7.7521, fuelStats: { declared: 1, tankSize: 50 }, damages: [] },
     { id: 'c2', plate: "GB-456-CD", brand: "Renault Clio", where: "Nantes", km: 31870, service: "2025-12-01", owner: "Maëva", lat: 47.2184, lng: -1.5536, fuelStats: { declared: 0, tankSize: 45 }, damages: [] }
 ];
@@ -33,8 +35,41 @@ const OperationsTab: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalMode, setAddModalMode] = useState<'manual'|'scan'>('manual');
   const [smartZoneId, setSmartZoneId] = useState<string>("");
-  const [housingData, setHousingData] = useState<Housing[]>(INITIAL_HOUSINGS);
-  const [carsData, setCarsData] = useState<CarType[]>(INITIAL_CARS);
+  const [housingData, setHousingData] = useState<Housing[]>([]);
+  const [carsData, setCarsData] = useState<CarType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
+
+  // Load data from Supabase, fall back to mock
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+
+    Promise.all([
+      housingsService.getAll().catch(() => null),
+      carsService.getAll().catch(() => null),
+    ]).then(([housings, cars]) => {
+      if (cancelled) return;
+
+      if (housings && housings.length > 0) {
+        setHousingData(housings);
+        setDataSource('supabase');
+      } else {
+        setHousingData(FALLBACK_HOUSINGS);
+        setDataSource('mock');
+      }
+
+      if (cars && cars.length > 0) {
+        setCarsData(cars);
+      } else {
+        setCarsData(FALLBACK_CARS);
+      }
+
+      setIsLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, []);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const selectedHousing = useMemo(() => selectedHousingId ? housingData.find(h => h.id === selectedHousingId) ?? null : null, [selectedHousingId, housingData]);
@@ -90,8 +125,25 @@ const OperationsTab: React.FC = () => {
 
   const handleSelectHousing = useCallback((h: Housing) => setSelectedHousingId(h.id), [setSelectedHousingId]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 size={24} className="animate-spin text-[var(--text-muted)]" />
+        <span className="ml-3 text-sm text-[var(--text-secondary)]">Chargement des données...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-10 relative">
+        {/* Data source indicator */}
+        {dataSource === 'mock' && (
+          <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 mb-3">
+            <AlertTriangle size={12} />
+            <span>Supabase hors ligne — données de démonstration</span>
+          </div>
+        )}
+
         {/* Modals */}
         <HousingDetailModal housing={selectedHousing} onClose={() => setSelectedHousingId(null)} />
         <AddHousingModal isOpen={isAddModalOpen} initialMode={addModalMode} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddNewHousing} />

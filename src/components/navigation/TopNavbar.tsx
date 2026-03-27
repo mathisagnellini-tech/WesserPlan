@@ -2,14 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Settings, ChevronDown, Moon, Sun, User } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
+import { useAuth } from '@/hooks/useAuth';
 import { tabConfig, secondaryTabs } from './navConfig';
 
 const TopNavbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggle } = useThemeStore();
+  const { userName } = useAuth();
   const [showMore, setShowMore] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+
+  const userInitials = userName
+    ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -114,10 +120,16 @@ const TopNavbar: React.FC = () => {
             </button>
 
             {/* User Avatar */}
-            <div className="relative ml-0.5 lg:ml-1">
-              <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center text-white border-2 border-white/20 shadow-md cursor-pointer hover:scale-105 transition-transform">
-                <User size={14} className="lg:hidden" />
-                <User size={16} className="hidden lg:block" />
+            <div className="relative ml-0.5 lg:ml-1 group cursor-pointer" onClick={() => navigate('/settings')}>
+              <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center text-white border-2 border-white/20 shadow-md hover:scale-105 transition-transform">
+                {userInitials ? (
+                  <span className="text-xs lg:text-sm font-bold">{userInitials}</span>
+                ) : (
+                  <>
+                    <User size={14} className="lg:hidden" />
+                    <User size={16} className="hidden lg:block" />
+                  </>
+                )}
               </div>
               <span className="absolute bottom-0 right-0 w-2 h-2 lg:w-2.5 lg:h-2.5 bg-green-500 border-2 border-[var(--bg-main)] rounded-full"></span>
             </div>

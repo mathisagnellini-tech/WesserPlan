@@ -1,22 +1,72 @@
 
 import React, { useMemo, useState } from 'react';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, AlertTriangle } from 'lucide-react';
 import { DashboardHeader, translations } from './DashboardHeader';
 import { CompactWeatherWidget } from './WeatherWidget';
 import { ActivityFeed } from './ActivityFeed';
 import { FranceMap, generateTeamsData } from './FranceMap';
 import { useDepartmentWeather } from '@/hooks/useWeather';
+import { useApiData } from '@/hooks/useApiData';
+import { dashboardService } from '@/services/dashboardService';
 
 const DashboardTab: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'fr'>('fr');
   const t = (key: keyof typeof translations.en) => translations[lang][key];
 
-  const { teams } = useMemo(() => generateTeamsData(), []);
+  // Real data with mock fallback
+  const mockTeams = useMemo(() => generateTeamsData(), []);
+  const { data: weeklyPerf, error: perfError } = useApiData(
+    () => dashboardService.getWeeklyPerformance(),
+  );
+  const { data: campaigns } = useApiData(
+    () => dashboardService.getCampaigns(),
+  );
+
+  const teams = mockTeams.teams;
   const { data: weatherData, isLoading: weatherLoading } = useDepartmentWeather('75');
+
+  // Compute KPIs from API data or fallback
+  const kpis = useMemo(() => {
+    if (weeklyPerf?.data?.length) {
+      const latest = weeklyPerf.data[weeklyPerf.data.length - 1];
+      return {
+        donorsRecruited: latest.donorsRecruited,
+        activeFundraisers: latest.activeFundraisers,
+        activeTeams: latest.activeTeams,
+        productivity: latest.productivity,
+      };
+    }
+    return null;
+  }, [weeklyPerf]);
 
   return (
     <section className="animate-fade-in h-auto lg:h-[calc(100vh-100px)] flex flex-col">
       <DashboardHeader lang={lang} onLangChange={() => setLang(l => l === 'en' ? 'fr' : 'en')} t={t} />
+
+      {/* KPI Bar — from API or hidden */}
+      {kpis && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          {[
+            { label: 'Donateurs recrutés', value: kpis.donorsRecruited },
+            { label: 'Fundraisers actifs', value: kpis.activeFundraisers },
+            { label: 'Équipes actives', value: kpis.activeTeams },
+            { label: 'Productivité', value: `${kpis.productivity.toFixed(1)}` },
+          ].map(({ label, value }) => (
+            <div key={label} className="glass-card px-4 py-3">
+              <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{label}</p>
+              <p className="text-xl font-black text-[var(--text-primary)]">{value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* API connection indicator */}
+      {perfError && (
+        <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 mb-3 px-1">
+          <AlertTriangle size={12} />
+          <span>API hors ligne — données de démonstration</span>
+        </div>
+      )}
 
       <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 min-h-0">
           {/* Main Map Area */}

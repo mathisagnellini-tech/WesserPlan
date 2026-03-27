@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { User, Palette, Bell, Database, Trash2, KeyRound, Sun, Moon } from 'lucide-react';
+import { User, Palette, Bell, Database, Trash2, KeyRound, Sun, Moon, LogOut } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
+import { useAuth } from '@/hooks/useAuth';
 
 const SettingsCard: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
     <div className="glass-card p-6">
@@ -27,7 +28,12 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
 
 const SettingsTab: React.FC = () => {
     const { isDark, setTheme } = useThemeStore();
+    const { userName, userEmail, logout, isAuthenticated } = useAuth();
     const [notifications, setNotifications] = useState({ summary: true, alerts: true, news: false });
+
+    const initials = userName
+      ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+      : 'U';
 
     return (
         <section className="animate-fade-in">
@@ -41,7 +47,7 @@ const SettingsTab: React.FC = () => {
                     <SettingsCard title="Profil Utilisateur" icon={User}>
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-600 dark:text-slate-300 border-2 border-white dark:border-slate-700 shadow-md">
-                                GL
+                                {initials}
                             </div>
                             <div>
                                 <button className="text-sm font-semibold bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-4 py-2 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-500/30 transition">Changer d'avatar</button>
@@ -50,13 +56,18 @@ const SettingsTab: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Nom complet</label>
-                            <input type="text" defaultValue="Gérard Larcher" className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
+                            <input type="text" defaultValue={userName ?? ''} className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Adresse e-mail</label>
-                            <input type="email" defaultValue="gerard.larcher@example.com" className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
+                            <input type="email" defaultValue={userEmail ?? ''} className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5" />
                         </div>
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-3">
+                            {isAuthenticated && (
+                              <button onClick={logout} className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition">
+                                <LogOut size={16} /> Déconnexion
+                              </button>
+                            )}
                             <button className="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition shadow-lg shadow-orange-500/20">Enregistrer</button>
                         </div>
                     </SettingsCard>

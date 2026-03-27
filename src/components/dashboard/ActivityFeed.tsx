@@ -1,14 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, Home, Ban, CheckCircle2, CalendarDays, Flag, Clock, Plus, X } from 'lucide-react';
-
-interface ActivityItem {
-    id: number;
-    type: string;
-    text: string;
-    author: string;
-    time: string;
-    date: string;
-}
+import { activityService, type ActivityItem } from '@/services/activityService';
 
 // Add Event Modal
 const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e: ActivityItem) => void }> = ({ isOpen, onClose, onAdd }) => {
@@ -86,16 +78,27 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
     );
 };
 
+const FALLBACK_ACTIVITIES: ActivityItem[] = [
+    { id: 1, type: 'housing', text: "Logement ajoute (Lyon)", author: "Sarah L.", time: "10:45", date: "Auj." },
+    { id: 2, type: 'refusal', text: "Refus Mairie Colmar", author: "Thomas R.", time: "09:30", date: "Auj." },
+    { id: 3, type: 'done', text: "Zone B terminee", author: "Equipe 4", time: "16:00", date: "Hier" },
+];
+
 export const ActivityFeed: React.FC = () => {
-    const [activities, setActivities] = useState<ActivityItem[]>([
-        { id: 1, type: 'housing', text: "Logement ajoute (Lyon)", author: "Sarah L.", time: "10:45", date: "Auj." },
-        { id: 2, type: 'refusal', text: "Refus Mairie Colmar", author: "Thomas R.", time: "09:30", date: "Auj." },
-        { id: 3, type: 'done', text: "Zone B terminee", author: "Equipe 4", time: "16:00", date: "Hier" },
-    ]);
+    const [activities, setActivities] = useState<ActivityItem[]>(FALLBACK_ACTIVITIES);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Try loading from Supabase
+    useEffect(() => {
+        activityService.getRecent(20)
+            .then(data => { if (data.length > 0) setActivities(data); })
+            .catch(() => { /* keep fallback */ });
+    }, []);
 
     const handleAddEvent = (newEvent: ActivityItem) => {
         setActivities([newEvent, ...activities]);
+        // Persist to Supabase (fire-and-forget)
+        activityService.create(newEvent).catch(() => {});
     };
 
     const getIcon = (type: string) => {
