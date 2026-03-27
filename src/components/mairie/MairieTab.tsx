@@ -15,36 +15,71 @@ export default function MairieTab() {
     const [mairies, setMairies] = useState<Mairie[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
-    const [recordCount, setRecordCount] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
+    const [page, setPage] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedOrgFilter, setSelectedOrgFilter] = useState<Organization | 'all'>('all');
+    const PAGE_SIZE = 50;
 
-    // Load from Supabase, fall back to mock
+    // Load from Supabase with server-side pagination + filtering
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
-        Promise.all([
-            mairieService.getZones().catch(() => null),
-            mairieService.getMairies().catch(() => null),
-        ]).then(([dbZones, dbMairies]) => {
-            if (cancelled) return;
-            if (dbMairies && dbMairies.length > 0) {
-                setMairies(dbMairies);
-                setRecordCount(dbMairies.length);
-                setDataSource('supabase');
-            } else {
-                setMairies(initialMairieData);
-                setRecordCount(initialMairieData.length);
+
+        const loadData = async () => {
+            try {
+                const [dbZones, result] = await Promise.all([
+                    mairieService.getZones().catch(() => null),
+                    mairieService.getMairies({
+                        org: selectedOrgFilter,
+                        page,
+                        pageSize: PAGE_SIZE,
+                        search: searchQuery || undefined,
+                    }).catch(() => null),
+                ]);
+
+                if (cancelled) return;
+
+                if (result && result.data.length > 0) {
+                    setMairies(result.data);
+                    setTotalCount(result.total);
+                    setDataSource('supabase');
+                } else if (result && result.total === 0) {
+                    setMairies([]);
+                    setTotalCount(0);
+                    setDataSource('supabase');
+                } else {
+                    setMairies(initialMairieData);
+                    setTotalCount(initialMairieData.length);
+                }
+
+                if (dbZones && dbZones.length > 0) {
+                    setZones(dbZones);
+                } else {
+                    setZones(initialZones);
+                }
+            } finally {
+                if (!cancelled) setIsLoading(false);
             }
-            if (dbZones && dbZones.length > 0) {
-                setZones(dbZones);
-            } else {
-                setZones(initialZones);
-            }
-            setIsLoading(false);
-        });
+        };
+
+        loadData();
         return () => { cancelled = true; };
-    }, []);
+    }, [selectedOrgFilter, page, searchQuery]);
+
+    // Reset page when filter/search changes
+    const handleOrgFilterChange = (org: Organization | 'all') => {
+        setSelectedOrgFilter(org);
+        setPage(0);
+    };
+
+    const handleSearch = (q: string) => {
+        setSearchQuery(q);
+        setPage(0);
+    };
+
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
     const [selectedMairie, setSelectedMairie] = useState<Mairie | null>(null);
-    const [selectedOrgFilter, setSelectedOrgFilter] = useState<Organization | 'all'>('all');
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [currentWeek, setCurrentWeek] = useState(getISOWeek());
     const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -87,8 +122,8 @@ export default function MairieTab() {
     };
     const nextWeek = () => { if (currentWeek < 52) setCurrentWeek(currentWeek + 1); else setCurrentWeek(1); };
     const prevWeek = () => { if (currentWeek > 1) setCurrentWeek(currentWeek - 1); else setCurrentWeek(52); };
-    const visibleZones = useMemo(() => { if (selectedOrgFilter === 'all') return zones; return zones.filter(z => z.organization === selectedOrgFilter); }, [zones, selectedOrgFilter]);
-    const unassignedMairies = useMemo(() => { let pool = mairies.filter(m => !m.zoneId); if (selectedOrgFilter !== 'all') { pool = pool.filter(m => m.organization === selectedOrgFilter); } return pool; }, [mairies, selectedOrgFilter]);
+    const visibleZones = useMemo(() => { if (selectedOrgFilter === 'all') return zones; return zones.filter(z => z.organization === selectedOrgFilter || z.organization === 'all'); }, [zones, selectedOrgFilter]);
+    const unassignedMairies = useMemo(() => mairies.filter(m => !m.zoneId), [mairies]);
 
     if (isLoading) {
         return (
@@ -113,7 +148,7 @@ export default function MairieTab() {
                             <p className="text-sm md:text-xl text-[var(--text-secondary)] font-medium">Suivi des prises de contact et organisation des tournées.</p>
                             {dataSource === 'supabase' && (
                                 <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
-                                    <Database size={10} /> {recordCount.toLocaleString()} mairies
+                                    <Database size={10} /> {totalCount.toLocaleString()} mairies
                                 </span>
                             )}
                         </div>
@@ -125,9 +160,19 @@ export default function MairieTab() {
                     </div>
                 </div>
 
-                <div className="flex gap-1 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-[var(--border-subtle)] w-fit">
-                     <button onClick={() => setSelectedOrgFilter('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 text-white shadow-md' : 'text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}> TOUTES </button>
-                    {Object.entries(ORGS_CONFIG).map(([key, conf]) => ( <button key={key} onClick={() => setSelectedOrgFilter(key as Organization)} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all uppercase ${selectedOrgFilter === key ? `${conf.bg.replace('50', '500')} text-white shadow-md` : `text-[var(--text-secondary)] hover:${conf.bg}`}`}> {conf.label} </button> ))}
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex gap-1 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-[var(--border-subtle)] w-fit">
+                         <button onClick={() => handleOrgFilterChange('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-md' : 'text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}> TOUTES </button>
+                        {Object.entries(ORGS_CONFIG).map(([key, conf]) => ( <button key={key} onClick={() => handleOrgFilterChange(key as Organization)} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all uppercase ${selectedOrgFilter === key ? `${conf.bg.replace('50', '500')} text-white shadow-md` : `text-[var(--text-secondary)] hover:${conf.bg}`}`}> {conf.label} </button> ))}
+                    </div>
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        placeholder="Rechercher une commune..."
+                        className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card-solid)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] w-64 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                    />
+                    <span className="text-sm text-[var(--text-muted)] font-medium">{totalCount.toLocaleString()} résultats</span>
                 </div>
             </header>
 
@@ -137,6 +182,29 @@ export default function MairieTab() {
 
             {unassignedMairies.length > 0 && (
                 <div className="mt-auto bg-slate-100 dark:bg-slate-800 rounded-3xl p-8 border-t border-[var(--border-subtle)]"> <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-3"> <ListIcon size={28} /> Communes Non Assignées ({unassignedMairies.length}) </h3> <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"> {unassignedMairies.map(m => { const seriesMairies = m.serieId ? unassignedMairies.filter(zm => zm.serieId === m.serieId) : [m]; const totalWeeks = seriesMairies.length; const sortedSeries = seriesMairies.sort((a,b) => a.semaineDemandee.localeCompare(b.semaineDemandee)); const currentRank = sortedSeries.findIndex(x => x.id === m.id) + 1; const firstMairie = sortedSeries[0]; const seriesStartWeek = parseInt(firstMairie.semaineDemandee.split('-W')[1]); return ( <MairieCard key={m.id} mairie={m} zoneOrg={m.organization} zoneDuration={1} zoneStartWeek={seriesStartWeek} viewMode="grid" seriesInfo={{ rank: currentRank, total: totalWeeks }} currentNavigationWeek={currentWeek} onStatusChange={(s) => handleUpdateMairieStatus(m.id, s)} onProgressChange={(s) => handleUpdateMairieProgress(m.id, s)} onAddComment={(t) => handleAddMairieComment(m.id, t)} onDeleteComment={(cId) => handleDeleteMairieComment(m.id, cId)} onEditComment={(cId, txt) => handleEditMairieComment(m.id, cId, txt)} onToggleFavorite={(cId) => handleToggleMairieCommentFavorite(m.id, cId)} onAddContact={(n, v, e) => handleAddMairieContact(m.id, n, v, e)} onUpdateContact={(f, v) => handleUpdateMairieContactInfo(m.id, f, v)} onClick={() => setSelectedMairie(m)} onShowToast={(msg) => setToastMessage(msg)} onDocRequest={() => setUnassignedDocMairieId(m.id)} onRequestContactEdit={(f, val) => setUnassignedContactEdit({ mairieId: m.id, field: f, currentVal: val })} onExtendWeek={() => handleExtendMairie(m.id)} onSetDuration={(d) => handleSetMairieDuration(m.id, d)} /> ); })} </div> </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 mt-8 mb-4">
+                    <button
+                        onClick={() => setPage(p => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                        className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <ChevronLeft size={16} /> Précédent
+                    </button>
+                    <span className="text-sm font-bold text-[var(--text-primary)]">
+                        Page {page + 1} / {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                        disabled={page >= totalPages - 1}
+                        className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Suivant <ChevronRight size={16} />
+                    </button>
+                </div>
             )}
 
             <MairieDetailModal mairie={selectedMairie} onClose={() => setSelectedMairie(null)} showToast={(msg) => setToastMessage(msg)} />

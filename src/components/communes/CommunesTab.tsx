@@ -10,14 +10,16 @@ const CommunesTab: React.FC = () => {
     const {
         mode, setMode,
         selectedOrg, setSelectedOrg,
+        activeRegion, setActiveRegion, availableSupabaseRegions,
         search, setSearch,
         selectedRegions, setSelectedRegions,
         selectedDepts, setSelectedDepts,
         selectedStatuses, toggleStatus, resetStatuses,
         availableRegionsOptions, availableDeptsOptions,
-        filteredCommunes,
+        filteredCommunes, totalCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
+        isLoading,
         pastRequests,
         validationData, setValidationData,
         handleMapValidationRequest, handleConfirmValidation,
@@ -46,6 +48,10 @@ const CommunesTab: React.FC = () => {
                 setMode={setMode}
                 selectedOrg={selectedOrg}
                 setSelectedOrg={setSelectedOrg}
+                activeRegion={activeRegion}
+                setActiveRegion={setActiveRegion}
+                availableSupabaseRegions={availableSupabaseRegions}
+                isLoading={isLoading}
                 search={search}
                 setSearch={setSearch}
                 selectedRegions={selectedRegions}
@@ -58,6 +64,7 @@ const CommunesTab: React.FC = () => {
                 availableRegionsOptions={availableRegionsOptions}
                 availableDeptsOptions={availableDeptsOptions}
                 filteredCommunes={filteredCommunes}
+                totalCommunes={totalCommunes}
                 selectedCommune={selectedCommune}
                 setSelectedCommune={setSelectedCommune}
                 onUpdateCommune={handleUpdateCommune}

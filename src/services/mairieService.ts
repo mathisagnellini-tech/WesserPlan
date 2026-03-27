@@ -149,54 +149,36 @@ export const mairieService = {
     return (data as TownHallZoneRow[]).map(rowToZone);
   },
 
-  async getMairies(limit = 500): Promise<Mairie[]> {
-    // Fetch entries and comments in parallel
-    const [entriesRes, commentsRes, zonesRes] = await Promise.all([
-      supabase
-        .from('town_halls')
-        .select('*')
-        .order('name')
-        .limit(limit),
-      supabase
-        .from('comments')
-        .select('*'),
-      supabase
-        .from('zones')
-        .select('id, town_hall_ids'),
-    ]);
+  async getMairies(options: {
+    org?: Organization | 'all';
+    page?: number;
+    pageSize?: number;
+    search?: string;
+  } = {}): Promise<{ data: Mairie[]; total: number }> {
+    const { org = 'all', page = 0, pageSize = 50, search } = options;
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
 
-    if (entriesRes.error) throw new Error(`Mairies fetch failed: ${entriesRes.error.message}`);
+    // Build query
+    let query = supabase
+      .from('town_halls')
+      .select('*', { count: 'exact' });
 
-    const comments = (commentsRes.data as TownHallCommentRow[]) ?? [];
-    const zones = (zonesRes.data as Pick<TownHallZoneRow, 'id' | 'town_hall_ids'>[]) ?? [];
-
-    // Build a lookup: town_hall_id → zone_id
-    const entryToZone: Record<number, string> = {};
-    for (const zone of zones) {
-      for (const thId of zone.town_hall_ids) {
-        entryToZone[thId] = zone.id;
-      }
+    if (org !== 'all') {
+      query = query.eq('organization', org);
     }
 
-    return (entriesRes.data as TownHallRow[]).map(row =>
-      rowToMairie(row, comments, entryToZone[row.id])
-    );
-  },
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
+    }
 
-  async getMairiesByOrg(org: Organization, limit = 500): Promise<Mairie[]> {
+    query = query.order('name').range(from, to);
+
+    // Fetch entries, comments, zones in parallel
     const [entriesRes, commentsRes, zonesRes] = await Promise.all([
-      supabase
-        .from('town_halls')
-        .select('*')
-        .eq('organization', org)
-        .order('name')
-        .limit(limit),
-      supabase
-        .from('comments')
-        .select('*'),
-      supabase
-        .from('zones')
-        .select('id, town_hall_ids'),
+      query,
+      supabase.from('comments').select('*'),
+      supabase.from('zones').select('id, town_hall_ids'),
     ]);
 
     if (entriesRes.error) throw new Error(`Mairies fetch failed: ${entriesRes.error.message}`);
@@ -211,9 +193,12 @@ export const mairieService = {
       }
     }
 
-    return (entriesRes.data as TownHallRow[]).map(row =>
-      rowToMairie(row, comments, entryToZone[row.id])
-    );
+    return {
+      data: (entriesRes.data as TownHallRow[]).map(row =>
+        rowToMairie(row, comments, entryToZone[row.id])
+      ),
+      total: entriesRes.count ?? 0,
+    };
   },
 
   async updateMairie(id: number, updates: Partial<{

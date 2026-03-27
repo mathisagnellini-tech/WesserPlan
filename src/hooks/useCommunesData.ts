@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Commune } from '@/types';
-import { communesData, departmentMap, departmentToRegionMap } from '@/constants';
+import { communesData } from '@/constants';
 import { MapCommuneFeature, ProspectHistoryItem } from '@/components/communes/types';
 import { useCommunesStore } from '@/stores/communesStore';
 import { communesService } from '@/services/communesService';
@@ -23,12 +23,17 @@ export function useCommunesData() {
     const toggleStatus = useCommunesStore((s) => s.toggleStatus);
     const resetStatuses = useCommunesStore((s) => s.resetStatuses);
 
+    // Region filter
+    const activeRegion = useCommunesStore((s) => s.activeRegion);
+    const setActiveRegion = useCommunesStore((s) => s.setActiveRegion);
+
     // Selected commune from store
     const selectedCommuneId = useCommunesStore((s) => s.selectedCommuneId);
     const setSelectedCommuneId = useCommunesStore((s) => s.setSelectedCommuneId);
 
     // Data
     const [localCommunes, setLocalCommunes] = useState<Commune[]>([]);
+    const [totalCommunes, setTotalCommunes] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
     const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([
@@ -47,35 +52,81 @@ export function useCommunesData() {
     ]);
     const [validationData, setValidationData] = useState<{ communes: MapCommuneFeature[], stats: any } | null>(null);
 
-    // Try Supabase first, fall back to mock data
+    // Derive effective filters from Sets (single-select)
+    const effectiveRegion = selectedRegions.size > 0
+        ? Array.from(selectedRegions)[0]
+        : activeRegion;
+    const effectiveDept = selectedDepts.size > 0
+        ? Array.from(selectedDepts)[0]
+        : null;
+
+    // Debounce search
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    useEffect(() => {
+        searchTimerRef.current = setTimeout(() => setDebouncedSearch(search), 300);
+        return () => clearTimeout(searchTimerRef.current);
+    }, [search]);
+
+    const hasFilters = selectedOrg !== 'all' || effectiveRegion || effectiveDept || debouncedSearch.length >= 2;
+
+    // Load from Supabase (plan.town_halls)
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
 
-        communesService.getByOrganization(selectedOrg)
-            .then(data => {
+        // When 'all' with no filters/search, show nothing
+        if (!hasFilters) {
+            setLocalCommunes([]);
+            setTotalCommunes(0);
+            setDataSource('supabase');
+            setIsLoading(false);
+            return;
+        }
+
+        const loadData = selectedOrg === 'all'
+            ? communesService.getAll(500, {
+                region: effectiveRegion ?? undefined,
+                departments: effectiveDept ? [effectiveDept] : undefined,
+                search: debouncedSearch.length >= 2 ? debouncedSearch : undefined,
+              }).then(r => ({ communes: r.data, total: r.total }))
+            : communesService.getByOrganization(selectedOrg).then(c => ({ communes: c, total: c.length }));
+
+        loadData
+            .then(({ communes, total }) => {
                 if (cancelled) return;
-                if (data.length > 0) {
-                    setLocalCommunes(data);
+                if (communes.length > 0) {
+                    setLocalCommunes(communes);
+                    setTotalCommunes(total);
                     setDataSource('supabase');
-                } else {
-                    // Supabase returned empty — use mocks
+                } else if (selectedOrg !== 'all' && communesData[selectedOrg]) {
                     setLocalCommunes(communesData[selectedOrg]);
+                    setTotalCommunes(communesData[selectedOrg].length);
                     setDataSource('mock');
+                } else {
+                    setLocalCommunes([]);
+                    setTotalCommunes(0);
+                    setDataSource('supabase');
                 }
             })
             .catch(() => {
                 if (cancelled) return;
-                // Supabase unavailable — use mocks
-                setLocalCommunes(communesData[selectedOrg]);
-                setDataSource('mock');
+                if (selectedOrg !== 'all' && communesData[selectedOrg]) {
+                    setLocalCommunes(communesData[selectedOrg]);
+                    setTotalCommunes(communesData[selectedOrg].length);
+                    setDataSource('mock');
+                } else {
+                    setLocalCommunes([]);
+                    setTotalCommunes(0);
+                }
             })
             .finally(() => {
                 if (!cancelled) setIsLoading(false);
             });
 
         return () => { cancelled = true; };
-    }, [selectedOrg]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedOrg, effectiveRegion, effectiveDept, debouncedSearch]);
 
     // Derive selectedCommune from store's selectedCommuneId
     const selectedCommune = useMemo(() => {
@@ -146,39 +197,44 @@ export function useCommunesData() {
         alert(`Demande validée ! Email automatique programmé pour ${stats.count} mairies.`);
     };
 
-    // Compute Options for filters
-    const availableDeptsOptions = useMemo(() => {
-        const allDepts = Object.keys(departmentMap).sort();
-        return allDepts.map(code => ({ value: code, label: `${code} - ${departmentMap[code] || ''}` }));
-    }, [localCommunes]);
+    // Fetch regions + departments from Supabase
+    const [availableRegionsOptions, setAvailableRegionsOptions] = useState<{ value: string; label: string }[]>([]);
+    const [allDepts, setAllDepts] = useState<{ value: string; label: string; region: string }[]>([]);
 
-    const availableRegionsOptions = useMemo(() => {
-        const regions = new Set<string>(Object.values(departmentToRegionMap));
-        return Array.from(regions).sort().map(r => ({ value: r, label: r }));
+    useEffect(() => {
+        communesService.getRegionsAndDepartments()
+            .then(({ regions, departments }) => {
+                setAvailableRegionsOptions(regions);
+                setAllDepts(departments);
+            })
+            .catch(() => {});
     }, []);
 
+    // Filter departments by selected region (activeRegion is a plain string, reliable)
+    const availableDeptsOptions = useMemo(() => {
+        if (activeRegion) {
+            return allDepts.filter(d => d.region === activeRegion);
+        }
+        return allDepts;
+    }, [allDepts, activeRegion]);
+
+    // Client-side filtering: only status (search + geo are server-side)
     const filteredCommunes = useMemo(() => {
-        return localCommunes.filter(c => {
-            const matchesSearch = c.nom.toLowerCase().includes(search.toLowerCase()) || c.departement.includes(search);
-            const matchesStatus = selectedStatuses.size === 0 || selectedStatuses.has(c.statut);
+        if (selectedStatuses.size === 0) return localCommunes;
+        return localCommunes.filter(c => selectedStatuses.has(c.statut));
+    }, [localCommunes, selectedStatuses]);
 
-            let matchesGeo = true;
-            if (selectedRegions.size > 0 || selectedDepts.size > 0) {
-                const region = departmentToRegionMap[c.departement];
-                const inRegion = region ? selectedRegions.has(region) : false;
-                const inDept = selectedDepts.has(c.departement);
-                matchesGeo = inRegion || inDept;
-            }
-
-            return matchesSearch && matchesStatus && matchesGeo;
-        });
-    }, [localCommunes, search, selectedRegions, selectedDepts, selectedStatuses]);
+    // Available regions from Supabase (already fetched above)
+    const availableSupabaseRegions = availableRegionsOptions;
 
     return {
         // Mode
         mode, setMode,
         // Org
         selectedOrg, setSelectedOrg,
+        // Region
+        activeRegion, setActiveRegion,
+        availableSupabaseRegions,
         // Search
         search, setSearch,
         // Filters
@@ -187,7 +243,7 @@ export function useCommunesData() {
         selectedStatuses, toggleStatus, resetStatuses,
         availableRegionsOptions, availableDeptsOptions,
         // Data
-        localCommunes, filteredCommunes,
+        localCommunes, filteredCommunes, totalCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
         isLoading, dataSource,

@@ -16,6 +16,12 @@ export interface Commune {
   email?: string;
   phone?: string;
   historiquePassages?: Record<string, string[]>;
+  medianIncome?: number;
+  povertyRate?: number;
+  postalCode?: string;
+  address?: string;
+  horaires?: string;
+  inseeCode?: string;
 }
 
 export interface DepartmentMap {

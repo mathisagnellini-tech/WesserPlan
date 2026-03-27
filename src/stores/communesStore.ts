@@ -1,8 +1,11 @@
 import { create } from 'zustand';
 import type { Organization, CommuneStatus } from '@/types/commune';
 
+export type OrgFilter = Organization | 'all';
+
 interface CommunesState {
-  selectedOrg: Organization;
+  selectedOrg: OrgFilter;
+  activeRegion: string | null;
   selectedCommuneId: number | null;
   mode: 'list' | 'map';
   search: string;
@@ -10,7 +13,8 @@ interface CommunesState {
   selectedDepts: Set<string>;
   selectedStatuses: Set<CommuneStatus>;
 
-  setSelectedOrg: (org: Organization) => void;
+  setSelectedOrg: (org: OrgFilter) => void;
+  setActiveRegion: (region: string | null) => void;
   setSelectedCommuneId: (id: number | null) => void;
   setMode: (mode: 'list' | 'map') => void;
   setSearch: (search: string) => void;
@@ -21,7 +25,8 @@ interface CommunesState {
 }
 
 export const useCommunesStore = create<CommunesState>((set) => ({
-  selectedOrg: 'msf',
+  selectedOrg: 'all',
+  activeRegion: null,
   selectedCommuneId: null,
   mode: 'list',
   search: '',
@@ -29,7 +34,8 @@ export const useCommunesStore = create<CommunesState>((set) => ({
   selectedDepts: new Set(),
   selectedStatuses: new Set(),
 
-  setSelectedOrg: (org) => set({ selectedOrg: org, selectedCommuneId: null }),
+  setSelectedOrg: (org) => set({ selectedOrg: org, selectedCommuneId: null, activeRegion: null }),
+  setActiveRegion: (region) => set({ activeRegion: region, selectedCommuneId: null }),
   setSelectedCommuneId: (id) => set({ selectedCommuneId: id }),
   setMode: (mode) => set({ mode }),
   setSearch: (search) => set({ search }),

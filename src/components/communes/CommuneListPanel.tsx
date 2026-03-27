@@ -1,17 +1,22 @@
 import React from 'react';
 import { Commune, Organization, CommuneStatus } from '@/types';
 import { statusMap } from '@/constants';
-import { Search, MapPin, Users, Euro, Check, List as ListIcon, Map as MapIcon, MousePointer2, History } from 'lucide-react';
+import { Search, MapPin, Users, Euro, Check, List as ListIcon, Map as MapIcon, MousePointer2, History, Loader2 } from 'lucide-react';
 import { QuickStatusDropdown } from '@/components/communes/QuickStatusDropdown';
 import { MultiSelectFilter } from '@/components/communes/MultiSelectFilter';
+import { SingleSelectFilter } from '@/components/communes/SingleSelectFilter';
 import { MiniZoneVisualizer } from '@/components/communes/MiniZoneVisualizer';
 import { ProspectHistoryItem } from '@/components/communes/types';
 
 interface CommuneListPanelProps {
     mode: 'list' | 'map';
     setMode: (mode: 'list' | 'map') => void;
-    selectedOrg: Organization;
-    setSelectedOrg: (org: Organization) => void;
+    selectedOrg: Organization | 'all';
+    setSelectedOrg: (org: Organization | 'all') => void;
+    activeRegion: string | null;
+    setActiveRegion: (region: string | null) => void;
+    availableSupabaseRegions: { region: string; count: number }[];
+    isLoading?: boolean;
     search: string;
     setSearch: (search: string) => void;
     selectedRegions: Set<string>;
@@ -24,6 +29,7 @@ interface CommuneListPanelProps {
     availableRegionsOptions: { value: string; label: string }[];
     availableDeptsOptions: { value: string; label: string }[];
     filteredCommunes: Commune[];
+    totalCommunes: number;
     selectedCommune: Commune | null;
     setSelectedCommune: (commune: Commune | null) => void;
     onUpdateCommune: (id: number, updates: Partial<Commune>) => void;
@@ -33,12 +39,14 @@ interface CommuneListPanelProps {
 export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
     mode, setMode,
     selectedOrg, setSelectedOrg,
+    activeRegion, setActiveRegion, availableSupabaseRegions,
+    isLoading,
     search, setSearch,
     selectedRegions, setSelectedRegions,
     selectedDepts, setSelectedDepts,
     selectedStatuses, toggleStatus, resetStatuses,
     availableRegionsOptions, availableDeptsOptions,
-    filteredCommunes,
+    filteredCommunes, totalCommunes,
     selectedCommune, setSelectedCommune,
     onUpdateCommune,
     pastRequests,
@@ -72,6 +80,12 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
 
                 {/* Org Switcher */}
                 <div className="flex gap-2">
+                     <button
+                        onClick={() => setSelectedOrg('all')}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === 'all' ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                     >
+                         Tous
+                     </button>
                      {(['msf', 'unicef', 'wwf', 'mdm'] as Organization[]).map(org => (
                          <button
                             key={org}
@@ -82,6 +96,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                          </button>
                      ))}
                 </div>
+
 
                 {/* Filters Section */}
                 <div className="space-y-3 pt-2 border-t border-[var(--border-subtle)]/50">
@@ -98,28 +113,42 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                         </div>
                     )}
 
-                    {/* Multi-Select Filters Row */}
-                    <div className="flex gap-2">
-                        <div className="flex-1">
-                            <MultiSelectFilter
-                                label="Régions"
-                                options={availableRegionsOptions}
-                                selected={selectedRegions}
-                                onChange={setSelectedRegions}
-                            />
-                        </div>
-                        <div className="flex-1">
-                             <MultiSelectFilter
-                                label="Départements"
-                                options={availableDeptsOptions}
-                                selected={selectedDepts}
-                                onChange={setSelectedDepts}
-                            />
-                        </div>
+                    {/* Region & Department Dropdowns */}
+                    <div className="space-y-2">
+                        <select
+                            value={activeRegion ?? ''}
+                            onChange={(e) => {
+                                const val = e.target.value || null;
+                                setActiveRegion(val);
+                                setSelectedRegions(val ? new Set([val]) : new Set());
+                                setSelectedDepts(new Set());
+                            }}
+                            className="w-full px-3 pr-8 py-2.5 text-xs font-semibold rounded-lg border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50 text-[var(--text-primary)] focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat"
+                        >
+                            <option value="">Toutes les régions</option>
+                            {availableRegionsOptions.map(r => (
+                                <option key={r.value} value={r.value}>{r.label}</option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={selectedDepts.size > 0 ? Array.from(selectedDepts)[0] : ''}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSelectedDepts(val ? new Set([val]) : new Set());
+                            }}
+                            disabled={availableDeptsOptions.length === 0}
+                            className="w-full px-3 pr-8 py-2.5 text-xs font-semibold rounded-lg border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50 text-[var(--text-primary)] focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-[image:none]"
+                        >
+                            <option value="">{activeRegion ? 'Tous les départements' : 'Sélectionner une région d\'abord'}</option>
+                            {availableDeptsOptions.map(d => (
+                                <option key={d.value} value={d.value}>{d.label}</option>
+                            ))}
+                        </select>
                     </div>
 
                     {mode === 'list' && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-5 gap-1.5">
                             {(['pas_demande', 'informe', 'refuse', 'telescope', 'fait'] as CommuneStatus[]).map(status => {
                                 const isSelected = selectedStatuses.has(status);
                                 const conf = statusMap[status];
@@ -127,7 +156,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                     <button
                                         key={status}
                                         onClick={() => toggleStatus(status)}
-                                        className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase border transition-all flex items-center gap-1
+                                        className={`px-2 py-1.5 rounded-md text-[10px] font-bold uppercase border transition-all flex items-center justify-center gap-1
                                         ${isSelected
                                             ? `${conf.bg} ${conf.color} border-${conf.color.split('-')[1]}-200 shadow-sm`
                                             : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:border-slate-300 dark:hover:border-slate-500'
@@ -156,7 +185,17 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
             {mode === 'list' && (
                 <>
                     <div className="flex-grow overflow-y-auto custom-scrollbar p-2 space-y-2">
-                        {filteredCommunes.length > 0 ? (
+                        {isLoading ? (
+                            <div className="p-8 flex items-center justify-center gap-2 text-[var(--text-muted)] text-sm">
+                                <Loader2 size={16} className="animate-spin" /> Chargement...
+                            </div>
+                        ) : selectedOrg === 'all' && filteredCommunes.length === 0 ? (
+                            <div className="p-8 text-center text-[var(--text-muted)] text-sm">
+                                <MapPin size={24} className="mx-auto mb-2 opacity-40" />
+                                <p className="font-semibold">Sélectionnez une région ou un département</p>
+                                <p className="text-xs mt-1">Utilisez les filtres ci-dessous pour afficher les communes.</p>
+                            </div>
+                        ) : filteredCommunes.length > 0 ? (
                             filteredCommunes.map(c => (
                                 <div
                                     key={c.id}
@@ -184,7 +223,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                         )}
                     </div>
                     <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] text-center text-xs font-bold text-[var(--text-secondary)]">
-                        {filteredCommunes.length} Communes affichées
+                        {filteredCommunes.length}{totalCommunes > filteredCommunes.length ? ` sur ${totalCommunes.toLocaleString()}` : ''} communes
                     </div>
                 </>
             )}

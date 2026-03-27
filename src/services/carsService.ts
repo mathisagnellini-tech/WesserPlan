@@ -1,103 +1,88 @@
-import { supabasePlan as supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import type { CarType } from '@/components/operations/types';
 
-// Supabase row type matches schema.sql
-interface CarRow {
-  id: number;
-  plate: string;
-  brand: string;
-  location: string | null;
-  km: number;
-  next_service: string | null;
-  owner: string | null;
-  lat: number;
-  lng: number;
-  fuel_declared: number;
-  tank_size: number;
-  damages: Array<{ date: string; description: string; author: string }>;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Cars schema client
+const supabaseCars = createClient(supabaseUrl, supabaseAnonKey, {
+  db: { schema: 'cars' },
+});
+
+// ── Row types (cars schema) ──
+
+interface VehicleRow {
+  vehicle_id: number;
+  license_plate: string;
+  model: string | null;
   created_at: string;
-  updated_at: string;
 }
 
-function rowToCar(row: CarRow): CarType {
+interface DamageRow {
+  damage_id: number;
+  vehicle_id: number;
+  source_type: string;
+  damage_json: { part: string; type: string; detail: string };
+  recorded_at: string;
+  created_by: string | null;
+}
+
+function rowToCar(row: VehicleRow, damages: DamageRow[]): CarType {
+  const vehicleDamages = damages
+    .filter(d => d.vehicle_id === row.vehicle_id)
+    .map(d => ({
+      date: d.recorded_at,
+      description: `${d.damage_json.part} — ${d.damage_json.type}: ${d.damage_json.detail}`,
+      author: d.created_by ?? d.source_type,
+    }));
+
   return {
-    id: String(row.id),
-    plate: row.plate,
-    brand: row.brand,
-    where: row.location ?? '',
-    km: row.km,
-    service: row.next_service ?? '',
-    owner: row.owner ?? '',
-    lat: row.lat,
-    lng: row.lng,
-    fuelStats: {
-      declared: row.fuel_declared,
-      tankSize: row.tank_size,
-    },
-    damages: row.damages ?? [],
+    id: String(row.vehicle_id),
+    plate: row.license_plate,
+    brand: row.model ?? '',
+    where: '',
+    km: 0,
+    service: '',
+    owner: '',
+    lat: 48.58,  // default Strasbourg
+    lng: 7.75,
+    fuelStats: { declared: 0, tankSize: 50 },
+    damages: vehicleDamages,
   };
 }
 
 export const carsService = {
   async getAll(): Promise<CarType[]> {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .select('*')
-      .order('plate');
+    const [vehiclesRes, damagesRes] = await Promise.all([
+      supabaseCars.from('vehicles').select('*').order('license_plate'),
+      supabaseCars.from('vehicle_damages').select('*'),
+    ]);
 
-    if (error) throw new Error(`Cars fetch failed: ${error.message}`);
-    return (data as CarRow[]).map(rowToCar);
+    if (vehiclesRes.error) throw new Error(`Vehicles fetch failed: ${vehiclesRes.error.message}`);
+
+    const damages = (damagesRes.data as DamageRow[]) ?? [];
+    return (vehiclesRes.data as VehicleRow[]).map(row => rowToCar(row, damages));
   },
 
   async getById(id: number): Promise<CarType | null> {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const [vehicleRes, damagesRes] = await Promise.all([
+      supabaseCars.from('vehicles').select('*').eq('vehicle_id', id).single(),
+      supabaseCars.from('vehicle_damages').select('*').eq('vehicle_id', id),
+    ]);
 
-    if (error) return null;
-    return rowToCar(data as CarRow);
+    if (vehicleRes.error) return null;
+    const damages = (damagesRes.data as DamageRow[]) ?? [];
+    return rowToCar(vehicleRes.data as VehicleRow, damages);
   },
 
-  async create(car: Partial<CarRow>): Promise<CarType> {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .insert(car)
-      .select()
-      .single();
-
-    if (error) throw new Error(`Car create failed: ${error.message}`);
-    return rowToCar(data as CarRow);
-  },
-
-  async update(id: number, updates: Partial<CarRow>): Promise<CarType | null> {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw new Error(`Car update failed: ${error.message}`);
-    return rowToCar(data as CarRow);
-  },
-
-  async reportDamage(id: number, damage: { date: string; description: string; author: string }): Promise<void> {
-    // Fetch current damages, append new one
-    const { data: car, error: fetchErr } = await supabase
-      .from('vehicles')
-      .select('damages')
-      .eq('id', id)
-      .single();
-
-    if (fetchErr) throw new Error(`Car fetch failed: ${fetchErr.message}`);
-
-    const currentDamages = (car as { damages: unknown[] }).damages ?? [];
-    const { error } = await supabase
-      .from('vehicles')
-      .update({ damages: [...currentDamages, damage] })
-      .eq('id', id);
+  async reportDamage(vehicleId: number, damage: { part: string; type: string; detail: string }): Promise<void> {
+    const { error } = await supabaseCars
+      .from('vehicle_damages')
+      .insert({
+        vehicle_id: vehicleId,
+        source_type: 'app',
+        damage_json: damage,
+      });
 
     if (error) throw new Error(`Damage report failed: ${error.message}`);
   },

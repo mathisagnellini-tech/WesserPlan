@@ -30,9 +30,16 @@ export const QuickStatusDropdown: React.FC<{
         }
     };
 
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         if (!isOpen) return;
-        const closeMenu = () => setIsOpen(false);
+        const closeMenu = (e: MouseEvent) => {
+            // Don't close if clicking inside the dropdown or trigger
+            if (dropdownRef.current?.contains(e.target as Node)) return;
+            if (triggerRef.current?.contains(e.target as Node)) return;
+            setIsOpen(false);
+        };
         const handleScroll = () => setIsOpen(false);
         document.addEventListener("mousedown", closeMenu);
         window.addEventListener("scroll", handleScroll, true);
@@ -56,6 +63,7 @@ export const QuickStatusDropdown: React.FC<{
 
             {isOpen && createPortal(
                 <div
+                    ref={dropdownRef}
                     className="fixed z-[9999] bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-2xl border border-[var(--border-subtle)] overflow-hidden min-w-[160px] animate-fade-in"
                     style={{
                         top: coords.top,
