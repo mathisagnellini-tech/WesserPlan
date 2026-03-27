@@ -4,15 +4,17 @@ import { Filter, Loader2, Eraser, Brush, ArrowRight, Check, Layers, Move } from 
 import L from 'leaflet';
 import 'leaflet-providers';
 import { MapCommuneFeature } from '@/components/communes/types';
+import { communesService } from '@/services/communesService';
 
 export const ProspectionMap: React.FC<{
-    departments: Set<string>;
+    department: string | null;
     onValidationRequest: (selectedCommunes: MapCommuneFeature[]) => void;
-}> = ({ departments, onValidationRequest }) => {
+}> = ({ department, onValidationRequest }) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<L.Map | null>(null);
     const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
     const hasCenteredRef = useRef<boolean>(false);
+    const deptCodeMapRef = useRef<Record<string, string> | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
     const [features, setFeatures] = useState<MapCommuneFeature[]>([]);
@@ -23,62 +25,69 @@ export const ProspectionMap: React.FC<{
     const [tool, setTool] = useState<'move' | 'brush' | 'eraser'>('move');
     const [isMouseDown, setIsMouseDown] = useState(false);
 
+    // Refs for stable closure access in Leaflet event handlers
+    const toolRef = useRef(tool);
+    toolRef.current = tool;
+    const isMouseDownRef = useRef(isMouseDown);
+    isMouseDownRef.current = isMouseDown;
+
     // Filters
-    const [minPop, setMinPop] = useState(1000);
-    const [minRevenue, setMinRevenue] = useState(20000);
+    const [minPop, setMinPop] = useState(0);
+    const [minRevenue, setMinRevenue] = useState(0);
 
     // History Layer State
     const [saturationOrg, setSaturationOrg] = useState<Organization | 'none'>('none');
 
-    // Fetch Geometry based on selected departments
+    // Fetch Geometry based on selected department
     useEffect(() => {
         const loadGeometry = async () => {
-            if (departments.size === 0) return;
+            if (!department) { setFeatures([]); setSelectedCodes(new Set()); return; }
             setIsLoading(true);
-            hasCenteredRef.current = false; // Reset zooming capability when depts change
-            const deptsArray = Array.from(departments);
-            let allFeatures: any[] = [];
+            setFeatures([]);
+            setSelectedCodes(new Set());
+            hasCenteredRef.current = false;
 
             try {
-                for (const deptCode of deptsArray) {
-                    const res = await fetch(`https://geo.api.gouv.fr/departements/${deptCode}/communes?geometry=contour&format=geojson&type=commune-actuelle`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        // Enrich with mock revenue, centroid, and history
-                        const enriched = data.features.map((f: any) => {
-                            // Rough centroid
-                            const coords = f.geometry.coordinates[0][0];
-                            const lng = Array.isArray(coords) ? coords[0] : 0;
-                            const lat = Array.isArray(coords) ? coords[1] : 0;
-
-                            // Mock History Generation
-                            const mockHistory: Record<string, string> = {};
-                            ['msf', 'unicef', 'wwf', 'mdm'].forEach(org => {
-                                // 40% chance of having been visited
-                                if (Math.random() > 0.6) {
-                                    // Date within last 2 years
-                                    const daysAgo = Math.floor(Math.random() * 730);
-                                    const d = new Date();
-                                    d.setDate(d.getDate() - daysAgo);
-                                    mockHistory[org] = d.toISOString().split('T')[0];
-                                }
-                            });
-
-                            return {
-                                ...f,
-                                properties: {
-                                    ...f.properties,
-                                    revenue: Math.floor(Math.random() * (45000 - 16000) + 16000),
-                                    lat,
-                                    lng,
-                                    history: mockHistory
-                                }
-                            };
-                        });
-                        allFeatures = [...allFeatures, ...enriched];
-                    }
+                // Get dept name → code mapping (cached)
+                if (!deptCodeMapRef.current) {
+                    deptCodeMapRef.current = await communesService.getDeptCodeMap();
                 }
-                setFeatures(allFeatures);
+                const deptCode = deptCodeMapRef.current[department] ?? department;
+
+                // Fetch geometry from GeoAPI
+                const res = await fetch(`https://geo.api.gouv.fr/departements/${deptCode}/communes?geometry=contour&format=geojson&type=commune-actuelle`);
+                if (!res.ok) { setFeatures([]); return; }
+                const data = await res.json();
+
+                // Fetch real commune data from Supabase
+                const realCommunes = await communesService.getCommunesByDeptCode(deptCode);
+                const communeByInsee: Record<string, typeof realCommunes[0]> = {};
+                for (const c of realCommunes) {
+                    if (c.inseeCode) communeByInsee[c.inseeCode] = c;
+                }
+
+                // Enrich GeoJSON with real data
+                const enriched = data.features.map((f: any) => {
+                    const inseeCode = f.properties.code;
+                    const real = communeByInsee[inseeCode];
+
+                    const coords = f.geometry.coordinates[0][0];
+                    const lng = Array.isArray(coords) ? coords[0] : 0;
+                    const lat = Array.isArray(coords) ? coords[1] : 0;
+
+                    return {
+                        ...f,
+                        properties: {
+                            ...f.properties,
+                            revenue: real?.medianIncome ?? 0,
+                            population: f.properties.population ?? real?.population ?? 0,
+                            lat: real?.lat ?? lat,
+                            lng: real?.lng ?? lng,
+                            history: {}
+                        }
+                    };
+                });
+                setFeatures(enriched);
             } catch (e) {
                 console.error("Failed to load map data", e);
             } finally {
@@ -87,7 +96,7 @@ export const ProspectionMap: React.FC<{
         };
 
         loadGeometry();
-    }, [departments]);
+    }, [department]);
 
     // Apply demographic filters
     useEffect(() => {
@@ -100,45 +109,69 @@ export const ProspectionMap: React.FC<{
 
     // Handle Map Interactions (Painting)
     const handleInteraction = (code: string) => {
-        if (!isMouseDown) return;
-        if (tool === 'move') return;
+        if (!isMouseDownRef.current) return;
+        if (toolRef.current === 'move') return;
 
         setSelectedCodes(prev => {
             const next = new Set(prev);
-            if (tool === 'brush') next.add(code);
+            if (toolRef.current === 'brush') next.add(code);
             else next.delete(code);
             return next;
         });
     };
 
-    // Render Map
+    // Initialize Map (once only)
     useEffect(() => {
-        if (!mapContainerRef.current) return;
+        if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-        if (!mapInstanceRef.current) {
-            const map = L.map(mapContainerRef.current, { zoomControl: false }).setView([46.6, 1.8], 6);
-            const isDark = document.documentElement.classList.contains('dark');
-            (L.tileLayer as any).provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
-            L.control.zoom({ position: 'topright' }).addTo(map);
-            mapInstanceRef.current = map;
+        const map = L.map(mapContainerRef.current, { zoomControl: false, boxZoom: false, doubleClickZoom: false }).setView([46.6, 1.8], 6);
+        const isDark = document.documentElement.classList.contains('dark');
+        (L.tileLayer as any).provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        mapInstanceRef.current = map;
 
-            // Global mouse listeners for brushing
-            map.on('mousedown', () => setIsMouseDown(true));
-            map.on('mouseup', () => setIsMouseDown(false));
-            document.addEventListener('mouseup', () => setIsMouseDown(false));
-        }
+        // Global mouse listeners for brushing
+        map.on('mousedown', () => setIsMouseDown(true));
+        map.on('mouseup', () => setIsMouseDown(false));
+        document.addEventListener('mouseup', () => setIsMouseDown(false));
 
+        // Prevent native drag selection box on the map container
+        const container = map.getContainer();
+        container.addEventListener('dragstart', (e) => e.preventDefault());
+        container.style.userSelect = 'none';
+
+        // Force remove boxZoom handler
+        if (map.boxZoom) map.boxZoom.disable();
+
+        // Prevent any native image drag on map tiles
+        container.addEventListener('mousedown', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'IMG') {
+                e.preventDefault();
+            }
+        });
+    }, []);
+
+    // Toggle map dragging based on tool
+    useEffect(() => {
         const map = mapInstanceRef.current;
-
-        // Toggle map dragging based on tool to allow "painting" without panning
+        if (!map) return;
         if (tool === 'brush' || tool === 'eraser') {
             map.dragging.disable();
         } else {
             map.dragging.enable();
         }
+    }, [tool]);
 
+    // Render GeoJSON Layer
+    useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+
+        // Cleanup: remove previous layer
         if (geoJsonLayerRef.current) {
             map.removeLayer(geoJsonLayerRef.current);
+            geoJsonLayerRef.current = null;
         }
 
         if (filteredFeatures.length > 0) {
@@ -207,11 +240,11 @@ export const ProspectionMap: React.FC<{
                     layer.on('mousedown', () => {
                         setIsMouseDown(true);
                         // Immediate click/interaction
-                        if (tool !== 'move') {
+                        if (toolRef.current !== 'move') {
                             setSelectedCodes(prev => {
                                 const next = new Set(prev);
                                 const code = feature.properties.code;
-                                if (tool === 'eraser') next.delete(code);
+                                if (toolRef.current === 'eraser') next.delete(code);
                                 else next.add(code);
                                 return next;
                             });
@@ -222,17 +255,21 @@ export const ProspectionMap: React.FC<{
 
             geoJsonLayerRef.current = layer;
 
-            // Only fit bounds ONCE per department load to prevent zooming in/out when filtering
+            // Fit bounds when department changes (hasCenteredRef reset in data loading effect)
             if (!hasCenteredRef.current) {
-                 if (map.getBounds().contains(layer.getBounds())) {
-                     // Do nothing if already visible
-                 } else {
-                     map.fitBounds(layer.getBounds());
-                 }
+                 map.fitBounds(layer.getBounds(), { padding: [20, 20] });
                  hasCenteredRef.current = true;
             }
         }
-    }, [filteredFeatures, selectedCodes, tool, isMouseDown, saturationOrg]);
+
+        // Cleanup function for React StrictMode and rapid re-renders
+        return () => {
+            if (geoJsonLayerRef.current && map) {
+                map.removeLayer(geoJsonLayerRef.current);
+                geoJsonLayerRef.current = null;
+            }
+        };
+    }, [filteredFeatures, selectedCodes, saturationOrg]);
 
 
     // Stats for Selection
@@ -250,7 +287,7 @@ export const ProspectionMap: React.FC<{
 
     const zonesCount = (selectedStats.pop / 8000).toFixed(1);
 
-    if (departments.size === 0) {
+    if (!department) {
         return (
             <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-[var(--border-subtle)]">
                 <div className="text-center text-[var(--text-muted)]">
@@ -381,7 +418,7 @@ export const ProspectionMap: React.FC<{
                 </div>
             )}
 
-            <div ref={mapContainerRef} className="h-full w-full z-0 bg-slate-100 dark:bg-slate-800"></div>
+            <div ref={mapContainerRef} className="h-full w-full z-0 bg-slate-100 dark:bg-slate-800 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', outline: 'none' }}></div>
 
             {/* Validation Bar - Bottom Center */}
             {selectedStats.count > 0 && (

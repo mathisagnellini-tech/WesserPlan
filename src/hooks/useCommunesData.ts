@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Commune } from '@/types';
+import { Commune, Organization } from '@/types';
 import { communesData } from '@/constants';
 import { MapCommuneFeature, ProspectHistoryItem } from '@/components/communes/types';
 import { useCommunesStore } from '@/stores/communesStore';
 import { communesService } from '@/services/communesService';
+import { supabasePlan } from '@/lib/supabase';
 
 export function useCommunesData() {
     // Read from Zustand store instead of local state
@@ -154,47 +155,76 @@ export function useCommunesData() {
         });
     };
 
-    const handleConfirmValidation = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleConfirmValidation = async (org: Organization, zoneName: string) => {
         if (!validationData) return;
+        setIsSubmitting(true);
 
         const { communes, stats } = validationData;
 
-        // 1. Convert features to communes and add/update them
-        const newCommunes: Commune[] = communes.map((f, idx) => ({
-            id: Date.now() + idx,
-            nom: f.properties.nom,
-            departement: f.properties.code.substring(0, 2),
-            population: f.properties.population,
-            passage: 'Jamais',
-            statut: 'pas_demande',
-            maire: 'Non renseigné',
-            revenue: `${Math.floor(f.properties.revenue)} €`,
-            lat: 0,
-            lng: 0,
-            email: '',
-            phone: ''
-        }));
+        try {
+            // 1. Get town_hall IDs matching the selected INSEE codes
+            const inseeCodes = communes.map(c => c.properties.code);
+            const { data: matchedTownHalls } = await supabasePlan
+                .from('town_halls')
+                .select('id')
+                .in('insee_code', inseeCodes);
 
-        setLocalCommunes(prev => [...prev, ...newCommunes]);
+            const townHallIds = (matchedTownHalls ?? []).map((t: { id: number }) => t.id);
 
-        // 2. Add to History
-        const newHistoryItem: ProspectHistoryItem = {
-            id: `req-${Date.now()}`,
-            date: new Date(),
-            communeCount: stats.count,
-            totalPop: stats.pop,
-            zoneCount: stats.zones,
-            communesList: communes.map(c => ({
-                nom: c.properties.nom,
-                lat: c.properties.lat || 0,
-                lng: c.properties.lng || 0
-            }))
-        };
-        setPastRequests(prev => [newHistoryItem, ...prev]);
+            // 2. Create zone in plan.zones
+            const currentWeek = new Date().toISOString().slice(0, 4) + '-W' + String(Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0');
+            const { error: zoneError } = await supabasePlan
+                .from('zones')
+                .insert({
+                    zone_name: zoneName,
+                    organization: org,
+                    deployment_weeks: [currentWeek],
+                    color: org === 'msf' ? '#dc2626' : org === 'unicef' ? '#38bdf8' : org === 'wwf' ? '#16a34a' : '#1e3a8a',
+                    town_hall_ids: townHallIds,
+                });
 
-        // 3. Close & Reset
-        setValidationData(null);
-        alert(`Demande validée ! Email automatique programmé pour ${stats.count} mairies.`);
+            if (zoneError) throw zoneError;
+
+            // 3. Update town_halls: assign org + set status to in_progress
+            if (townHallIds.length > 0) {
+                const { error: updateError } = await supabasePlan
+                    .from('town_halls')
+                    .update({
+                        organization: org,
+                        status: 'in_progress',
+                    })
+                    .in('id', townHallIds);
+
+                if (updateError) throw updateError;
+            }
+
+            // 4. Add to local history
+            const newHistoryItem: ProspectHistoryItem = {
+                id: `req-${Date.now()}`,
+                date: new Date(),
+                communeCount: stats.count,
+                totalPop: stats.pop,
+                zoneCount: stats.zones,
+                communesList: communes.map(c => ({
+                    nom: c.properties.nom,
+                    lat: c.properties.lat || 0,
+                    lng: c.properties.lng || 0
+                }))
+            };
+            setPastRequests(prev => [newHistoryItem, ...prev]);
+
+            // 5. Close & confirm
+            setValidationData(null);
+            alert(`Zone "${zoneName}" créée ! ${townHallIds.length} communes assignées à ${org.toUpperCase()}.`);
+
+        } catch (err) {
+            console.error('Validation failed:', err);
+            alert('Erreur lors de la création de la zone. Réessayez.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Fetch regions + departments from Supabase
@@ -246,7 +276,7 @@ export function useCommunesData() {
         localCommunes, filteredCommunes, totalCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
-        isLoading, dataSource,
+        isLoading, isSubmitting, dataSource, effectiveDept,
         // Map/Prospection
         pastRequests,
         validationData, setValidationData,

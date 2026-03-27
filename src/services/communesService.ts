@@ -143,6 +143,28 @@ export const communesService = {
     };
   },
 
+  async getDeptCodeMap(): Promise<Record<string, string>> {
+    const { data, error } = await supabase.rpc('get_dept_codes');
+    if (error) throw new Error(`Dept codes fetch failed: ${error.message}`);
+    const map: Record<string, string> = {};
+    for (const row of data as { department: string; dept_code: string }[]) {
+      map[row.department] = row.dept_code;
+    }
+    return map;
+  },
+
+  async getCommunesByDeptCode(deptCode: string): Promise<Commune[]> {
+    const { data, error } = await supabase
+      .from('town_halls')
+      .select(SELECT_COLS)
+      .like('postal_code', `${deptCode}%`)
+      .order('name')
+      .limit(2000);
+
+    if (error) throw new Error(`Communes by dept code failed: ${error.message}`);
+    return (data as TownHallRow[]).map(rowToCommune);
+  },
+
   async getById(id: number): Promise<Commune | null> {
     const { data, error } = await supabase
       .from('town_halls')

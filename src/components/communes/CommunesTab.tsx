@@ -19,7 +19,8 @@ const CommunesTab: React.FC = () => {
         filteredCommunes, totalCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
-        isLoading,
+        isLoading, isSubmitting,
+        effectiveDept,
         pastRequests,
         validationData, setValidationData,
         handleMapValidationRequest, handleConfirmValidation,
@@ -40,6 +41,7 @@ const CommunesTab: React.FC = () => {
                 onConfirm={handleConfirmValidation}
                 communes={validationData?.communes || []}
                 stats={validationData?.stats || {count:0, pop:0, zones:"0"}}
+                isSubmitting={isSubmitting}
             />
 
             {/* Left List Panel */}
@@ -85,7 +87,8 @@ const CommunesTab: React.FC = () => {
                     </>
                 ) : (
                     <ProspectionMap
-                        departments={selectedDepts}
+                        key={effectiveDept ?? 'none'}
+                        department={effectiveDept}
                         onValidationRequest={handleMapValidationRequest}
                     />
                 )}
