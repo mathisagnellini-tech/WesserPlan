@@ -1,39 +1,46 @@
+import { Cluster } from '@/components/zone-maker/types';
 
-import { GoogleGenAI } from "@google/genai";
-import { Cluster } from "@/components/zone-maker/types";
+// Calls the Supabase Edge Function `analyze-cluster`, which proxies to Gemini
+// with the API key held server-side. Frontend never sees GEMINI_API_KEY.
+//
+// Deploy the function: see supabase/functions/analyze-cluster/README.md
 
-// Function to analyze a cluster using Gemini AI
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 export const analyzeCluster = async (cluster: Cluster): Promise<string> => {
-  // Always create a new instance right before making an API call to ensure latest API key usage
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  if (!SUPABASE_URL) {
+    return 'Configuration manquante : VITE_SUPABASE_URL.';
+  }
 
-  const names = cluster.communes.map(c => `${c.name} (${c.population} hab.)`).join(', ');
-  const total = cluster.totalPopulation;
-
-  const prompt = `
-    Tu es un urbaniste expert du territoire français.
-    J'ai créé un regroupement de communes composé de :
-    ${names}.
-
-    Population totale: ${total}.
-
-    1. Donne un nom créatif et réaliste à ce territoire (Ex: "Terres de l'Ill", "Porte du Sud", etc).
-    2. Analyse brièvement la cohérence de ce groupe (ex: rural vs urbain).
-    3. Suggère un service public prioritaire à mutualiser pour ces villes (ex: crèche, transport, déchetterie).
-
-    Réponds en format texte court et structuré (Markdown). Sois concis.
-  `;
+  const payload = {
+    communes: cluster.communes.map((c) => ({
+      name: c.name,
+      population: c.population,
+    })),
+    totalPopulation: cluster.totalPopulation,
+  };
 
   try {
-    // Basic Text Task uses gemini-3-flash-preview
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/analyze-cluster`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(SUPABASE_ANON_KEY ? { apikey: SUPABASE_ANON_KEY } : {}),
+      },
+      body: JSON.stringify(payload),
     });
-    // Access text property directly as per latest SDK guidelines
-    return response.text || "Pas de réponse générée.";
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      throw new Error(`Edge Function ${res.status}: ${detail}`);
+    }
+
+    const data = (await res.json()) as { text?: string; error?: string };
+    if (data.error) throw new Error(data.error);
+    return data.text ?? 'Pas de réponse générée.';
   } catch (error) {
-    console.error("Gemini Error:", error);
+    console.error('Gemini Edge Function error:', error);
     return "Erreur lors de l'analyse IA. Vérifiez la console.";
   }
 };

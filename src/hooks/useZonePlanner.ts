@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { recalculateSchedule, calculateDuration, getZoneStatus } from '@/services/clusteringService';
+import { recalculateSchedule, calculateDuration, getZoneStatus, generateClusters, clusterPersistence } from '@/services/clusteringService';
 import { Cluster, ClusteringResult, Commune, GeoFeature, CommuneStatus } from '@/components/zone-maker/types';
 import {
-  API_GEO_URL, TARGET_COMMUNES_LIST, DEPT_CODE, CLUSTER_COLORS, MIN_1W
+  API_GEO_URL, TARGET_COMMUNES_LIST, DEPT_CODE, CLUSTER_COLORS, MIN_1W, TARGET_POPULATION
 } from '@/components/zone-maker/constants';
 import { useZoneStore } from '@/stores/zoneStore';
 
@@ -66,6 +66,11 @@ export function useZonePlanner() {
   const [isolatedWeek, setIsolatedWeek] = useState<number | null>(null);
   const [visibleTeamPath, setVisibleTeamPath] = useState<number | null>(null);
   const [showSectorPolicy, setShowSectorPolicy] = useState(false);
+
+  // Persistence state (per-NGO)
+  const [persistenceError, setPersistenceError] = useState<string | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydratedNgosRef = useRef<Set<string>>(new Set());
 
   // Auto-save current planning
   useEffect(() => {
@@ -164,6 +169,46 @@ export function useZonePlanner() {
             status: status
           };
         });
+
+        // Compute neighbors via shared geometry vertices \u2014 required for the
+        // BFS-based generateClusters() algorithm to expand beyond single
+        // communes. Without this, every cluster is one commune wide.
+        const flattenCoords = (geometry: GeoFeature['geometry']): string[] => {
+          const coords: string[] = [];
+          const extract = (list: any[]) => {
+            if (list.length === 2 && typeof list[0] === 'number' && typeof list[1] === 'number') {
+              coords.push(`${list[0].toFixed(4)},${list[1].toFixed(4)}`);
+            } else {
+              list.forEach(item => extract(item));
+            }
+          };
+          extract(geometry.coordinates);
+          return coords;
+        };
+        const vertexMap = new Map<string, string[]>();
+        initialCommunes.forEach(c => {
+          const uniqueVertices = new Set(flattenCoords(c.feature.geometry));
+          uniqueVertices.forEach(v => {
+            if (!vertexMap.has(v)) vertexMap.set(v, []);
+            vertexMap.get(v)!.push(c.id);
+          });
+        });
+        const byId = new Map(initialCommunes.map(c => [c.id, c]));
+        vertexMap.forEach(communeIds => {
+          if (communeIds.length > 1) {
+            for (let i = 0; i < communeIds.length; i++) {
+              for (let j = i + 1; j < communeIds.length; j++) {
+                const c1 = byId.get(communeIds[i]);
+                const c2 = byId.get(communeIds[j]);
+                if (c1 && c2) {
+                  if (!c1.neighbors.includes(c2.id)) c1.neighbors.push(c2.id);
+                  if (!c2.neighbors.includes(c1.id)) c2.neighbors.push(c1.id);
+                }
+              }
+            }
+          }
+        });
+
         setCommunes(initialCommunes);
       } catch (err) {
         console.error(err);
@@ -173,6 +218,73 @@ export function useZonePlanner() {
     };
     loadData();
   }, []);
+
+  // Hydrate clusters for the active NGO from Supabase (once per NGO).
+  useEffect(() => {
+    if (communes.length === 0) return;
+    if (hydratedNgosRef.current.has(selectedNGO)) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const lookup = new Map<string, Commune>(communes.map(c => [c.id, c]));
+        const stored = await clusterPersistence.loadAll(selectedNGO, lookup);
+        if (cancelled) return;
+        hydratedNgosRef.current.add(selectedNGO);
+        if (stored.length > 0) {
+          const next: ClusteringResult = { clusters: stored, unclustered: [] };
+          setData(next);
+          setNgoStates(prev => ({ ...prev, [selectedNGO]: next }));
+        }
+      } catch (err) {
+        if (cancelled) return;
+        console.error('[useZonePlanner] cluster load failed', err);
+        setPersistenceError(err instanceof Error ? err.message : 'Erreur de chargement des zones');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [communes, selectedNGO]);
+
+  // Debounced save: persist whenever the active NGO's clusters change.
+  useEffect(() => {
+    if (!hydratedNgosRef.current.has(selectedNGO)) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    const ngoToSave = selectedNGO;
+    const clustersToSave = data.clusters;
+    saveTimerRef.current = setTimeout(() => {
+      clusterPersistence.replaceAll(ngoToSave, clustersToSave)
+        .catch(err => {
+          console.error('[useZonePlanner] cluster save failed', err);
+          setPersistenceError(err instanceof Error ? err.message : 'Erreur de sauvegarde des zones');
+        });
+    }, 500);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [data.clusters, selectedNGO]);
+
+  /**
+   * Generate clusters automatically from communes flagged ASKED for the
+   * current NGO. Replaces any existing clusters in local state (which the
+   * debounced save effect will then sync to Supabase).
+   */
+  const handleGenerate = useCallback(() => {
+    const askedCommunes = communes.filter(c => c.status === 'ASKED');
+    // Mark hydrated so the save effect triggers (e.g. when generating before
+    // a remote load completes, or when clearing all clusters to empty).
+    hydratedNgosRef.current.add(selectedNGO);
+    if (askedCommunes.length === 0) {
+      pushToHistory(data);
+      setData(prev => ({ ...prev, clusters: [] }));
+      return;
+    }
+    pushToHistory(data);
+    const result = generateClusters({
+      communes: askedCommunes,
+      targetPop: TARGET_POPULATION,
+    });
+    setData({ clusters: result.clusters, unclustered: result.unclustered });
+    setSelectedCluster(null);
+  }, [communes, data, selectedNGO, setSelectedCluster]);
 
   const handleCommuneBrush = (communeId: string, forceState?: boolean) => {
     setBrushSelection(prev => {
@@ -494,5 +606,7 @@ export function useZonePlanner() {
     modifyWeekTeamCount, handlePutBackToDraft,
     toggleStatusVisibility, copyToClipboard,
     setSelectedCluster,
+    handleGenerate,
+    persistenceError,
   };
 }

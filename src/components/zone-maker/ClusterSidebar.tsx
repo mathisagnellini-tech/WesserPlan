@@ -4,7 +4,7 @@ import { MIN_1W } from './constants';
 import { ASSOCIATIONS } from '@/hooks/useZonePlanner';
 import {
   Sparkles, Hand, Eye, Package, Users, Undo2, Building2,
-  FileText, Info, Trash2, AlertTriangle, Zap, UserPlus, UserMinus, Route, GripVertical
+  FileText, Info, Trash2, AlertTriangle, Zap, UserPlus, UserMinus, Route, GripVertical, Wand2
 } from 'lucide-react';
 import ScheduleGrid from './ScheduleGrid';
 
@@ -43,6 +43,7 @@ interface ClusterSidebarProps {
   onManualMoveRequest: (clusterId: string, team: number, week: number) => void;
   sidebarWidth: number;
   sidebarRef: React.RefObject<HTMLElement | null>;
+  onGenerate?: () => void;
 }
 
 const ClusterSidebar: React.FC<ClusterSidebarProps> = ({
@@ -54,7 +55,7 @@ const ClusterSidebar: React.FC<ClusterSidebarProps> = ({
   schedule, maxCapacity, isCompact,
   visibleTeamPath, onToggleTeamPath, onModifyWeekTeamCount,
   dragOverCell, setDragOverCell, onManualMoveRequest,
-  sidebarWidth, sidebarRef,
+  sidebarWidth, sidebarRef, onGenerate,
 }) => {
   return (
     <aside
@@ -97,6 +98,15 @@ const ClusterSidebar: React.FC<ClusterSidebarProps> = ({
             </button>
             <button onClick={onShowSectorPolicy} className="p-3 bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-orange-600 hover:border-orange-100 dark:hover:border-orange-800 transition-all shadow-sm"><Info size={18} strokeWidth={2.2} /></button>
             <button onClick={onUndo} disabled={historyLength === 0} className={`p-3 rounded-2xl border transition-all ${historyLength > 0 ? 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-900 dark:text-white border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm' : 'bg-white/50 dark:bg-slate-800/50 text-slate-200 dark:text-slate-600 border-slate-100 dark:border-slate-800 shadow-none cursor-not-allowed'}`}><Undo2 size={18} strokeWidth={2.2} /></button>
+            {onGenerate && (
+              <button
+                onClick={onGenerate}
+                title="Générer les zones automatiquement"
+                className="p-3 rounded-2xl border bg-orange-600 text-white border-orange-600 hover:bg-orange-700 hover:border-orange-700 shadow-md transition-all"
+              >
+                <Wand2 size={18} strokeWidth={2.2} />
+              </button>
+            )}
           </div>
         </div>
 

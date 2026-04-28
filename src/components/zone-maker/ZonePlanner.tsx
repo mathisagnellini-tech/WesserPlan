@@ -83,6 +83,7 @@ const ZonePlanner: React.FC = () => {
         onManualMoveRequest={zp.handleManualMoveRequest}
         sidebarWidth={zp.sidebarWidth}
         sidebarRef={zp.sidebarRef}
+        onGenerate={zp.handleGenerate}
       />
 
       {/* Resize handle */}
