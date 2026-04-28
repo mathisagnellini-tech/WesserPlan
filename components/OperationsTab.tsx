@@ -1,6 +1,7 @@
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Plus, Trash2, FileText, Search, MapPin, LayoutGrid, List as ListIcon, Fuel, AlertTriangle, Gauge, Calendar, Phone, User, Euro, CheckCircle2, Navigation, Hotel, X, Bed, Wifi, Car, Star, ArrowRight, Scan, Upload, Loader2, Save, Copy, Check, Camera, MousePointer2, ShieldCheck, Target, Zap, TrendingDown, Percent, Wallet } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 // To satisfy TypeScript for global variables loaded from CDNs
 declare const L: any;
@@ -305,19 +306,72 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
   const [smartZoneId, setSmartZoneId] = useState<string>("");
 
   // Data State
-  const [housingData, setHousingData] = useState<Housing[]>([
-    { id: '1', name: "Appartement Croix-Rousse", date: "2025-10-29", lead: "Aboubacar N.", region: "Rhône-Alpes", dept: "69", org: "MSF", people: 5, nights: 7, cost: 660, channel: "Airbnb Pro", address: "12 Rue de la République, 69001 Lyon", owner: "+33 6 00 00 00 00", ownerName: "M. Dupuis", rating: 4, comment: "Très bon emplacement, parking difficile pour le Trafic.", lat: 45.7640, lng: 4.8357, amenities: ["Wifi Haut Débit", "Cuisine équipée", "Lave-linge"] },
-    { id: '2', name: "Maison Alsacienne", date: "2025-11-03", lead: "Mickaël P.", region: "Alsace", dept: "67", org: "UNICEF", people: 5, nights: 7, cost: 610, channel: "Booking", address: "5 Avenue des Vosges, 67000 Strasbourg", owner: "+33 6 11 22 33 44", ownerName: "Sarl ImmoEst", rating: 3, comment: "Correct, un peu bruyant le matin.", lat: 48.5839, lng: 7.7455, amenities: ["Wifi", "TV", "Draps fournis"] },
-    { id: '3', name: "Gîte des Vignes", date: "2025-11-10", lead: "Sarah L.", region: "Alsace", dept: "68", org: "WWF", people: 8, nights: 4, cost: 820, channel: "Gîtes de France", address: "Route du Vin, 68000 Colmar", owner: "+33 6 55 44 33 22", ownerName: "Mme. Weber", rating: 5, comment: "Super gîte, grand parking, proprio adorable.", lat: 48.0794, lng: 7.3585, amenities: ["Parking Privé", "Wifi", "Jardin", "Barbecue"] },
-    { id: '4', name: "T3 Centre Rennes", date: "2025-09-15", lead: "Thomas R.", region: "Bretagne", dept: "35", org: "MSF", people: 6, nights: 6, cost: 550, channel: "Leboncoin", address: "Rue de Saint-Malo, 35000 Rennes", owner: "+33 6 99 88 77 66", ownerName: "Julien B.", rating: 4, comment: "Bien situé, bon rapport qualité prix.", lat: 48.1173, lng: -1.6778, amenities: ["Wifi", "Parking rue gratuit"] },
-    { id: '5', name: "Duplex Fosse", date: "2025-10-01", lead: "Julie B.", region: "Pays de la Loire", dept: "44", org: "WWF", people: 5, nights: 7, cost: 700, channel: "Airbnb", address: "Quai de la Fosse, 44000 Nantes", owner: "+33 6 12 34 56 78", ownerName: "Agence Loire", rating: 3, comment: "Appartement sombre mais fonctionnel.", lat: 47.2100, lng: -1.5600, amenities: ["Wifi", "Proche Tram"] },
-    { id: '6', name: "Maison Cronenbourg", date: "2025-11-05", lead: "Moussa D.", region: "Alsace", dept: "67", org: "MSF", people: 6, nights: 7, cost: 580, channel: "Pap", address: "Rue Principale, 67200 Strasbourg (Cronenbourg)", owner: "+33 6 98 76 54 32", ownerName: "Famille Muller", rating: 4, comment: "A 10 min du centre en tram, calme.", lat: 48.5900, lng: 7.7200, amenities: ["Wifi", "Garage", "Lave-vaisselle"] },
-  ]);
+  const [housingData, setHousingData] = useState<Housing[]>([]);
+  const [carsData, setCarsData] = useState<Car[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [carsData, setCarsData] = useState<Car[]>([
-    { id: 'c1', plate: "GA-123-AB", brand: "Peugeot 2008", where: "Strasbourg", km: 42850, service: "2026-01-10", owner: "Léa", lat: 48.5734, lng: 7.7521, fuelStats: { declared: 1, tankSize: 50 }, damages: [] },
-    { id: 'c2', plate: "GB-456-CD", brand: "Renault Clio", where: "Nantes", km: 31870, service: "2025-12-01", owner: "Maëva", lat: 47.2184, lng: -1.5536, fuelStats: { declared: 0, tankSize: 45 }, damages: [] }
-  ]);
+  // --- Supabase: Load data with fallback ---
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [housingsRes, carsRes] = await Promise.all([
+        supabase.from('housings').select('*').order('date_start', { ascending: false }),
+        supabase.from('cars').select('*').order('km', { ascending: false }),
+      ]);
+
+      const hasHousings = housingsRes.data && housingsRes.data.length > 0;
+      const hasCars = carsRes.data && carsRes.data.length > 0;
+
+      if (hasHousings) {
+        setHousingData(housingsRes.data.map((h: any) => ({
+          id: String(h.id),
+          name: h.name || '',
+          date: h.date_start || '',
+          lead: h.lead || '',
+          region: h.region || '',
+          dept: h.dept || '',
+          org: h.org || '',
+          people: h.people || 0,
+          nights: h.nights || 0,
+          cost: Number(h.cost_total) || 0,
+          channel: h.channel || '',
+          address: h.address || '',
+          owner: '',
+          ownerName: '',
+          rating: 0,
+          comment: h.team_note || '',
+          lat: h.lat || 0,
+          lng: h.lng || 0,
+          amenities: [],
+        })));
+      }
+
+      if (hasCars) {
+        setCarsData(carsRes.data.map((c: any) => ({
+          id: String(c.id),
+          plate: c.plate,
+          brand: c.brand || 'Non renseigné',
+          where: c.location || '',
+          km: c.km || 0,
+          service: c.next_service || '',
+          owner: c.owner || '',
+          lat: c.lat || 0,
+          lng: c.lng || 0,
+          fuelStats: { declared: c.fuel_declared || 0, tankSize: c.tank_size || 50 },
+          damages: c.damages || [],
+        })));
+      }
+
+      if (!hasHousings && !hasCars) {
+        console.warn('[WesserPlan] Supabase tables vides ou inexistantes. Exécute supabase/setup.sql dans le SQL Editor.');
+      }
+    } catch (err) {
+      console.error('[WesserPlan] Erreur Supabase:', err);
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const [selectedHousing, setSelectedHousing] = useState<Housing | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -441,11 +495,38 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
     }
   }, [isActive, activeSubTab, viewMode, filteredHousing, smartZoneId]);
 
-  const handleAddNewHousing = (newHousing: Housing) => { setHousingData([newHousing, ...housingData]); };
-  const handleReportDamage = (desc: string) => {
+  const handleAddNewHousing = async (newHousing: Housing) => {
+    const { data, error } = await supabase.from('housings').insert({
+      name: newHousing.name,
+      date_start: newHousing.date || null,
+      lead: newHousing.lead,
+      region: newHousing.region,
+      dept: newHousing.dept,
+      org: newHousing.org,
+      people: newHousing.people,
+      nights: newHousing.nights,
+      cost_total: newHousing.cost,
+      cost_final: newHousing.cost,
+      channel: newHousing.channel,
+      address: newHousing.address,
+      team_note: newHousing.comment,
+      lat: newHousing.lat || null,
+      lng: newHousing.lng || null,
+    }).select().single();
+
+    if (data && !error) {
+      setHousingData([{ ...newHousing, id: String(data.id) }, ...housingData]);
+    } else {
+      setHousingData([newHousing, ...housingData]);
+    }
+  };
+
+  const handleReportDamage = async (desc: string) => {
       if (reportingCar) {
           const newDamage = { date: new Date().toISOString(), description: desc, author: "Moi" };
-          setCarsData(carsData.map(c => c.id === reportingCar.id ? { ...c, damages: [...(c.damages || []), newDamage] } : c));
+          const updatedDamages = [...(reportingCar.damages || []), newDamage];
+          await supabase.from('cars').update({ damages: updatedDamages }).eq('id', Number(reportingCar.id));
+          setCarsData(carsData.map(c => c.id === reportingCar.id ? { ...c, damages: updatedDamages } : c));
           setReportingCar(null);
       }
   };
@@ -462,9 +543,20 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
       setIsAddModalOpen(true);
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="animate-spin text-orange-500" />
+          <p className="text-slate-500 dark:text-slate-400 font-medium">Chargement des données...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-10 relative">
-        
+
         {/* Modals */}
         <HousingDetailModal housing={selectedHousing} onClose={() => setSelectedHousing(null)} />
         <AddHousingModal isOpen={isAddModalOpen} initialMode={addModalMode} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddNewHousing} />
