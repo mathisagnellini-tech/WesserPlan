@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -18,7 +18,10 @@ import type { ChartData, ChartOptions } from 'chart.js';
 import type { MapMetric } from '@/components/wplan/metricsConfig';
 import type L from 'leaflet';
 import { dashboardService } from '@/services/dashboardService';
-import type { WeeklyMetricDto } from '@/types/api';
+import { reporter } from '@/lib/observability';
+import { hashCode } from '@/lib/wplanHash';
+import { buildNationalKpis, type NationalKpis } from '@/lib/nationalKpis';
+import { useThemeStore } from '@/stores/themeStore';
 
 ChartJS.register(
     CategoryScale,
@@ -40,6 +43,9 @@ interface WplanFilters {
     departments: Set<string>;
 }
 
+// Re-export so consumers don't have to change import paths.
+export type { NationalKpis } from '@/lib/nationalKpis';
+
 /**
  * Strategy note (Phase 3 — Option B):
  *   The map renders 9 metrics by region/department. The backend exposes national
@@ -58,101 +64,30 @@ interface WplanFilters {
  *   Real per-department data will require new backend endpoints — see TODOs
  *   in METRICS_BACKEND_MAP.
  */
-
-/**
- * Which metrics could be replaced with real backend data once endpoints exist.
- * 'static' = will likely remain client-side (geo-sociology, no backend source).
- * 'backend' = real candidate, currently mocked because no per-geo endpoint.
- */
 export const METRICS_BACKEND_MAP: Record<MapMetric, 'static' | 'backend'> = {
-    density: 'static',           // INSEE — no Wesser endpoint
-    income: 'static',            // INSEE — no Wesser endpoint
-    donors: 'backend',           // TODO: GET /api/France/Web/Dashboard/donors-by-department
-    visits: 'backend',           // TODO: GET /api/France/Web/Teams/deployments-by-department
-    politics: 'static',          // External / public dataset
-    unemployment: 'static',      // INSEE — no Wesser endpoint
-    age: 'static',               // INSEE — no Wesser endpoint
-    urbanity: 'static',          // INSEE — no Wesser endpoint
-    generosity_score: 'backend', // TODO: derive from avg contrib by department
+    density: 'static',
+    income: 'static',
+    donors: 'backend',
+    visits: 'backend',
+    politics: 'static',
+    unemployment: 'static',
+    age: 'static',
+    urbanity: 'static',
+    generosity_score: 'backend',
 };
 
-export interface NationalKpis {
-    weeklyDonors: number[];
-    weekLabels: string[];
-    activeFundraisers: number;
-    activeTeams: number;
-    productivity: number;
-    avgMonthlyDonation: number;
-    avgDonorAge: number;
-    /** Cohort-style retention proxy: activeFundraisers / cumulative newcomers. */
-    retentionByWeek: number[];
-    weeklyVolume: number[];
-}
-
-function buildNationalKpis(weekly: WeeklyMetricDto[]): NationalKpis {
-    if (!weekly.length) {
-        return {
-            weeklyDonors: [],
-            weekLabels: [],
-            activeFundraisers: 0,
-            activeTeams: 0,
-            productivity: 0,
-            avgMonthlyDonation: 0,
-            avgDonorAge: 0,
-            retentionByWeek: [],
-            weeklyVolume: [],
-        };
-    }
-
-    const sorted = [...weekly].sort(
-        (a, b) => a.year * 100 + a.weekNumber - (b.year * 100 + b.weekNumber),
-    );
-
-    const weeklyDonors = sorted.map((w) => w.donorsRecruited);
-    const weekLabels = sorted.map((w) => `S${w.weekNumber}`);
-    const weeklyVolume = sorted.map((w) => w.totalDailyRevenue);
-
-    let cumulativeNewcomers = 0;
-    const retentionByWeek = sorted.map((w) => {
-        cumulativeNewcomers += w.newcomers || 0;
-        if (cumulativeNewcomers === 0) return 0;
-        const ratio = (w.activeFundraisers / cumulativeNewcomers) * 100;
-        return Math.max(0, Math.min(100, parseFloat(ratio.toFixed(1))));
-    });
-
-    const last = sorted[sorted.length - 1];
-
-    return {
-        weeklyDonors,
-        weekLabels,
-        weeklyVolume,
-        activeFundraisers: last.activeFundraisers,
-        activeTeams: last.activeTeams,
-        productivity: last.productivity,
-        avgMonthlyDonation: last.avgMonthlyDonation,
-        avgDonorAge: last.avgDonorAge,
-        retentionByWeek,
-    };
-}
-
-const hashCode = (str: string): number => {
-    let hash = 0;
-    if (!str.length) return hash;
-    for (let i = 0; i < str.length; i++) {
-        const ch = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + ch;
-        hash = hash & hash;
-    }
-    return Math.abs(hash);
-};
+const FRANCE_GEOJSON_REGIONS_URL = 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson';
+const FRANCE_GEOJSON_DEPARTMENTS_URL = 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson';
 
 export function useWplanData() {
-    const [regionGeoJSON, setRegionGeoJSON] = useState<any>(null);
-    const [departmentGeoJSON, setDepartmentGeoJSON] = useState<any>(null);
+    const [regionGeoJSON, setRegionGeoJSON] = useState<GeoJSON.FeatureCollection | null>(null);
+    const [departmentGeoJSON, setDepartmentGeoJSON] = useState<GeoJSON.FeatureCollection | null>(null);
+    const [geoError, setGeoError] = useState<Error | null>(null);
+    const [geoReloadKey, setGeoReloadKey] = useState(0);
     const [mapLevel, setMapLevel] = useState<'regions' | 'departments'>('regions');
-    const [viewingRegion, setViewingRegion] = useState<any | null>(null);
-    const [selectedItem, setSelectedItem] = useState<any | null>(null);
-    const [comparisonItem, setComparisonItem] = useState<any | null>(null);
+    const [viewingRegion, setViewingRegion] = useState<GeoJSON.Feature | null>(null);
+    const [selectedItem, setSelectedItem] = useState<GeoJSON.Feature | null>(null);
+    const [comparisonItem, setComparisonItem] = useState<GeoJSON.Feature | null>(null);
     const [isComparing, setIsComparing] = useState(false);
     const [showEvents, setShowEvents] = useState(false);
     const [isDataLibraryOpen, setIsDataLibraryOpen] = useState(false);
@@ -161,7 +96,10 @@ export function useWplanData() {
         regions: new Set<string>(),
         departments: new Set<string>(),
     });
-    const [chartTitle, setChartTitle] = useState("Top Départements (Signatures)");
+    const [chartTitle, setChartTitle] = useState('Top Départements (Signatures)');
+
+    // Theme — read so chart colours track dark mode without re-mounting.
+    const isDark = useThemeStore((s) => s.isDark);
 
     // ── Real backend data ─────────────────────────────────────────────
     const [nationalKpis, setNationalKpis] = useState<NationalKpis | null>(null);
@@ -176,6 +114,7 @@ export function useWplanData() {
             setNationalKpis(buildNationalKpis(resp.data || []));
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Erreur de chargement';
+            reporter.error('wplan getWeeklyPerformance failed', err, { source: 'useWplanData' });
             setKpisError(msg);
             setNationalKpis(null);
         } finally {
@@ -187,19 +126,42 @@ export function useWplanData() {
         fetchNationalKpis();
     }, [fetchNationalKpis]);
 
-    // GeoJSON
+    // GeoJSON — abortable + reporter-wired + retryable.
     useEffect(() => {
+        const ctrl = new AbortController();
+        setGeoError(null);
         Promise.all([
-            fetch("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson").then(res => res.json()),
-            fetch("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson").then(res => res.json())
-        ]).then(([regionData, departmentData]) => {
-            departmentData.features = departmentData.features.filter((f: any) =>
-                parseInt(f.properties.code) < 96 || f.properties.code.startsWith('2A') || f.properties.code.startsWith('2B')
-            );
-            setRegionGeoJSON(regionData);
-            setDepartmentGeoJSON(departmentData);
-        });
-    }, []);
+            fetch(FRANCE_GEOJSON_REGIONS_URL, { signal: ctrl.signal }).then((res) => {
+                if (!res.ok) throw new Error(`Régions GeoJSON ${res.status}`);
+                return res.json();
+            }),
+            fetch(FRANCE_GEOJSON_DEPARTMENTS_URL, { signal: ctrl.signal }).then((res) => {
+                if (!res.ok) throw new Error(`Départements GeoJSON ${res.status}`);
+                return res.json();
+            }),
+        ])
+            .then(([regionData, departmentData]) => {
+                if (ctrl.signal.aborted) return;
+                // Drop overseas departments (DOM-TOM) — the métropole-only map
+                // is the design intent. Codes ≥ 96 are overseas, except for
+                // Corsica (2A / 2B) which sit between 95 and 97.
+                departmentData.features = departmentData.features.filter((f: GeoJSON.Feature) => {
+                    const code = (f.properties as { code?: string } | null)?.code ?? '';
+                    return parseInt(code, 10) < 96 || code.startsWith('2A') || code.startsWith('2B');
+                });
+                setRegionGeoJSON(regionData);
+                setDepartmentGeoJSON(departmentData);
+            })
+            .catch((err: unknown) => {
+                if (ctrl.signal.aborted) return;
+                if (err instanceof DOMException && err.name === 'AbortError') return;
+                reporter.error('GeoJSON load failed', err, { source: 'useWplanData' });
+                setGeoError(err instanceof Error ? err : new Error(String(err)));
+            });
+        return () => ctrl.abort();
+    }, [geoReloadKey]);
+
+    const retryGeo = React.useCallback(() => setGeoReloadKey((k) => k + 1), []);
 
     /** Total weekly signups from real backend (sum of last 4 weeks). */
     const realWeeklySignaturesTotal = useMemo(() => {
@@ -207,16 +169,16 @@ export function useWplanData() {
         return nationalKpis.weeklyDonors.slice(-4).reduce((a, b) => a + b, 0);
     }, [nationalKpis]);
 
-    const getMockCommunesForDepartment = (deptCode: string) => {
+    const getMockCommunesForDepartment = React.useCallback((deptCode: string) => {
         const count = 5 + (hashCode(deptCode) % 5);
-        const communes = [];
+        const communes: { name: string; sigs: number }[] = [];
         for (let i = 0; i < count; i++) {
             const name = `Commune ${deptCode}-${i + 1}`;
             const sigs = 5 + (hashCode(name) % 45);
             communes.push({ name, sigs });
         }
         return communes.sort((a, b) => b.sigs - a.sigs);
-    };
+    }, []);
 
     /**
      * Department signatures: deterministic per-code, scaled to real national totals.
@@ -232,7 +194,7 @@ export function useWplanData() {
         return baseHash;
     }, [realWeeklySignaturesTotal]);
 
-    const generateDataForItem = React.useCallback((item: any) => {
+    const generateDataForItem = React.useCallback((item: GeoJSON.Feature | null) => {
         if (!item) {
             if (nationalKpis && nationalKpis.weeklyDonors.length) {
                 const totalSigs = nationalKpis.weeklyDonors.reduce((a, b) => a + b, 0);
@@ -240,23 +202,20 @@ export function useWplanData() {
                 // Contacts is a proxy: ~20 contacts per signature is the field heuristic.
                 // Once /Dashboard/contacts endpoint exists, replace with real value.
                 const contacts = lastWeek * 20;
-                const conversion = contacts > 0
-                    ? parseFloat(((lastWeek / contacts) * 100).toFixed(1))
-                    : 0;
+                const conversion = contacts > 0 ? parseFloat(((lastWeek / contacts) * 100).toFixed(1)) : 0;
                 return {
                     signatures: lastWeek,
                     contacts,
                     conversion,
-                    retention: nationalKpis.retentionByWeek.slice(-3).length === 3
-                        ? nationalKpis.retentionByWeek.slice(-3)
-                        : [92, 86, 78],
+                    retention: nationalKpis.retentionByWeek.slice(-3).length === 3 ? nationalKpis.retentionByWeek.slice(-3) : [92, 86, 78],
                     revenue: Math.round(totalSigs * (nationalKpis.avgMonthlyDonation || 25)),
                     isReal: true,
                 };
             }
             return { signatures: 0, contacts: 0, conversion: 0, retention: [0, 0, 0], revenue: 0, isReal: false };
         }
-        const code = item.properties.code || item.properties.nom;
+        const props = (item.properties ?? {}) as { code?: string; nom?: string };
+        const code = props.code ?? props.nom ?? '';
         const signatures = getDepartmentSignatures(String(code));
         const contactsRatio = 18 + (hashCode(String(code)) % 6);
         const contacts = signatures * contactsRatio;
@@ -283,47 +242,70 @@ export function useWplanData() {
         return { france, selected, comparison };
     }, [selectedItem, comparisonItem, viewingRegion, generateDataForItem]);
 
-    const selectedRegionName = useMemo(() => selectedItem?.properties.nom || viewingRegion?.properties.nom, [selectedItem, viewingRegion]);
+    const selectedRegionName = useMemo<string | undefined>(() => {
+        const sel = (selectedItem?.properties as { nom?: string } | null)?.nom;
+        const view = (viewingRegion?.properties as { nom?: string } | null)?.nom;
+        return sel ?? view;
+    }, [selectedItem, viewingRegion]);
+
     const selectedDeptCode = useMemo<string | null>(() => {
-        if (selectedItem && mapLevel === 'departments') return selectedItem.properties.code;
+        if (selectedItem && mapLevel === 'departments') {
+            return (selectedItem.properties as { code?: string } | null)?.code ?? null;
+        }
         return null;
     }, [selectedItem, mapLevel]);
 
-    const regionOptions = useMemo(() =>
-        regionGeoJSON
-            ? regionGeoJSON.features.map((f: any) => ({ value: f.properties.nom, label: f.properties.nom })).sort((a: any, b: any) => a.label.localeCompare(b.label))
-            : [],
-        [regionGeoJSON]
+    const regionOptions = useMemo(
+        () =>
+            regionGeoJSON
+                ? regionGeoJSON.features
+                      .map((f) => {
+                          const nom = (f.properties as { nom?: string } | null)?.nom ?? '';
+                          return { value: nom, label: nom };
+                      })
+                      .sort((a, b) => a.label.localeCompare(b.label))
+                : [],
+        [regionGeoJSON],
     );
 
-    const departmentOptions = useMemo(() =>
-        departmentGeoJSON
-            ? departmentGeoJSON.features.map((f: any) => ({ value: f.properties.code, label: `${f.properties.code} - ${f.properties.nom}` })).sort((a: any, b: any) => a.label.localeCompare(b.label))
-            : [],
-        [departmentGeoJSON]
+    const departmentOptions = useMemo(
+        () =>
+            departmentGeoJSON
+                ? departmentGeoJSON.features
+                      .map((f) => {
+                          const props = (f.properties ?? {}) as { code?: string; nom?: string };
+                          return { value: props.code ?? '', label: `${props.code ?? '?'} - ${props.nom ?? ''}` };
+                      })
+                      .sort((a, b) => a.label.localeCompare(b.label))
+                : [],
+        [departmentGeoJSON],
     );
 
     const handleMultiSelectChange = (filterName: 'regions' | 'departments', value: string) => {
-        setFilters(f => {
+        setFilters((f) => {
             const newSet = new Set(f[filterName]);
-            if (newSet.has(value)) newSet.delete(value); else newSet.add(value);
+            if (newSet.has(value)) newSet.delete(value);
+            else newSet.add(value);
             return { ...f, [filterName]: newSet };
         });
     };
 
     const handleClearFilter = (filterName: 'regions' | 'departments') => {
-        setFilters(f => ({ ...f, [filterName]: new Set() }));
+        setFilters((f) => ({ ...f, [filterName]: new Set() }));
     };
 
+    // CSS-variable-derived chart colours track theme. Recompute on isDark change.
     const textSecondary = useMemo(() => {
         if (typeof document === 'undefined') return '#6b7280';
         return getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#6b7280';
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isDark]);
 
     const borderColor = useMemo(() => {
         if (typeof document === 'undefined') return '#e5e7eb';
         return getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim() || '#e5e7eb';
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isDark]);
 
     const chartConfig = useMemo<{
         data: ChartData<'bar'> | ChartData<'radar'>;
@@ -347,12 +329,14 @@ export function useWplanData() {
             const maxSigs = Math.max(a.signatures, b.signatures, 1);
             const maxRev = Math.max(a.revenue, b.revenue, 1);
             const maxCt = Math.max(a.contacts, b.contacts, 1);
+            const aName = (selectedItem.properties as { nom?: string } | null)?.nom ?? 'A';
+            const bName = (comparisonItem.properties as { nom?: string } | null)?.nom ?? 'B';
 
             const radarData: ChartData<'radar'> = {
                 labels: ['Volume Sigs', 'Revenu Moyen', 'Taux Conversion', 'Rétention 1m', 'Saturation'],
                 datasets: [
                     {
-                        label: selectedItem.properties.nom,
+                        label: aName,
                         data: [
                             norm(a.signatures, maxSigs),
                             norm(a.revenue, maxRev),
@@ -365,7 +349,7 @@ export function useWplanData() {
                         pointBackgroundColor: '#FF5B2B',
                     },
                     {
-                        label: comparisonItem.properties.nom,
+                        label: bName,
                         data: [
                             norm(b.signatures, maxSigs),
                             norm(b.revenue, maxRev),
@@ -376,8 +360,8 @@ export function useWplanData() {
                         backgroundColor: 'rgba(59, 130, 246, 0.2)',
                         borderColor: '#3b82f6',
                         pointBackgroundColor: '#3b82f6',
-                    }
-                ]
+                    },
+                ],
             };
             const radarOptions: ChartOptions<'radar'> = {
                 responsive: true,
@@ -387,55 +371,61 @@ export function useWplanData() {
                         angleLines: { color: borderColor },
                         grid: { color: borderColor },
                         pointLabels: { color: textSecondary, font: { size: 11 } },
-                        ticks: { display: false }
-                    }
+                        ticks: { display: false },
+                    },
                 },
                 plugins: {
                     legend: { display: true, labels: { color: textSecondary } },
-                    datalabels: { display: false }
-                }
+                    datalabels: { display: false },
+                },
             };
             return { data: radarData, options: radarOptions, type: 'radar' as const, title: 'Comparaison Profil' };
         }
 
-        let chartData: { labels: string[], values: number[] };
+        let chartData: { labels: string[]; values: number[] };
         let newTitle: string;
 
         const isSelectedDepartment = selectedItem && mapLevel === 'departments';
         const isSelectedRegion = selectedItem && mapLevel === 'regions';
 
         if (isSelectedDepartment) {
-            const deptCode = selectedItem.properties.code;
-            const deptName = selectedItem.properties.nom;
+            const props = (selectedItem.properties ?? {}) as { code?: string; nom?: string };
+            const deptCode = props.code ?? '';
+            const deptName = props.nom ?? '';
             newTitle = `Top Communes (${deptName})`;
             const communesData = getMockCommunesForDepartment(deptCode);
-            chartData = { labels: communesData.map(c => c.name), values: communesData.map(c => c.sigs) };
+            chartData = { labels: communesData.map((c) => c.name), values: communesData.map((c) => c.sigs) };
         } else if (isSelectedRegion || viewingRegion) {
-            const regionFeature = isSelectedRegion ? selectedItem : viewingRegion;
-            newTitle = `Top Départements (${regionFeature.properties.nom})`;
-            const regionCode = regionFeature.properties.code;
-            const deptsForRegion = departmentGeoJSON.features.filter((d: any) => String(d.properties.codeRegion) === String(regionCode));
+            const regionFeature = (isSelectedRegion ? selectedItem : viewingRegion) as GeoJSON.Feature;
+            const props = (regionFeature.properties ?? {}) as { code?: string; nom?: string };
+            newTitle = `Top Départements (${props.nom ?? ''})`;
+            const regionCode = props.code ?? '';
+            const deptsForRegion = (departmentGeoJSON.features as GeoJSON.Feature[]).filter(
+                (d) => String((d.properties as { codeRegion?: string } | null)?.codeRegion ?? '') === String(regionCode),
+            );
             const deptsData = deptsForRegion
-                .map((d: any) => ({ name: d.properties.nom, sigs: getDepartmentSignatures(d.properties.code) }))
-                .sort((a: any, b: any) => b.sigs - a.sigs)
+                .map((d) => {
+                    const dp = (d.properties ?? {}) as { nom?: string; code?: string };
+                    return { name: dp.nom ?? '', sigs: getDepartmentSignatures(dp.code ?? '') };
+                })
+                .sort((a, b) => b.sigs - a.sigs)
                 .slice(0, 5);
-            chartData = { labels: deptsData.map((d: any) => d.name), values: deptsData.map((d: any) => d.sigs) };
+            chartData = { labels: deptsData.map((d) => d.name), values: deptsData.map((d) => d.sigs) };
         } else {
-            newTitle = "Top 10 Départements (National)";
-            const allDepts = departmentGeoJSON.features
-                .map((f: any) => ({
-                    name: f.properties.nom,
-                    code: f.properties.code,
-                    sigs: getDepartmentSignatures(f.properties.code),
-                }))
-                .sort((a: any, b: any) => b.sigs - a.sigs)
+            newTitle = 'Top 10 Départements (National)';
+            const allDepts = (departmentGeoJSON.features as GeoJSON.Feature[])
+                .map((f) => {
+                    const dp = (f.properties ?? {}) as { nom?: string; code?: string };
+                    return { name: dp.nom ?? '', code: dp.code ?? '', sigs: getDepartmentSignatures(dp.code ?? '') };
+                })
+                .sort((a, b) => b.sigs - a.sigs)
                 .slice(0, 10);
-            chartData = { labels: allDepts.map((d: any) => d.name), values: allDepts.map((d: any) => d.sigs) };
+            chartData = { labels: allDepts.map((d) => d.name), values: allDepts.map((d) => d.sigs) };
         }
 
         const barData: ChartData<'bar'> = {
             labels: chartData.labels,
-            datasets: [{ data: chartData.values, backgroundColor: ['#3b82f6'], borderRadius: 6 }]
+            datasets: [{ data: chartData.values, backgroundColor: ['#3b82f6'], borderRadius: 6 }],
         };
         const barOptions: ChartOptions<'bar'> = {
             responsive: true,
@@ -446,16 +436,16 @@ export function useWplanData() {
                     color: 'white',
                     anchor: 'end',
                     align: 'top',
-                    font: { weight: 'bold' }
-                }
+                    font: { weight: 'bold' },
+                },
             },
             scales: {
                 y: { beginAtZero: true, grid: { color: borderColor }, ticks: { color: textSecondary } },
-                x: { grid: { display: false }, ticks: { color: textSecondary } }
+                x: { grid: { display: false }, ticks: { color: textSecondary } },
             },
         };
         return { data: barData, options: barOptions, type: 'bar' as const, title: newTitle };
-    }, [departmentGeoJSON, regionGeoJSON, viewingRegion, selectedItem, comparisonItem, isComparing, mapLevel, borderColor, textSecondary, chartTitle, generateDataForItem, getDepartmentSignatures]);
+    }, [departmentGeoJSON, regionGeoJSON, viewingRegion, selectedItem, comparisonItem, isComparing, mapLevel, borderColor, textSecondary, chartTitle, generateDataForItem, getDepartmentSignatures, getMockCommunesForDepartment]);
 
     useEffect(() => {
         setChartTitle(chartConfig.title);
@@ -466,7 +456,7 @@ export function useWplanData() {
         setMapLevel('regions');
         setSelectedItem(null);
         setComparisonItem(null);
-        setFilters(f => ({ ...f, departments: new Set() }));
+        setFilters((f) => ({ ...f, departments: new Set() }));
         mapInstanceRef.current?.setView([46.8, 2.8], 5.5);
     };
 
@@ -477,7 +467,7 @@ export function useWplanData() {
     };
 
     const handleToggleCompare = () => {
-        setIsComparing(p => !p);
+        setIsComparing((p) => !p);
         setSelectedItem(null);
         setComparisonItem(null);
     };
@@ -485,6 +475,8 @@ export function useWplanData() {
     return {
         regionGeoJSON,
         departmentGeoJSON,
+        geoError,
+        retryGeo,
         mapLevel,
         viewingRegion,
         selectedItem,

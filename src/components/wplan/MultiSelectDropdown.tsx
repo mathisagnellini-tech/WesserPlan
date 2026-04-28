@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Layers, Search, Check } from 'lucide-react';
 
 interface MultiSelectDropdownProps {
@@ -23,6 +23,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -30,14 +31,21 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKey);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [isOpen]);
 
   const filteredOptions = useMemo(() => {
-    return options.filter((opt) =>
-      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return options.filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [options, searchTerm]);
 
   const selectedLabel = useMemo(() => {
@@ -52,8 +60,12 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   return (
     <div className="relative z-50" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
         className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex justify-between items-center shadow-sm group relative z-10
         ${
           disabled
@@ -64,20 +76,14 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         }`}
       >
         <div className="flex items-center gap-3 overflow-hidden">
-          <div
-            className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' : 'bg-slate-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}
-          >
+          <div className={`p-2 rounded-lg ${selected.size > 0 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' : 'bg-slate-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
             {icon}
           </div>
           <div className="flex flex-col">
-            <span
-              className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${selected.size > 0 ? 'text-orange-600' : 'text-[var(--text-muted)]'}`}
-            >
+            <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${selected.size > 0 ? 'text-orange-600' : 'text-[var(--text-muted)]'}`}>
               {selected.size > 0 ? 'Filtre Actif' : 'Filtrer par'}
             </span>
-            <span
-              className={`font-bold truncate text-sm ${selected.size > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
-            >
+            <span className={`font-bold truncate text-sm ${selected.size > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
               {selectedLabel}
             </span>
           </div>
@@ -89,16 +95,20 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-0 sm:min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5">
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-multiselectable="true"
+          aria-label={title}
+          className="absolute top-[calc(100%+8px)] left-0 w-full min-w-0 sm:min-w-[320px] bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-[100] overflow-hidden animate-fade-in flex flex-col max-h-[400px] ring-1 ring-black/5"
+        >
           <div className="p-3 border-b border-[var(--border-subtle)] sticky top-0 bg-white dark:bg-[var(--bg-card-solid)] z-10">
             <div className="relative group">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
-              />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
               <input
                 type="text"
                 placeholder="Rechercher..."
+                aria-label="Rechercher"
                 className="w-full pl-10 pr-3 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-800 focus:border-orange-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all font-medium"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -111,20 +121,21 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
               filteredOptions.map(({ value, label }) => {
                 const isSelected = selected.has(value);
                 return (
-                  <div
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
                     key={value}
                     onClick={() => onSelectionChange(value)}
-                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 border border-transparent
+                    className={`w-full text-left flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40
                     ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 border-orange-100 dark:border-orange-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 text-[var(--text-secondary)] hover:border-slate-100 dark:hover:border-slate-700'}`}
                   >
-                    <div
-                      className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0
-                      ${isSelected ? 'bg-orange-600 border-orange-600' : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}
-                    >
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0
+                      ${isSelected ? 'bg-orange-600 border-orange-600' : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
                       {isSelected && <Check size={12} className="text-white stroke-[3]" />}
                     </div>
                     <span className="text-sm font-medium">{label}</span>
-                  </div>
+                  </button>
                 );
               })
             ) : (
@@ -139,6 +150,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                 {selected.size} sélectionné(s)
               </span>
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onClear();

@@ -14,6 +14,8 @@ const WplanTab: React.FC = () => {
     const {
         regionGeoJSON,
         departmentGeoJSON,
+        geoError,
+        retryGeo,
         mapLevel,
         viewingRegion,
         selectedItem,
@@ -67,11 +69,25 @@ const WplanTab: React.FC = () => {
 
     return (
         <section>
-            {isDataLibraryOpen && (
-                <DataLibraryModal
-                    onClose={() => setIsDataLibraryOpen(false)}
-                    selectedDeptCode={selectedDeptCode}
-                />
+            <DataLibraryModal
+                isOpen={isDataLibraryOpen}
+                onClose={() => setIsDataLibraryOpen(false)}
+                selectedDeptCode={selectedDeptCode}
+            />
+
+            {geoError && (
+                <div role="alert" className="mb-4 glass-card p-4 border border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-900/20">
+                    <p className="text-sm text-red-700 dark:text-red-300 font-semibold mb-2">
+                        Carte indisponible — chargement du fond géographique impossible.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={retryGeo}
+                        className="text-xs font-bold px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                    >
+                        Réessayer
+                    </button>
+                </div>
             )}
 
             <WplanHeader

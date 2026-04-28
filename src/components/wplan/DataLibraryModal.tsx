@@ -1,36 +1,60 @@
-import React from 'react';
+import React, { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Library } from 'lucide-react';
 import { dataLibraryData } from '@/constants';
 import { GoldenHourWidget, WeatherCorrelatorWidget, GenomeWidget, SeismographWidget } from '@/components/wplan/DataLabWidgets';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
 interface DataLibraryModalProps {
+    isOpen: boolean;
     onClose: () => void;
     /** Currently-selected department code (drives weather widget). */
     selectedDeptCode?: string | null;
 }
 
-const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose, selectedDeptCode }) => {
-    return (
-        <div className="fixed inset-0 z-[200] animate-fade-in flex items-center justify-center p-4" onClick={onClose}>
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ isOpen, onClose, selectedDeptCode }) => {
+    const titleId = useId();
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const { dialogRef } = useDialogA11y({ isOpen, onClose, initialFocusRef: closeRef });
 
-            <div className="relative bg-slate-900 w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-700/50" onClick={e => e.stopPropagation()}>
-                {/* Header */}
+    if (!isOpen) return null;
+
+    return createPortal(
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="fixed inset-0 z-[200] animate-fade-in flex items-center justify-center p-4"
+        >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
+            <div
+                ref={dialogRef}
+                className="relative bg-slate-900 w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-700/50"
+            >
                 <header className="flex justify-between items-center p-8 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-orange-600 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)]">
+                        <div className="p-3 bg-orange-600 rounded-2xl shadow-[0_0_20px_rgba(255,91,43,0.4)]">
                             <Library className="text-white w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-3xl font-black text-white tracking-tight">Data Lab <span className="text-orange-500">.</span></h3>
+                            <h3 id={titleId} className="text-3xl font-black text-white tracking-tight">
+                                Data Lab <span className="text-orange-500">.</span>
+                            </h3>
                             <p className="text-slate-400 text-sm font-medium">Observatoire de la donnée terrain & Intelligence Artificielle</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors"><X size={24} /></button>
+                    <button
+                        ref={closeRef}
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Fermer"
+                        className="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
                 </header>
 
                 <div className="overflow-y-auto custom-scrollbar p-8">
-                    {/* Section 1: Live Widgets */}
                     <div className="mb-12">
                         <h4 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -44,7 +68,6 @@ const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose, selectedDe
                         </div>
                     </div>
 
-                    {/* Section 2: Catalogue */}
                     <div className="mb-8">
                         <h4 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
                             <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
@@ -58,7 +81,7 @@ const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose, selectedDe
                                         <span className="text-slate-600 text-[10px] bg-slate-800 px-2 py-1 rounded-full group-hover:text-white transition-colors">{category.items.length}</span>
                                     </h5>
                                     <div className="flex flex-wrap gap-2">
-                                        {category.items.map(item => (
+                                        {category.items.map((item) => (
                                             <span key={item} className="bg-slate-900 text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-700 group-hover:border-slate-600 transition-colors cursor-default">
                                                 {item}
                                             </span>
@@ -70,7 +93,8 @@ const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose, selectedDe
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 };
 

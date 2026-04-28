@@ -1,7 +1,9 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { Info, MapPin } from 'lucide-react';
 import { METRICS_CONFIG } from '@/components/wplan/metricsConfig';
 import type { MapMetric } from '@/components/wplan/metricsConfig';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { METRICS_BACKEND_MAP } from '@/hooks/useWplanData';
 
 interface MapPanelProps {
     mapContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -102,23 +104,44 @@ const MapPanel: React.FC<MapPanelProps> = ({
                     </label>
                 </div>
 
-                {/* METRIC SELECTOR */}
+                {/* METRIC SELECTOR — every metric is wrapped in a tooltip
+                    explaining whether it draws on real backend data or
+                    deterministic placeholders, so users never confuse the two. */}
                 <div className="flex flex-wrap gap-2 pb-2">
-                    {Object.entries(METRICS_CONFIG).map(([key, config]) => (
-                        <button
-                            key={key}
-                            onClick={() => onActiveMetricChange(key as MapMetric)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
-                            ${
-                                activeMetric === key
-                                    ? 'bg-slate-800 dark:bg-orange-600 text-white border-slate-800 dark:border-orange-600 shadow-md transform scale-105'
-                                    : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'
-                            }`}
-                        >
-                            {config.icon}
-                            {config.label}
-                        </button>
-                    ))}
+                    {Object.entries(METRICS_CONFIG).map(([key, config]) => {
+                        const metric = key as MapMetric;
+                        const source = METRICS_BACKEND_MAP[metric];
+                        const isPlaceholder = source === 'static' || source === 'backend';
+                        // Both sources are currently rendered from a deterministic
+                        // hash. Once a backend endpoint exists, swap METRICS_BACKEND_MAP
+                        // entry to a different value to disable the disclaimer.
+                        return (
+                            <Tooltip
+                                key={key}
+                                comingSoon={isPlaceholder}
+                                content={
+                                    source === 'backend'
+                                        ? "Endpoint backend prévu — affichage actuellement basé sur un hash déterministe pour préserver la lisibilité de la carte."
+                                        : "Donnée statique INSEE / dataset public — aucune source backend dynamique n'est prévue côté Wesser."
+                                }
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => onActiveMetricChange(metric)}
+                                    aria-pressed={activeMetric === key}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
+                                    ${
+                                        activeMetric === key
+                                            ? 'bg-slate-800 dark:bg-orange-600 text-white border-slate-800 dark:border-orange-600 shadow-md transform scale-105'
+                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'
+                                    }`}
+                                >
+                                    {config.icon}
+                                    {config.label}
+                                </button>
+                            </Tooltip>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -132,9 +155,18 @@ const MapPanel: React.FC<MapPanelProps> = ({
 
                 {/* DYNAMIC LEGEND */}
                 <div className="absolute top-4 left-4 bg-white/90 dark:bg-[var(--bg-card-solid)] backdrop-blur-sm p-3 rounded-xl border border-[var(--border-subtle)] shadow-lg z-[500] min-w-[160px]">
-                    <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase mb-2 tracking-wider border-b border-[var(--border-subtle)] pb-1">
-                        {METRICS_CONFIG[activeMetric].label}
-                    </h4>
+                    <div className="flex items-center justify-between gap-2 mb-2 border-b border-[var(--border-subtle)] pb-1">
+                        <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">
+                            {METRICS_CONFIG[activeMetric].label}
+                        </h4>
+                        <Tooltip
+                            content="Le découpage par région / département est généré localement (hash déterministe) — les chiffres ne sont pas issus d'un endpoint backend pour cette métrique."
+                        >
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                                <Info size={10} /> Estimé
+                            </span>
+                        </Tooltip>
+                    </div>
                     <div className="flex flex-col gap-1.5">
                         {METRICS_CONFIG[activeMetric].colors.map((color, idx) => (
                             <div key={idx} className="flex items-center gap-2">

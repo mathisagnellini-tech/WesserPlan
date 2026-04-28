@@ -6,6 +6,7 @@ import type { NationalKpis } from '@/hooks/useWplanData';
 import type { WeatherData } from '@/services/weatherService';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 interface ChartPanelProps {
     chartTitle: string;
@@ -24,7 +25,7 @@ interface ChartPanelProps {
     /** Weather data for currently-selected department (drives correlation chart). */
     weatherData?: WeatherData | null;
     weatherLoading?: boolean;
-    weatherError?: string | null;
+    weatherError?: Error | string | null;
     selectedDeptCode?: string | null;
 }
 
@@ -105,6 +106,20 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
         if (kpisLoading || weatherLoading) {
             return <LoadingState fullHeight label="Chargement corrélation…" />;
         }
+        // No dept selected → invite the user instead of synthesising a scatter.
+        if (!selectedDeptCode) {
+            return (
+                <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                    <p className="text-xs text-[var(--text-muted)]">
+                        Sélectionnez un département pour voir la corrélation pluie / signatures.
+                    </p>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-2">
+                        Endpoint complet à venir :{' '}
+                        <code className="font-mono">/Dashboard/daily-by-department</code>
+                    </p>
+                </div>
+            );
+        }
         if (weatherError) {
             return (
                 <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -118,37 +133,31 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
             return (
                 <div className="flex flex-col items-center justify-center h-full text-center px-4">
                     <p className="text-xs text-[var(--text-muted)]">
-                        Sélectionnez un département pour voir la corrélation pluie / signatures.
-                    </p>
-                    <p className="text-[10px] text-[var(--text-muted)] mt-2">
-                        Endpoint complet à venir :{' '}
-                        <code className="font-mono">/Dashboard/daily-by-department</code>
+                        Données météo / KPIs incomplètes — réessayez plus tard.
                     </p>
                 </div>
             );
         }
 
         // X = daily precipitation (next 7 days for selected dept).
-        // Y = a signups proxy: scale national daily signups (weeklyDonors / 7) to
-        //     the dept's share of national depts. This is a placeholder that
-        //     becomes truly meaningful once the per-dept daily endpoint exists.
+        // Y = signups proxy: national daily average × dept share. Marked
+        // "Données estimées" until a per-dept daily endpoint exists.
         const dailyPrecip = weatherData.daily.precipitationSum.slice(0, 7);
         const dailyNationalSignups =
             nationalKpis.weeklyDonors[nationalKpis.weeklyDonors.length - 1] / 7;
-        // Deterministic dept share (around 1/95) via dept code hash
-        const deptCode = selectedDeptCode || '00';
         let h = 0;
-        for (const c of deptCode) h = (h * 31 + c.charCodeAt(0)) | 0;
-        const share = (Math.abs(h) % 30 + 70) / 100 / 95; // 0.7%..1.0% of national / 95
-        // Inverse correlation with rain: more rain → fewer signups (-30% per 5mm)
+        for (const c of selectedDeptCode) h = (h * 31 + c.charCodeAt(0)) | 0;
+        const share = ((Math.abs(h) % 30) + 70) / 100 / 95;
         const points = dailyPrecip.map((p, i) => ({
             x: parseFloat(p.toFixed(1)),
             y: Math.max(
                 0,
                 Math.round(
-                    dailyNationalSignups * 95 * share *
-                    Math.max(0.3, 1 - p / 15) *
-                    (0.85 + ((h + i) % 30) / 100), // small per-day variance
+                    dailyNationalSignups *
+                        95 *
+                        share *
+                        Math.max(0.3, 1 - p / 15) *
+                        (0.85 + ((h + i) % 30) / 100),
                 ),
             ),
         }));
@@ -156,7 +165,7 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
         const scatterData: ChartData<'scatter'> = {
             datasets: [
                 {
-                    label: `Pluie vs. signatures (dépt ${deptCode})`,
+                    label: `Pluie vs. signatures (dépt ${selectedDeptCode})`,
                     data: points,
                     backgroundColor: 'rgb(255, 91, 43)',
                     pointRadius: 6,
@@ -193,8 +202,17 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
     return (
         <div className="space-y-6">
             <div className="glass-card p-4">
-                <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-bold text-[var(--text-primary)]">{chartTitle}</h3>
+                <div className="flex justify-between items-center mb-2 gap-2">
+                    <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
+                        {chartTitle}
+                        <Tooltip
+                            content="Le classement par département / commune est généré localement (hash déterministe pondéré par les KPI nationaux réels). Endpoint per-département à venir."
+                        >
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                                <Info size={10} /> Estimé
+                            </span>
+                        </Tooltip>
+                    </h3>
                     {isComparing && <Radar size={16} className="text-orange-500" />}
                 </div>
                 <div className="h-[200px]">
