@@ -62,6 +62,13 @@ export interface Zone {
     organization: Organization | 'all';
     defaultDuration: number;
     startWeek: number;
+    /**
+     * Canonical list of town_hall ids assigned to this zone, mirroring the
+     * `zones.town_hall_ids` Postgres column. Tracked on the Zone object so
+     * add/remove handlers don't recompute membership from a paginated
+     * `mairies` slice (which would silently drop off-page members).
+     */
+    townHallIds: number[];
 }
 
 export type ViewMode = 'list' | 'grid';

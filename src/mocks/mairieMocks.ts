@@ -3,8 +3,8 @@ import type { Zone, Mairie } from '@/components/mairie/types';
 import { standardHoraires } from '@/components/mairie/helpers';
 
 export const initialZones: Zone[] = [
-    { id: 'z1', name: 'Zone A (Nord)', leader: 'Thomas R.', organization: 'msf', defaultDuration: 2, startWeek: 45 },
-    { id: 'z2', name: 'Centre-Ville', leader: 'Sarah L.', organization: 'unicef', defaultDuration: 1, startWeek: 48 },
+    { id: 'z1', name: 'Zone A (Nord)', leader: 'Thomas R.', organization: 'msf', defaultDuration: 2, startWeek: 45, townHallIds: [1, 2] },
+    { id: 'z2', name: 'Centre-Ville', leader: 'Sarah L.', organization: 'unicef', defaultDuration: 1, startWeek: 48, townHallIds: [3] },
 ];
 
 export const initialMairieData: Mairie[] = [

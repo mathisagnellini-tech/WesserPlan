@@ -15,7 +15,6 @@ export const ZoneCard: React.FC<{ zone: Zone, assignedMairies: Mairie[], availab
     const handleDocConfirm = (docName: string) => { if (docModalMairieId) { onUpdateMairieProgress(docModalMairieId, 3); onUpdateMairieStatus(docModalMairieId, 'Action requise'); onAddMairieComment(docModalMairieId, `[DOC] Requis : ${docName}`); onShowToast("Statut mis à jour : Documents requis"); setDocModalMairieId(null); } };
     const handleContactEditConfirm = (val: string) => { if (editContactState) { onUpdateMairieContactInfo(editContactState.mairieId, editContactState.field, val); onShowToast(`${editContactState.field === 'tel' ? 'Téléphone' : 'Email'} mis à jour !`); setEditContactState(null); } };
     const orgTheme = zone.organization !== 'all' ? ORGS_CONFIG[zone.organization] : ORGS_CONFIG['msf']; const borderColor = orgTheme.border; const headerBg = orgTheme.bg;
-    const currentZoneRank = Math.max(1, currentNavigationWeek - zone.startWeek + 1);
 
     return (
         <div className={`flex flex-col rounded-3xl border-2 ${borderColor} bg-white dark:bg-[var(--bg-card-solid)] shadow-sm overflow-hidden mb-8`}>
@@ -32,7 +31,7 @@ export const ZoneCard: React.FC<{ zone: Zone, assignedMairies: Mairie[], availab
                     <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-card-solid)] px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] shadow-sm">
                         <User size={20} className="text-[var(--text-muted)]"/>
                         {viewMode === 'grid' ? (
-                            <select value={zone.leader} onChange={(e) => onUpdateZone(zone.id, 'leader', e.target.value)} className="text-lg font-bold bg-transparent border-none rounded py-0.5 px-1 focus:ring-0 outline-none cursor-pointer text-[var(--text-primary)]"> {LEADERS.map(l => <option key={l} value={l}>{l}</option>)} </select>
+                            <select value={zone.leader} onChange={(e) => onUpdateZone(zone.id, 'leader', e.target.value)} disabled title="Le chef de zone n'est pas encore persisté (UUID non disponible)" className="text-lg font-bold bg-transparent border-none rounded py-0.5 px-1 focus:ring-0 outline-none cursor-not-allowed text-[var(--text-muted)] opacity-70"> {LEADERS.map(l => <option key={l} value={l}>{l}</option>)} </select>
                         ) : ( <span className="text-lg font-bold text-[var(--text-primary)] px-1">{zone.leader}</span> )}
                         {viewMode === 'grid' && ( <div className="ml-2 pl-2 border-l border-[var(--border-subtle)]"> <ZoneTimeManager startWeek={zone.startWeek} duration={zone.defaultDuration} onUpdateStart={(w) => onUpdateZone(zone.id, 'startWeek', w)} onUpdateDuration={(d) => onUpdateZone(zone.id, 'defaultDuration', d)} currentWeek={currentNavigationWeek} /> </div> )}
                         {viewMode === 'list' && ( <div className="ml-2 pl-2 border-l border-[var(--border-subtle)] flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)]"> <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Commencé en S{zone.startWeek}</span> <span className="bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-1 rounded">Semaine {Math.max(1, currentNavigationWeek - zone.startWeek + 1)} sur {zone.defaultDuration}</span> </div> )}
