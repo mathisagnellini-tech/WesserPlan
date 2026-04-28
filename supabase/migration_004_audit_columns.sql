@@ -43,8 +43,8 @@ ALTER TABLE plan.clusters
   ADD COLUMN IF NOT EXISTS created_by_oid TEXT,
   ADD COLUMN IF NOT EXISTS updated_by_oid TEXT;
 
--- ── activities (public schema, dashboard feed) ──
-ALTER TABLE IF EXISTS public.activities
+-- ── plan.activities (dashboard activity feed lives in plan, not public) ──
+ALTER TABLE plan.activities
   ADD COLUMN IF NOT EXISTS created_by_oid TEXT,
   ADD COLUMN IF NOT EXISTS updated_by_oid TEXT;
 
@@ -55,6 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_comments_created_by_oid    ON plan.comments(creat
 CREATE INDEX IF NOT EXISTS idx_housings_updated_by_oid    ON plan.housings(updated_by_oid);
 CREATE INDEX IF NOT EXISTS idx_vehicles_updated_by_oid    ON plan.vehicles(updated_by_oid);
 CREATE INDEX IF NOT EXISTS idx_clusters_updated_by_oid    ON plan.clusters(updated_by_oid);
+CREATE INDEX IF NOT EXISTS idx_activities_updated_by_oid  ON plan.activities(updated_by_oid);
 
 COMMIT;
 
