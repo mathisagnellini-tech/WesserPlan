@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Send, AlertTriangle, X, List as ListIcon, Loader2 } from 'lucide-react';
+import { Send, AlertTriangle, X, List as ListIcon, Loader2, CheckCircle2 } from 'lucide-react';
 import { MapCommuneFeature } from '@/components/communes/types';
 import type { Organization } from '@/types/commune';
 
@@ -11,11 +11,36 @@ export const ProspectValidationModal: React.FC<{
     communes: MapCommuneFeature[];
     stats: { count: number; pop: number; zones: string };
     isSubmitting?: boolean;
-}> = ({ isOpen, onClose, onConfirm, communes, stats, isSubmitting }) => {
+    submitError?: Error | null;
+    submitSuccess?: { zoneName: string; count: number } | null;
+    onDismissError?: () => void;
+    onDismissSuccess?: () => void;
+}> = ({ isOpen, onClose, onConfirm, communes, stats, isSubmitting, submitError, submitSuccess, onDismissError, onDismissSuccess }) => {
     const [selectedOrg, setSelectedOrg] = useState<Organization>('msf');
     const [zoneName, setZoneName] = useState('');
+    const [nameError, setNameError] = useState<string | null>(null);
+
+    // Clear inline name error as user edits
+    useEffect(() => {
+        if (nameError) setNameError(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [zoneName]);
 
     if (!isOpen) return null;
+
+    const handleConfirm = () => {
+        const trimmed = zoneName.trim();
+        if (!trimmed) {
+            setNameError('Le nom de zone est obligatoire');
+            return;
+        }
+        if (trimmed.length < 2) {
+            setNameError('Le nom de zone doit contenir au moins 2 caractères');
+            return;
+        }
+        setNameError(null);
+        onConfirm(selectedOrg, trimmed);
+    };
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -36,6 +61,38 @@ export const ProspectValidationModal: React.FC<{
 
                 {/* Content */}
                 <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
+
+                    {/* Success banner */}
+                    {submitSuccess && (
+                        <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 flex items-start gap-3">
+                            <CheckCircle2 className="text-emerald-500 shrink-0 mt-0.5" size={20}/>
+                            <div className="flex-1">
+                                <h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm uppercase mb-1">Zone créée</h4>
+                                <p className="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed">
+                                    Zone <b>"{submitSuccess.zoneName}"</b> créée. {submitSuccess.count} communes assignées.
+                                </p>
+                            </div>
+                            {onDismissSuccess && (
+                                <button onClick={onDismissSuccess} className="text-emerald-700 dark:text-emerald-300 hover:opacity-70"><X size={16}/></button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Error banner */}
+                    {submitError && (
+                        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/20 rounded-xl p-4 flex items-start gap-3">
+                            <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20}/>
+                            <div className="flex-1">
+                                <h4 className="font-bold text-red-800 dark:text-red-300 text-sm uppercase mb-1">Erreur lors de la création</h4>
+                                <p className="text-sm text-red-800 dark:text-red-300 leading-relaxed">
+                                    {submitError.message || 'Erreur lors de la création de la zone. Réessayez.'}
+                                </p>
+                            </div>
+                            {onDismissError && (
+                                <button onClick={onDismissError} className="text-red-700 dark:text-red-300 hover:opacity-70"><X size={16}/></button>
+                            )}
+                        </div>
+                    )}
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -62,8 +119,16 @@ export const ProspectValidationModal: React.FC<{
                                 value={zoneName}
                                 onChange={(e) => setZoneName(e.target.value)}
                                 placeholder={`Zone ${communes[0]?.properties.nom ?? ''}`}
-                                className="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--border-subtle)] bg-[var(--input-bg)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                                aria-invalid={!!nameError}
+                                className={`w-full px-3 py-2.5 text-sm rounded-lg border bg-[var(--input-bg)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 ${
+                                    nameError
+                                        ? 'border-red-500 focus:ring-red-500/30'
+                                        : 'border-[var(--border-subtle)] focus:ring-orange-500/30'
+                                }`}
                             />
+                            {nameError && (
+                                <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">{nameError}</p>
+                            )}
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1.5">Organisation</label>
@@ -118,7 +183,7 @@ export const ProspectValidationModal: React.FC<{
                         Annuler
                     </button>
                     <button
-                        onClick={() => onConfirm(selectedOrg, zoneName || `Zone ${communes[0]?.properties.nom ?? 'Nouvelle'}`)}
+                        onClick={handleConfirm}
                         disabled={isSubmitting}
                         className="px-6 py-2.5 bg-orange-600 text-white hover:bg-orange-700 rounded-xl font-bold text-sm shadow-lg shadow-orange-200 dark:shadow-orange-900/50 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >

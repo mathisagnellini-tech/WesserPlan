@@ -10,7 +10,7 @@ const CommunesTab: React.FC = () => {
     const {
         mode, setMode,
         selectedOrg, setSelectedOrg,
-        activeRegion, setActiveRegion, availableSupabaseRegions,
+        activeRegion, setActiveRegion,
         search, setSearch,
         selectedRegions, setSelectedRegions,
         selectedDepts, setSelectedDepts,
@@ -24,6 +24,9 @@ const CommunesTab: React.FC = () => {
         pastRequests,
         validationData, setValidationData,
         handleMapValidationRequest, handleConfirmValidation,
+        validationError, setValidationError,
+        validationSuccess, setValidationSuccess,
+        error, geoError,
     } = useCommunesData();
 
     const { mapContainerRef } = useCommuneListMap(
@@ -36,12 +39,20 @@ const CommunesTab: React.FC = () => {
         <section className="min-h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in">
             {/* VALIDATION MODAL */}
             <ProspectValidationModal
-                isOpen={!!validationData}
-                onClose={() => setValidationData(null)}
+                isOpen={!!validationData || !!validationSuccess}
+                onClose={() => {
+                    setValidationData(null);
+                    setValidationError(null);
+                    setValidationSuccess(null);
+                }}
                 onConfirm={handleConfirmValidation}
                 communes={validationData?.communes || []}
                 stats={validationData?.stats || {count:0, pop:0, zones:"0"}}
                 isSubmitting={isSubmitting}
+                submitError={validationError}
+                submitSuccess={validationSuccess}
+                onDismissError={() => setValidationError(null)}
+                onDismissSuccess={() => setValidationSuccess(null)}
             />
 
             {/* Left List Panel */}
@@ -52,8 +63,9 @@ const CommunesTab: React.FC = () => {
                 setSelectedOrg={setSelectedOrg}
                 activeRegion={activeRegion}
                 setActiveRegion={setActiveRegion}
-                availableSupabaseRegions={availableSupabaseRegions}
                 isLoading={isLoading}
+                loadError={error}
+                geoError={geoError}
                 search={search}
                 setSearch={setSearch}
                 selectedRegions={selectedRegions}

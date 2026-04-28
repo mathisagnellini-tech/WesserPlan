@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Commune, Organization } from '@/types';
-import { communesData } from '@/constants';
 import { MapCommuneFeature, ProspectHistoryItem } from '@/components/communes/types';
 import { useCommunesStore } from '@/stores/communesStore';
 import { communesService } from '@/services/communesService';
 import { supabasePlan } from '@/lib/supabase';
+import { withAudit } from '@/lib/audit';
 
 export function useCommunesData() {
     // Read from Zustand store instead of local state
@@ -36,7 +36,8 @@ export function useCommunesData() {
     const [localCommunes, setLocalCommunes] = useState<Commune[]>([]);
     const [totalCommunes, setTotalCommunes] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
-    const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
+    const [error, setError] = useState<Error | null>(null);
+    // Local-only: no Supabase table for prospect history yet — keep sample seed.
     const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([
         {
             id: 'req-1',
@@ -52,6 +53,8 @@ export function useCommunesData() {
         }
     ]);
     const [validationData, setValidationData] = useState<{ communes: MapCommuneFeature[], stats: any } | null>(null);
+    const [validationError, setValidationError] = useState<Error | null>(null);
+    const [validationSuccess, setValidationSuccess] = useState<{ zoneName: string; count: number } | null>(null);
 
     // Derive effective filters from Sets (single-select)
     const effectiveRegion = selectedRegions.size > 0
@@ -75,12 +78,12 @@ export function useCommunesData() {
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
+        setError(null);
 
         // When 'all' with no filters/search, show nothing
         if (!hasFilters) {
             setLocalCommunes([]);
             setTotalCommunes(0);
-            setDataSource('supabase');
             setIsLoading(false);
             return;
         }
@@ -96,30 +99,14 @@ export function useCommunesData() {
         loadData
             .then(({ communes, total }) => {
                 if (cancelled) return;
-                if (communes.length > 0) {
-                    setLocalCommunes(communes);
-                    setTotalCommunes(total);
-                    setDataSource('supabase');
-                } else if (selectedOrg !== 'all' && communesData[selectedOrg]) {
-                    setLocalCommunes(communesData[selectedOrg]);
-                    setTotalCommunes(communesData[selectedOrg].length);
-                    setDataSource('mock');
-                } else {
-                    setLocalCommunes([]);
-                    setTotalCommunes(0);
-                    setDataSource('supabase');
-                }
+                setLocalCommunes(communes);
+                setTotalCommunes(total);
             })
-            .catch(() => {
+            .catch((err: Error) => {
                 if (cancelled) return;
-                if (selectedOrg !== 'all' && communesData[selectedOrg]) {
-                    setLocalCommunes(communesData[selectedOrg]);
-                    setTotalCommunes(communesData[selectedOrg].length);
-                    setDataSource('mock');
-                } else {
-                    setLocalCommunes([]);
-                    setTotalCommunes(0);
-                }
+                setLocalCommunes([]);
+                setTotalCommunes(0);
+                setError(err);
             })
             .finally(() => {
                 if (!cancelled) setIsLoading(false);
@@ -139,8 +126,40 @@ export function useCommunesData() {
         setSelectedCommuneId(commune ? commune.id : null);
     };
 
-    const handleUpdateCommune = (id: number, updates: Partial<Commune>) => {
+    const handleUpdateCommune = async (id: number, updates: Partial<Commune>) => {
+        // Optimistic local update
         setLocalCommunes(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+
+        // Map Commune fields → DB columns understood by communesService.update
+        const dbUpdates: Parameters<typeof communesService.update>[1] = {};
+        if (updates.email !== undefined) dbUpdates.email = updates.email ?? '';
+        if (updates.phone !== undefined) dbUpdates.phone = updates.phone ?? '';
+        if (updates.maire !== undefined) dbUpdates.mayor = updates.maire;
+        if (updates.statut !== undefined) {
+            const reverseMap: Record<string, string> = {
+                'pas_demande': 'pending',
+                'informe': 'in_progress',
+                'refuse': 'refused',
+                'telescope': 'action_required',
+                'fait': 'accepted',
+            };
+            dbUpdates.status = reverseMap[updates.statut] ?? 'pending';
+        }
+
+        // Nothing to persist (e.g. only client-only fields touched) → bail
+        if (Object.keys(dbUpdates).length === 0) return;
+
+        try {
+            await communesService.update(id, dbUpdates);
+        } catch (err) {
+            console.error('Commune update failed', err);
+            // Revert optimistic update by refetching the row
+            const fresh = await communesService.getById(id).catch(() => null);
+            if (fresh) {
+                setLocalCommunes(prev => prev.map(c => c.id === id ? fresh : c));
+            }
+            setError(err instanceof Error ? err : new Error('Commune update failed'));
+        }
     };
 
     const handleMapValidationRequest = (selectedFeatures: MapCommuneFeature[]) => {
@@ -160,6 +179,8 @@ export function useCommunesData() {
     const handleConfirmValidation = async (org: Organization, zoneName: string) => {
         if (!validationData) return;
         setIsSubmitting(true);
+        setValidationError(null);
+        setValidationSuccess(null);
 
         const { communes, stats } = validationData;
 
@@ -177,13 +198,13 @@ export function useCommunesData() {
             const currentWeek = new Date().toISOString().slice(0, 4) + '-W' + String(Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0');
             const { error: zoneError } = await supabasePlan
                 .from('zones')
-                .insert({
+                .insert(withAudit({
                     zone_name: zoneName,
                     organization: org,
                     deployment_weeks: [currentWeek],
                     color: org === 'msf' ? '#dc2626' : org === 'unicef' ? '#38bdf8' : org === 'wwf' ? '#16a34a' : '#1e3a8a',
                     town_hall_ids: townHallIds,
-                });
+                }, 'insert'));
 
             if (zoneError) throw zoneError;
 
@@ -191,10 +212,10 @@ export function useCommunesData() {
             if (townHallIds.length > 0) {
                 const { error: updateError } = await supabasePlan
                     .from('town_halls')
-                    .update({
+                    .update(withAudit({
                         organization: org,
                         status: 'in_progress',
-                    })
+                    }, 'update'))
                     .in('id', townHallIds);
 
                 if (updateError) throw updateError;
@@ -217,11 +238,11 @@ export function useCommunesData() {
 
             // 5. Close & confirm
             setValidationData(null);
-            alert(`Zone "${zoneName}" créée ! ${townHallIds.length} communes assignées à ${org.toUpperCase()}.`);
+            setValidationSuccess({ zoneName, count: townHallIds.length });
 
         } catch (err) {
             console.error('Validation failed:', err);
-            alert('Erreur lors de la création de la zone. Réessayez.');
+            setValidationError(err instanceof Error ? err : new Error('Erreur lors de la création de la zone.'));
         } finally {
             setIsSubmitting(false);
         }
@@ -230,6 +251,7 @@ export function useCommunesData() {
     // Fetch regions + departments from Supabase
     const [availableRegionsOptions, setAvailableRegionsOptions] = useState<{ value: string; label: string }[]>([]);
     const [allDepts, setAllDepts] = useState<{ value: string; label: string; region: string }[]>([]);
+    const [geoError, setGeoError] = useState<Error | null>(null);
 
     useEffect(() => {
         communesService.getRegionsAndDepartments()
@@ -237,7 +259,7 @@ export function useCommunesData() {
                 setAvailableRegionsOptions(regions);
                 setAllDepts(departments);
             })
-            .catch(() => {});
+            .catch((err: Error) => setGeoError(err));
     }, []);
 
     // Filter departments by selected region (activeRegion is a plain string, reliable)
@@ -254,9 +276,6 @@ export function useCommunesData() {
         return localCommunes.filter(c => selectedStatuses.has(c.statut));
     }, [localCommunes, selectedStatuses]);
 
-    // Available regions from Supabase (already fetched above)
-    const availableSupabaseRegions = availableRegionsOptions;
-
     return {
         // Mode
         mode, setMode,
@@ -264,7 +283,6 @@ export function useCommunesData() {
         selectedOrg, setSelectedOrg,
         // Region
         activeRegion, setActiveRegion,
-        availableSupabaseRegions,
         // Search
         search, setSearch,
         // Filters
@@ -276,7 +294,14 @@ export function useCommunesData() {
         localCommunes, filteredCommunes, totalCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
-        isLoading, isSubmitting, dataSource, effectiveDept,
+        isLoading, isSubmitting, effectiveDept,
+        // Errors / surfacing
+        error,
+        geoError,
+        validationError,
+        validationSuccess,
+        setValidationError,
+        setValidationSuccess,
         // Map/Prospection
         pastRequests,
         validationData, setValidationData,

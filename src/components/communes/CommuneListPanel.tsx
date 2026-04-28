@@ -1,12 +1,13 @@
 import React from 'react';
 import { Commune, Organization, CommuneStatus } from '@/types';
 import { statusMap } from '@/constants';
-import { Search, MapPin, Users, Euro, Check, List as ListIcon, Map as MapIcon, MousePointer2, History, Loader2 } from 'lucide-react';
+import { Search, MapPin, Users, Euro, Check, List as ListIcon, Map as MapIcon, MousePointer2, History } from 'lucide-react';
 import { QuickStatusDropdown } from '@/components/communes/QuickStatusDropdown';
-import { MultiSelectFilter } from '@/components/communes/MultiSelectFilter';
-import { SingleSelectFilter } from '@/components/communes/SingleSelectFilter';
 import { MiniZoneVisualizer } from '@/components/communes/MiniZoneVisualizer';
 import { ProspectHistoryItem } from '@/components/communes/types';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface CommuneListPanelProps {
     mode: 'list' | 'map';
@@ -15,8 +16,9 @@ interface CommuneListPanelProps {
     setSelectedOrg: (org: Organization | 'all') => void;
     activeRegion: string | null;
     setActiveRegion: (region: string | null) => void;
-    availableSupabaseRegions: { region: string; count: number }[];
     isLoading?: boolean;
+    loadError?: Error | null;
+    geoError?: Error | null;
     search: string;
     setSearch: (search: string) => void;
     selectedRegions: Set<string>;
@@ -39,8 +41,10 @@ interface CommuneListPanelProps {
 export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
     mode, setMode,
     selectedOrg, setSelectedOrg,
-    activeRegion, setActiveRegion, availableSupabaseRegions,
+    activeRegion, setActiveRegion,
     isLoading,
+    loadError,
+    geoError,
     search, setSearch,
     selectedRegions, setSelectedRegions,
     selectedDepts, setSelectedDepts,
@@ -186,16 +190,24 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
             {mode === 'list' && (
                 <>
                     <div className="flex-grow overflow-y-auto custom-scrollbar p-2 space-y-2">
-                        {isLoading ? (
-                            <div className="p-8 flex items-center justify-center gap-2 text-[var(--text-muted)] text-sm">
-                                <Loader2 size={16} className="animate-spin" /> Chargement...
-                            </div>
+                        {loadError ? (
+                            <ErrorState
+                                title="Erreur de chargement des communes"
+                                error={loadError}
+                            />
+                        ) : geoError ? (
+                            <ErrorState
+                                title="Erreur de chargement des régions"
+                                error={geoError}
+                            />
+                        ) : isLoading ? (
+                            <LoadingState />
                         ) : selectedOrg === 'all' && filteredCommunes.length === 0 ? (
-                            <div className="p-8 text-center text-[var(--text-muted)] text-sm">
-                                <MapPin size={24} className="mx-auto mb-2 opacity-40" />
-                                <p className="font-semibold">Sélectionnez une région ou un département</p>
-                                <p className="text-xs mt-1">Utilisez les filtres ci-dessous pour afficher les communes.</p>
-                            </div>
+                            <EmptyState
+                                icon={<MapPin size={22} />}
+                                title="Sélectionnez une région ou un département"
+                                message="Utilisez les filtres ci-dessus pour afficher les communes."
+                            />
                         ) : filteredCommunes.length > 0 ? (
                             filteredCommunes.map(c => (
                                 <div
@@ -218,9 +230,10 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 </div>
                             ))
                         ) : (
-                            <div className="p-8 text-center text-[var(--text-muted)] text-sm italic">
-                                Aucune commune ne correspond aux filtres.
-                            </div>
+                            <EmptyState
+                                title="Aucune commune"
+                                message="Aucune commune ne correspond aux filtres."
+                            />
                         )}
                     </div>
                     <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] text-center text-xs font-bold text-[var(--text-secondary)]">
