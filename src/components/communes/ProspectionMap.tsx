@@ -286,7 +286,7 @@ export const ProspectionMap: React.FC<{
                         `<div class="text-center font-sans">` +
                         `<b>${escapeHtml(props.nom)}</b><br/>` +
                         `${escapeHtml(pop.toLocaleString())} hab.<br/>` +
-                        `<span class="text-xs text-emerald-600 font-bold">${escapeHtml(rev.toLocaleString())} €</span><br/>` +
+                        `<span class="text-xs text-emerald-700 dark:text-emerald-400 font-bold">${escapeHtml(rev.toLocaleString())} €</span><br/>` +
                         (saturationOrg !== 'none'
                             ? `<span class="text-xs ${lastVisit ? 'text-[var(--text-secondary)]' : 'text-green-600'}">Dernier passage (${escapeHtml(orgUpper)}): <b>${escapeHtml(dateStr)}</b></span>`
                             : '') +
@@ -484,7 +484,7 @@ export const ProspectionMap: React.FC<{
                         </div>
                         <div className="flex items-center gap-2 pt-1 mt-1 border-t border-[var(--border-subtle)]">
                             <span className="w-3 h-3 rounded-full bg-orange-500 shadow-sm border border-white"></span>
-                            <span className="text-xs font-bold text-orange-600">Votre Sélection</span>
+                            <span className="text-xs font-bold text-orange-600 dark:text-orange-400">Votre Sélection</span>
                         </div>
                     </div>
                 </div>
@@ -495,12 +495,12 @@ export const ProspectionMap: React.FC<{
             {selectedStats.count > 0 && (
                 <div className="absolute bottom-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[40] bg-slate-900/95 backdrop-blur text-white p-3 md:p-4 rounded-2xl shadow-2xl flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-8 animate-fade-in">
                     <div>
-                        <p className="text-slate-400 text-xs font-bold uppercase">Sélection</p>
-                        <p className="text-xl font-black">{selectedStats.count} <span className="text-sm font-medium text-slate-400">communes</span></p>
+                        <p className="text-slate-300 text-xs font-bold uppercase">Sélection</p>
+                        <p className="text-xl font-black">{selectedStats.count} <span className="text-sm font-medium text-slate-300">communes</span></p>
                     </div>
                     <div className="hidden md:block w-px bg-white/20 h-8 self-center"></div>
                     <div>
-                        <p className="text-slate-400 text-xs font-bold uppercase">Potentiel Hab.</p>
+                        <p className="text-slate-300 text-xs font-bold uppercase">Potentiel Hab.</p>
                         <p className="text-xl font-black text-orange-400">{(selectedStats.pop / 1000).toFixed(1)}k</p>
                     </div>
 

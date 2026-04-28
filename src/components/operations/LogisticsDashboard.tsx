@@ -60,19 +60,19 @@ export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[]
                 <p className="text-[10px] text-[var(--text-muted)] mt-1">Cumul logements affichés</p>
             </div>
 
-            <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700 shadow-sm flex flex-col justify-between relative overflow-hidden text-white">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between relative overflow-hidden text-slate-900 dark:text-white">
                 <div className="absolute right-0 top-0 p-3 opacity-20">
                     <AlertTriangle size={48} />
                 </div>
                 <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Alertes Flotte</h4>
                 <div className="mt-2 space-y-2">
                     {carsWithRecentDamage === 0 ? (
-                        <div className="flex items-center gap-2 text-sm font-medium text-green-300">
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-300">
                             <ShieldCheck size={14}/>
                             <span>Aucune alerte</span>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 text-sm font-medium text-red-300">
+                        <div className="flex items-center gap-2 text-sm font-medium text-red-700 dark:text-red-300">
                             <AlertTriangle size={14}/>
                             <span>{carsWithRecentDamage} choc{carsWithRecentDamage > 1 ? 's' : ''} récent{carsWithRecentDamage > 1 ? 's' : ''} (&lt; 30j)</span>
                         </div>

@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Handshake, Flame, Zap } from 'lucide-react';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
 interface RelationshipModalProps {
     onConfirm: (type: 'affinity' | 'conflict' | 'synergy') => void;
@@ -8,10 +10,23 @@ interface RelationshipModalProps {
 }
 
 export const RelationshipModal: React.FC<RelationshipModalProps> = ({ onConfirm, onCancel }) => {
-    return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-6 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 text-center">Créer une Relation</h3>
+    const titleId = useId();
+    const cancelRef = useRef<HTMLButtonElement>(null);
+    const { dialogRef } = useDialogA11y({ isOpen: true, onClose: onCancel, initialFocusRef: cancelRef });
+
+    return createPortal(
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        >
+            <div
+                ref={dialogRef}
+                tabIndex={-1}
+                className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-6 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200"
+            >
+                <h3 id={titleId} className="text-lg font-black text-slate-900 dark:text-white mb-4 text-center">Créer une Relation</h3>
                 <div className="flex flex-col gap-3">
                     <button
                         onClick={() => onConfirm('affinity')}
@@ -45,12 +60,14 @@ export const RelationshipModal: React.FC<RelationshipModalProps> = ({ onConfirm,
                     </button>
                 </div>
                 <button
+                    ref={cancelRef}
                     onClick={onCancel}
-                    className="mt-4 w-full py-2 text-slate-400 font-bold text-xs hover:text-slate-600 dark:hover:text-slate-300"
+                    className="mt-4 w-full py-2 text-slate-500 dark:text-slate-400 font-bold text-xs hover:text-slate-600 dark:hover:text-slate-300"
                 >
                     Annuler
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

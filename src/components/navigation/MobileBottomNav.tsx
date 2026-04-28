@@ -25,12 +25,14 @@ const MobileBottomNav: React.FC = () => {
               onClick={() => isMore ? openMobileMenu() : navigate(tab.path)}
               aria-label={isMore ? 'Ouvrir le menu' : tab.label}
               aria-current={isActive && !isMore ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 rounded-xl transition-all duration-200
-                ${isActive && !isMore ? 'text-[var(--accent-primary)]' : 'text-[var(--text-muted)]'}
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] focus-visible:outline-none
+                ${isActive && !isMore ? 'text-[var(--accent-primary)]' : 'text-[var(--text-secondary)]'}
               `}
             >
-              <tab.icon size={22} strokeWidth={isActive && !isMore ? 2.5 : 1.8} />
-              <span className={`text-[10px] font-bold ${isActive && !isMore ? 'text-[var(--accent-primary)]' : 'text-[var(--text-muted)]'}`}>
+              <span className={isActive && !isMore ? 'bg-[var(--accent-primary)]/10 rounded-full p-1' : 'p-1'}>
+                <tab.icon size={20} strokeWidth={isActive && !isMore ? 2.5 : 1.8} />
+              </span>
+              <span className={`text-[10px] font-bold ${isActive && !isMore ? 'text-[var(--accent-primary)]' : 'text-[var(--text-secondary)]'}`}>
                 {tab.label}
               </span>
             </button>

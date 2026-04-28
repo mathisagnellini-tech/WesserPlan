@@ -18,7 +18,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuPress }) => {
   const label = currentTab ? currentTab.label : 'Wesser Plan';
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 md:hidden bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] safe-area-top">
+    <header className="fixed top-0 left-0 right-0 z-40 md:hidden bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-[var(--border-subtle)] safe-area-top">
       <div className="flex items-center h-14 px-4">
         <button
           onClick={onMenuPress}

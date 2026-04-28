@@ -189,14 +189,14 @@ export const AddHousingModal: React.FC<{
             <div className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
                     <h3 className="font-bold text-lg text-[var(--text-primary)]">{mode === 'manual' ? 'Saisie Manuelle' : 'Scanner un document'}</h3>
-                    <button onClick={onClose}><X className="text-[var(--text-muted)] hover:text-slate-600" /></button>
+                    <button onClick={onClose}><X className="text-[var(--text-muted)] hover:text-slate-600 dark:hover:text-slate-300" /></button>
                 </div>
                 <div className="p-6 overflow-y-auto">
                     {mode === 'scan' && (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             {scanStatus === 'idle' && (
                                 <div onClick={handleScanFile} className="w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
-                                    <Upload size={48} className="text-slate-300 mb-4" />
+                                    <Upload size={48} className="text-[var(--text-muted)] mb-4" />
                                     <p className="font-medium text-[var(--text-secondary)]">Cliquez pour uploader le reçu</p>
                                     <p className="text-xs text-[var(--text-muted)] mt-1">PDF, JPG, PNG acceptés</p>
                                 </div>

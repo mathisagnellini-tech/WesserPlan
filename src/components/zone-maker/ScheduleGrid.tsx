@@ -59,7 +59,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
           if (slot.week < CURRENT_WEEK) {
             bgThemeClass = "bg-slate-100/30 dark:bg-slate-800/30 opacity-60";
-            weekLabelTheme = "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600";
+            weekLabelTheme = "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-500";
           } else if (slot.week === CURRENT_WEEK) {
             bgThemeClass = "bg-gradient-to-r from-emerald-50/50 dark:from-emerald-900/30 to-white dark:to-slate-800/40 border-y-emerald-100/50 dark:border-y-emerald-800/50 border-l-4 border-l-emerald-400";
             weekLabelTheme = "bg-emerald-100 dark:bg-emerald-900/50 border-emerald-200 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 shadow-lg shadow-emerald-100/50 dark:shadow-emerald-900/50 ring-2 ring-white dark:ring-emerald-800";
@@ -75,9 +75,9 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               <div className="flex flex-col items-center gap-4 py-2">
                 <div className={`font-black text-[11px] px-3 py-2 rounded-2xl border transition-all ${weekLabelTheme}`}>S{slot.week}</div>
                 <div className="flex flex-col items-center gap-1.5 bg-white/60 dark:bg-slate-800/60 p-1.5 rounded-2xl shadow-inner border border-slate-100/50 dark:border-slate-700/50">
-                  <button onClick={() => onModifyWeekTeamCount(slot.week, 1)} className="p-1.5 text-slate-300 hover:text-orange-600 transition-colors"><UserPlus size={11} strokeWidth={2.5} /></button>
+                  <button onClick={() => onModifyWeekTeamCount(slot.week, 1)} className="p-1.5 text-slate-300 dark:text-slate-500 hover:text-orange-600 transition-colors"><UserPlus size={11} strokeWidth={2.5} /></button>
                   <div className="text-[10px] font-black text-slate-500 dark:text-slate-400">{slot.capacity}</div>
-                  <button onClick={() => onModifyWeekTeamCount(slot.week, -1)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><UserMinus size={11} strokeWidth={2.5} /></button>
+                  <button onClick={() => onModifyWeekTeamCount(slot.week, -1)} className="p-1.5 text-slate-300 dark:text-slate-500 hover:text-red-500 transition-colors"><UserMinus size={11} strokeWidth={2.5} /></button>
                 </div>
               </div>
               {Array.from({ length: maxCapacity }).map((_, idx) => {
@@ -101,20 +101,20 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                               {cluster.isBonus && <Zap size={15} className="text-emerald-500" strokeWidth={2.5} />}
                             </div>
                             {isCompact && (
-                              <span className="bg-slate-900 text-white px-2 py-1 rounded-lg text-[9px] font-black tracking-wider uppercase shadow-sm">{cluster.durationWeeks}s</span>
+                              <span className="bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2 py-1 rounded-lg text-[9px] font-black tracking-wider uppercase shadow-sm">{cluster.durationWeeks}s</span>
                             )}
                           </div>
                           <div className="h-1.5 w-10 rounded-full mt-2" style={{ backgroundColor: cluster.color }}></div>
                         </div>
                         <div className={`${isCompact ? 'px-4 py-3' : 'px-6 py-4'} flex-grow flex items-center`}>
                           <div className={`text-[11px] font-black uppercase flex items-center gap-2 ${isLow ? 'text-red-600' : 'text-slate-400'} ${cluster.isBonus ? 'text-emerald-600' : ''}`}>
-                            <Users size={isCompact ? 13 : 15} strokeWidth={2.2} className={isLow ? 'text-red-400' : (cluster.isBonus ? 'text-emerald-400' : 'text-slate-200')} />
+                            <Users size={isCompact ? 13 : 15} strokeWidth={2.2} className={isLow ? 'text-red-400' : (cluster.isBonus ? 'text-emerald-400' : 'text-slate-200 dark:text-slate-700')} />
                             {(cluster.totalPopulation / 1000).toFixed(1)}k
                           </div>
                         </div>
                         {!isCompact && (
                           <div className="px-6 py-4 bg-slate-50/30 dark:bg-slate-800/30 border-t border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between">
-                            <span className="bg-slate-900 text-white px-2.5 py-1 rounded-xl text-[9px] font-black tracking-[0.15em] shadow-sm uppercase">{cluster.durationWeeks} semaines</span>
+                            <span className="bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2.5 py-1 rounded-xl text-[9px] font-black tracking-[0.15em] shadow-sm uppercase">{cluster.durationWeeks} semaines</span>
                             {cluster.isBonus && <span className="text-emerald-600 text-[10px] font-black uppercase tracking-tighter flex items-center gap-1.5"><Zap size={12} strokeWidth={2.5} /> Zone Bonus</span>}
                           </div>
                         )}

@@ -111,7 +111,7 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
             <div className="flex flex-col">
               <span className="text-xs font-bold text-[var(--text-secondary)]">{condition}</span>
               {tempDelta !== null && (
-                <span className="text-[10px] text-[var(--text-muted)] font-medium flex items-center gap-1">
+                <span className="text-[10px] text-[var(--text-secondary)] font-medium flex items-center gap-1">
                   <TrendingUp size={10} /> {tempDelta >= 0 ? '+' : ''}{tempDelta}° vs Hier
                 </span>
               )}
@@ -139,7 +139,7 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
       <div className="flex-grow relative min-w-[80px] h-full">
         {chartData ? (
           <>
-            <div className="absolute top-0 right-0 text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase">
+            <div className="absolute top-0 right-0 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
               24h
             </div>
             <div className="h-full w-full pt-2">
@@ -148,7 +148,7 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
           </>
         ) : (
           <div className="h-full w-full flex items-center justify-center">
-            <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wide text-center">
+            <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-center">
               Données indisponibles
             </span>
           </div>

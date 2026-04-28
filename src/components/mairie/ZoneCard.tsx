@@ -128,7 +128,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                     onChange={(e) => onUpdateZone(zone.id, 'leader', e.target.value)}
                                     disabled
                                     aria-label="Chef de zone"
-                                    className="text-lg font-bold bg-transparent border-none rounded py-0.5 px-1 focus:ring-0 outline-none cursor-not-allowed text-[var(--text-muted)] opacity-70"
+                                    className="text-lg font-bold bg-transparent border-none rounded py-0.5 px-1 focus:ring-0 outline-none cursor-not-allowed text-[var(--text-muted)]"
                                 >
                                     {LEADERS.map((l) => (
                                         <option key={l} value={l}>{l}</option>
@@ -182,7 +182,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                 type="button"
                                 onClick={() => onDeleteZone(zone.id)}
                                 aria-label="Supprimer la zone"
-                                className="ml-2 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors"
+                                className="ml-2 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors"
                             >
                                 <Trash2 size={24} />
                             </button>
@@ -225,7 +225,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                             }}
                                         >
                                             <span className="text-base font-medium text-[var(--text-primary)]">{m.nom}</span>
-                                            <Plus size={20} className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <Plus size={20} className="text-orange-500 dark:text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </button>
                                     ))
                                 ) : (

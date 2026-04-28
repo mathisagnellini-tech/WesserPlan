@@ -1,6 +1,8 @@
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Search, Zap, Layout, Activity, Eye, EyeOff, BarChart2 } from 'lucide-react';
+import React, { useEffect, useId, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { Search } from 'lucide-react';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -18,49 +20,67 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const titleId = useId();
 
-  const filteredActions = actions.filter(action => 
+  const filteredActions = actions.filter(action =>
     action.label.toLowerCase().includes(query.toLowerCase())
   );
 
+  // Refs to read latest values inside the keydown handler without re-subscribing.
+  const filteredActionsRef = useRef(filteredActions);
+  const selectedIndexRef = useRef(selectedIndex);
+  filteredActionsRef.current = filteredActions;
+  selectedIndexRef.current = selectedIndex;
+
+  const { dialogRef } = useDialogA11y({ isOpen, onClose, initialFocusRef: inputRef });
+
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
       setQuery('');
       setSelectedIndex(0);
     }
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
+      const list = filteredActionsRef.current;
+      const idx = selectedIndexRef.current;
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % filteredActions.length);
+        if (list.length > 0) setSelectedIndex((idx + 1) % list.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + filteredActions.length) % filteredActions.length);
+        if (list.length > 0) setSelectedIndex((idx - 1 + list.length) % list.length);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (filteredActions[selectedIndex]) {
-            filteredActions[selectedIndex].perform();
-            onClose();
+        if (list[idx]) {
+          list[idx].perform();
+          onClose();
         }
-      } else if (e.key === 'Escape') {
-        onClose();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, filteredActions, selectedIndex, onClose]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <h2 id={titleId} className="sr-only">Palette de commandes</h2>
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -115,6 +135,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
             </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

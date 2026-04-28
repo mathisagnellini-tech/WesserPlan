@@ -59,7 +59,7 @@ export const SingleSelectFilter: React.FC<{
                 aria-expanded={isOpen}
                 aria-controls={listboxId}
                 className={`w-full flex items-center justify-between px-3 py-2 text-sm border rounded-xl bg-white dark:bg-[var(--bg-card-solid)] transition-all
-                ${selectedValue ? 'border-orange-300 ring-1 ring-orange-100 text-orange-700' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-orange-300'}`}
+                ${selectedValue ? 'border-orange-300 ring-1 ring-orange-100 dark:ring-orange-500/20 text-orange-700 dark:text-orange-400' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-orange-300'}`}
             >
                 <span className="font-bold truncate">{selectedLabel ?? label}</span>
                 <ChevronDown size={14} className={`text-[var(--text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />

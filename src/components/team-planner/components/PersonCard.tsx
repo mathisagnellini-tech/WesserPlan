@@ -100,12 +100,12 @@ export const PersonCard = memo<PersonCardProps>(({
 
   // --- SCORE LOGIC ---
   const objective = person.objective || 15;
-  const scoreColor = person.drRate >= objective ? 'text-emerald-600' : (person.drRate >= objective * 0.8 ? 'text-amber-600' : 'text-red-600');
+  const scoreColor = person.drRate >= objective ? 'text-emerald-600 dark:text-emerald-400' : (person.drRate >= objective * 0.8 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400');
   const barColor = person.drRate >= objective ? 'bg-emerald-500' : (person.drRate >= objective * 0.8 ? 'bg-amber-500' : 'bg-red-500');
 
   // --- DELTA LOGIC ---
   const delta = person.previousDrRate ? +(person.drRate - person.previousDrRate).toFixed(1) : 0;
-  const deltaColor = delta > 0 ? 'text-emerald-600' : (delta < 0 ? 'text-red-500' : 'text-slate-400');
+  const deltaColor = delta > 0 ? 'text-emerald-600 dark:text-emerald-400' : (delta < 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500');
   const DeltaIcon = delta > 0 ? TrendingUp : (delta < 0 ? TrendingDown : Minus);
 
   // --- ALERT LOGIC ---
@@ -126,11 +126,21 @@ export const PersonCard = memo<PersonCardProps>(({
   const showNgoWarning = person.hasWorkedWithNgo === false; 
 
   // --- HELPERS ---
+  const handleKeyActivate = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isAlumni) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick(e as unknown as React.MouseEvent);
+    }
+  };
+
+  const ariaLabel = `${person.name} – ${person.role}`;
+
   const getMetricConfig = (val: number) => {
       if (isHeatmapMode && forceWhiteText) return { color: 'text-white', bg: 'bg-white/20', ring: 'ring-white/30' };
-      if (val >= 20) return { color: 'text-emerald-600', bg: 'bg-emerald-400/10', ring: 'ring-emerald-500/20' };
-      if (val >= 15) return { color: 'text-orange-600', bg: 'bg-orange-400/10', ring: 'ring-orange-500/20' };
-      return { color: 'text-amber-600', bg: 'bg-amber-400/10', ring: 'ring-amber-500/20' };
+      if (val >= 20) return { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-400/10', ring: 'ring-emerald-500/20' };
+      if (val >= 15) return { color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-400/10', ring: 'ring-orange-500/20' };
+      return { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-400/10', ring: 'ring-amber-500/20' };
   };
   const metricConfig = getMetricConfig(person.drRate);
 
@@ -261,8 +271,12 @@ export const PersonCard = memo<PersonCardProps>(({
   // Compact View
   if (density === 'compact') {
       return (
-        <div 
+        <div
+          role="button"
+          tabIndex={isAlumni ? -1 : 0}
+          aria-label={ariaLabel}
           onClick={onClick}
+          onKeyDown={handleKeyActivate}
           draggable={!isAlumni && !isLinkingMode} // Disable drag in link mode
           onDragStart={onDragStart}
           onDragOver={handleDragOver}
@@ -278,9 +292,10 @@ export const PersonCard = memo<PersonCardProps>(({
         >
 
             <div className="relative flex-shrink-0">
-                <img 
-                    src={person.photoUrl} 
-                    alt={person.name} 
+                <img
+                    src={person.photoUrl}
+                    alt={person.name}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
                     className={`w-10 h-10 rounded-full object-cover shadow-sm border-2 ${forceWhiteText ? 'border-white/30' : 'border-white'}`}
                 />
                 {isLeader && (
@@ -311,8 +326,12 @@ export const PersonCard = memo<PersonCardProps>(({
   // Tiny View
   if (density === 'tiny') {
        return (
-          <div 
+          <div
+            role="button"
+            tabIndex={isAlumni ? -1 : 0}
+            aria-label={ariaLabel}
             onClick={onClick}
+            onKeyDown={handleKeyActivate}
             draggable={!isAlumni && !isLinkingMode}
             onDragStart={onDragStart}
             onDragOver={handleDragOver}
@@ -326,7 +345,7 @@ export const PersonCard = memo<PersonCardProps>(({
             `}
             title={`${person.name} - ${person.drRate}`}
           >
-              <img src={person.photoUrl} className="w-full h-full rounded-full object-cover" alt={person.name} />
+              <img src={person.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} className="w-full h-full rounded-full object-cover" alt={person.name} />
               {isLeader && (
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border border-white flex items-center justify-center">
                       <Crown size={6} className="text-white fill-current" />
@@ -340,8 +359,12 @@ export const PersonCard = memo<PersonCardProps>(({
   // Revert Alumni style to match Board style: Glassmorphism background, standard text colors unless heatmap
   return (
     <div
+      role="button"
+      tabIndex={isAlumni ? -1 : 0}
+      aria-label={ariaLabel}
       onClick={onClick}
-      draggable={!isAlumni && !isLinkingMode} 
+      onKeyDown={handleKeyActivate}
+      draggable={!isAlumni && !isLinkingMode}
       onDragStart={onDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -368,10 +391,11 @@ export const PersonCard = memo<PersonCardProps>(({
       <div className="flex items-start gap-4 mb-4 relative z-10">
         <div className="relative">
              <div className="w-14 h-14 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:shadow-xl transition-shadow">
-                <img 
-                    src={person.photoUrl} 
-                    alt={person.name} 
-                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110`} 
+                <img
+                    src={person.photoUrl}
+                    alt={person.name}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110`}
                 />
              </div>
              {isLeader && (
@@ -386,7 +410,7 @@ export const PersonCard = memo<PersonCardProps>(({
             <h3 className={`font-[800] text-[13px] leading-tight mb-0.5 whitespace-normal break-words ${forceWhiteText ? 'text-white' : 'text-slate-800 dark:text-slate-100'}`}>
                 {person.name}
             </h3>
-            <div className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${forceWhiteText ? 'text-white/80' : 'text-slate-400'}`}>
+            <div className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${forceWhiteText ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
                 {person.role.toUpperCase()}
             </div>
             
@@ -441,7 +465,7 @@ export const PersonCard = memo<PersonCardProps>(({
               {isAlumni ? (
                   <>
                     <div className="flex flex-col justify-center">
-                         <div className={`text-[9px] font-bold uppercase ${forceWhiteText ? 'text-white/70' : 'text-slate-400'} mb-1`}>
+                         <div className={`text-[9px] font-bold uppercase ${forceWhiteText ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'} mb-1`}>
                              {person.tags.includes('Student') ? 'Étudiant' : 'Ancien'}
                          </div>
                          <div className={`text-xs font-bold ${forceWhiteText ? 'text-white bg-white/20' : 'text-slate-700 dark:text-slate-200 bg-slate-100/50 dark:bg-slate-700/50'} px-2 py-1 rounded-md w-fit`}>
@@ -470,7 +494,7 @@ export const PersonCard = memo<PersonCardProps>(({
                          )}
                          {viewMode === 'performance' && (
                             <div className="flex flex-col">
-                                <span className={`text-[9px] font-bold uppercase ${forceWhiteText ? 'text-white/70' : 'text-slate-400'}`}>Objectif</span>
+                                <span className={`text-[9px] font-bold uppercase ${forceWhiteText ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>Objectif</span>
                                 <div className={`h-1.5 w-16 rounded-full mt-1 ${forceWhiteText ? 'bg-white/30' : 'bg-slate-100 dark:bg-slate-700'} overflow-hidden`}>
                                     <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min((person.drRate / objective) * 100, 100)}%` }}></div>
                                 </div>

@@ -30,10 +30,10 @@ export const PrivateTab: React.FC<PrivateTabProps> = ({ person, isUnlocked, onRe
             ) : (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between px-2 mb-2">
-                        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                            <MessageSquare size={14} className="text-slate-400" /> Notes & Échanges
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-slate-200 uppercase tracking-widest flex items-center gap-2">
+                            <MessageSquare size={14} className="text-slate-400 dark:text-slate-500" /> Notes & Échanges
                         </h3>
-                        <div className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                        <div className="px-2 py-1 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold flex items-center gap-1">
                             <Eye size={10} /> Visible
                         </div>
                     </div>
@@ -47,23 +47,23 @@ export const PrivateTab: React.FC<PrivateTabProps> = ({ person, isUnlocked, onRe
                                             note.type === 'incident' ? 'bg-red-500' :
                                             note.type === 'feedback' ? 'bg-orange-500' : 'bg-slate-300'
                                         }`} />
-                                        <span className="text-xs font-bold text-slate-500 uppercase">{note.type}</span>
+                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{note.type}</span>
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400">{note.date}</span>
+                                    <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{note.date}</span>
                                 </div>
-                                <p className="text-sm text-slate-700 leading-relaxed font-medium mb-3">
+                                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium mb-3">
                                     "{note.content}"
                                 </p>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
                                         {note.author.charAt(0)}
                                     </div>
-                                    <span className="text-xs text-slate-400 font-medium">Par {note.author}</span>
+                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Par {note.author}</span>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="p-8 text-center border-2 border-dashed border-slate-100 rounded-[24px] text-slate-400 text-sm italic">
+                        <div className="p-8 text-center border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-[24px] text-slate-400 dark:text-slate-500 text-sm italic">
                             Aucune note privée enregistrée.
                         </div>
                     )}

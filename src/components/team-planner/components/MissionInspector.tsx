@@ -1,8 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { Column } from '../types';
 import { X, MapPin, Wind, CloudRain, Sun, Cloud, Car, Home, Wifi, Key, Fuel, Gauge, CalendarClock, Navigation, Copy, ExternalLink, ChevronRight, Edit2, Save, Loader2 } from 'lucide-react';
 import { useWeather } from '@/hooks/useWeather';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
 interface MissionInspectorProps {
   column: Column;
@@ -14,6 +15,15 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'housing' | 'vehicle'>('overview');
   const [isEditing, setIsEditing] = useState(false);
+  const titleId = useId();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(onClose, 350);
+  };
+
+  const { dialogRef } = useDialogA11y({ isOpen: true, onClose: handleClose, initialFocusRef: closeBtnRef });
   
   // Local state for editing form
   const [editForm, setEditForm] = useState({
@@ -36,11 +46,6 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
     });
     return () => clearTimeout(timer);
   }, [column]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 350); 
-  };
 
   const handleSave = () => {
       onUpdate({
@@ -93,9 +98,14 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
       />
       
       {/* Panel */}
-      <div 
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={`
-            fixed top-4 bottom-4 right-4 w-[480px] z-[130] rounded-[36px] 
+            fixed top-4 bottom-4 right-4 w-[480px] z-[130] rounded-[36px]
             bg-white dark:bg-slate-900 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-white/50 dark:border-slate-700
             flex flex-col overflow-hidden
             transform transition-all duration-300 cubic-bezier(0.2, 0.8, 0.2, 1)
@@ -110,8 +120,10 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                    <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 via-white/40 dark:via-slate-900/40 to-transparent" />
                </div>
                
-               <button 
+               <button
+                  ref={closeBtnRef}
                   onClick={handleClose}
+                  aria-label="Fermer"
                   className="absolute top-6 right-6 p-2.5 rounded-full bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-900 dark:text-white backdrop-blur-md transition-all shadow-sm hover:shadow-md border border-white/40 dark:border-slate-600 z-20"
               >
                   <X size={20} />
@@ -149,7 +161,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                             <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-300 font-bold uppercase tracking-wider text-[10px] mb-2 bg-orange-100/90 dark:bg-orange-900/60 backdrop-blur-md px-2.5 py-1 rounded-lg w-fit shadow-sm border border-orange-200/50 dark:border-orange-700/50">
                                 <MapPin size={10} strokeWidth={3} /> {zone.name}
                             </div>
-                            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none drop-shadow-sm line-clamp-2">{column.title}</h2>
+                            <h2 id={titleId} className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none drop-shadow-sm line-clamp-2">{column.title}</h2>
                         </>
                       )}
                   </div>
@@ -234,21 +246,21 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                           <div className="space-y-1">
                               <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 shadow-sm">
                                   <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-400"><Home size={16} /></div>
+                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-500 dark:text-slate-400"><Home size={16} /></div>
                                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Logement</span>
                                   </div>
                                   <span className="text-sm text-slate-900 dark:text-white font-black">{housing.type}</span>
                               </div>
                               <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 shadow-sm">
                                   <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-400"><Car size={16} /></div>
+                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-500 dark:text-slate-400"><Car size={16} /></div>
                                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Véhicule</span>
                                   </div>
                                   <span className="text-sm text-slate-900 dark:text-white font-black">{car.model}</span>
                               </div>
                               <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 shadow-sm">
                                   <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-400"><CalendarClock size={16} /></div>
+                                      <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-500 dark:text-slate-400"><CalendarClock size={16} /></div>
                                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Fin Mission</span>
                                   </div>
                                   <span className="text-sm text-slate-900 dark:text-white font-black">{housing.checkOut}</span>
@@ -286,7 +298,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                               <div className="flex items-center gap-4">
                                   <div className="bg-orange-100 dark:bg-orange-900/40 p-3 rounded-2xl text-orange-600"><Wifi size={20}/></div>
                                   <div>
-                                      <div className="text-[10px] uppercase text-slate-400 font-bold">Réseau Wifi</div>
+                                      <div className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-bold">Réseau Wifi</div>
                                       <div className="text-slate-900 dark:text-white font-mono text-sm font-bold">{housing.wifiDetails?.split('/')[0] || 'Unknown'}</div>
                                   </div>
                               </div>
@@ -296,7 +308,7 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
                               <div className="flex items-center gap-4">
                                   <div className="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-2xl text-purple-600 dark:text-purple-400"><Key size={20}/></div>
                                   <div>
-                                      <div className="text-[10px] uppercase text-slate-400 font-bold">Code d'accès</div>
+                                      <div className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-bold">Code d'accès</div>
                                       <div className="text-slate-900 dark:text-white font-mono text-sm font-bold tracking-widest">{housing.accessCode || 'N/A'}</div>
                                   </div>
                               </div>
@@ -306,12 +318,12 @@ export const MissionInspector: React.FC<MissionInspectorProps> = ({ column, onCl
 
                       <div className="grid grid-cols-2 gap-4">
                           <div className="bg-white dark:bg-[var(--bg-card-solid)] p-5 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-sm text-center">
-                              <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Arrivée</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Arrivée</div>
                               <div className="text-2xl font-black text-slate-900 dark:text-white">{housing.checkIn}</div>
                               <div className="text-xs text-slate-500 font-bold mt-1 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full inline-block">17:00</div>
                           </div>
                           <div className="bg-white dark:bg-[var(--bg-card-solid)] p-5 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-sm text-center">
-                              <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Départ</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Départ</div>
                               <div className="text-2xl font-black text-slate-900 dark:text-white">{housing.checkOut}</div>
                               <div className="text-xs text-slate-500 font-bold mt-1 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full inline-block">10:00</div>
                           </div>

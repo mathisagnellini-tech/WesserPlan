@@ -36,7 +36,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   const tones = {
     danger: 'bg-red-600 hover:bg-red-700 shadow-red-200 dark:shadow-red-900/40',
-    warning: 'bg-amber-600 hover:bg-amber-700 shadow-amber-200 dark:shadow-amber-900/40',
+    warning: 'bg-amber-700 hover:bg-amber-800 shadow-amber-200 dark:shadow-amber-900/40',
     primary: 'bg-orange-600 hover:bg-orange-700 shadow-orange-200 dark:shadow-orange-900/40',
   } as const;
 
@@ -54,7 +54,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       >
         <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-100 dark:border-amber-500/20 p-5 flex items-start gap-3">
           <div className="bg-white dark:bg-[var(--bg-card-solid)] p-2 rounded-full shrink-0">
-            <AlertTriangle className="text-amber-500" size={22} />
+            <AlertTriangle className="text-amber-600 dark:text-amber-500" size={22} />
           </div>
           <div className="flex-1">
             <h3 id={titleId} className="text-base font-bold text-[var(--text-primary)] mb-1">
@@ -66,7 +66,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Fermer"
-            className="p-1.5 hover:bg-white/60 dark:hover:bg-slate-700 rounded-full text-[var(--text-secondary)]"
+            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-[var(--text-secondary)]"
           >
             <X size={18} />
           </button>

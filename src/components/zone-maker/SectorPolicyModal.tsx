@@ -26,7 +26,7 @@ const SectorPolicyModal: React.FC<SectorPolicyModalProps> = ({ selectedNGO, data
               <p className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">{selectedNGO} &bull; R&eacute;glementation &amp; Chiffres</p>
             </div>
           </div>
-          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fermer" className="p-4 bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-[1.5rem] transition-all"><X size={24} /></button>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fermer" className="p-4 bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-[1.5rem] transition-all"><X size={24} /></button>
         </div>
 
         <div className="p-10 space-y-10 overflow-y-auto max-h-[70vh]">
@@ -35,11 +35,11 @@ const SectorPolicyModal: React.FC<SectorPolicyModalProps> = ({ selectedNGO, data
             <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-1 flex items-center gap-3"><BarChart3 size={16} /> État actuel du déploiement</h4>
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-8 space-y-2">
-                <div className="text-slate-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Target size={14} /> Zones créées</div>
+                <div className="text-slate-400 dark:text-slate-300 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Target size={14} /> Zones créées</div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{data.clusters.length}</div>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-8 space-y-2">
-                <div className="text-slate-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users size={14} /> Population totale</div>
+                <div className="text-slate-400 dark:text-slate-300 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users size={14} /> Population totale</div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">
                   {(data.clusters.reduce((sum, c) => sum + c.totalPopulation, 0) / 1000).toFixed(1)}k
                 </div>
@@ -76,7 +76,7 @@ const SectorPolicyModal: React.FC<SectorPolicyModalProps> = ({ selectedNGO, data
             <div className="p-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-[1.5rem] flex gap-4">
               <AlertCircle className="text-amber-600 shrink-0" size={20} />
               <p className="text-xs text-amber-800 dark:text-amber-200 font-medium leading-relaxed">
-                Une zone sous les <span className="font-black">{MIN_1W.toLocaleString()} habitants</span> est considérée comme "Insuffisante". Utilisez le mode <span className="font-black text-orange-600">ZONE BONUS</span> pour absorbé des communes orphelines sans impacter la durée de votre planning.
+                Une zone sous les <span className="font-black">{MIN_1W.toLocaleString()} habitants</span> est considérée comme "Insuffisante". Utilisez le mode <span className="font-black text-orange-600 dark:text-orange-300">ZONE BONUS</span> pour absorbé des communes orphelines sans impacter la durée de votre planning.
               </p>
             </div>
           </div>

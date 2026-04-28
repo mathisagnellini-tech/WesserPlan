@@ -62,7 +62,7 @@ export const HousingMap: React.FC<HousingMapProps> = ({ housings, smartZoneId, o
             const bounds = L.latLngBounds([]);
 
             housings.forEach((h: any) => {
-                const iconHtml = `<div class="w-8 h-8 bg-white dark:bg-[var(--bg-card-solid)] rounded-full border-2 border-white flex items-center justify-center shadow-md hover:scale-110 transition-transform cursor-pointer text-sm relative">
+                const iconHtml = `<div class="w-8 h-8 bg-white dark:bg-[var(--bg-card-solid)] rounded-full border-2 border-white dark:border-slate-700 flex items-center justify-center shadow-md hover:scale-110 transition-transform cursor-pointer text-sm relative">
                                     🏠
                                     ${h._matchLabel ? `<span class="absolute -top-2 -right-2 w-3 h-3 rounded-full ${h._matchColor}"></span>` : ''}
                                   </div>`;

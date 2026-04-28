@@ -39,7 +39,7 @@ export const EditableField: React.FC<{
                 <input
                     type={type}
                     aria-label={label ?? type}
-                    className="flex-1 min-w-0 bg-white dark:bg-[var(--bg-card-solid)] border border-orange-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="flex-1 min-w-0 bg-white dark:bg-[var(--bg-card-solid)] border border-orange-300 dark:border-orange-500/40 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                     value={tempValue}
                     onChange={(e) => setTempValue(e.target.value)}
                     autoFocus
@@ -87,7 +87,7 @@ export const EditableField: React.FC<{
                 <Icon size={16} className="text-[var(--text-muted)]" />
                 <span className="text-[var(--text-primary)] font-medium truncate">{value || 'Non renseigné'}</span>
             </div>
-            <Edit2 size={12} className="text-slate-300 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Edit2 size={12} className="text-slate-300 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
     );
 };

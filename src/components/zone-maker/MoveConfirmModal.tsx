@@ -15,11 +15,11 @@ const MoveConfirmModal: React.FC<MoveConfirmModalProps> = ({ move, onCancel, onC
         <div className="p-6 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50"><h3 className="font-bold text-xl text-slate-900 dark:text-white">Confirmer le déplacement</h3></div>
         <div className="p-6 space-y-6">
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Vous souhaitez ajouter <strong className="text-slate-900 dark:text-white">{move.communeName}</strong> ({move.communePop.toLocaleString()} habitants) à la zone <strong className="text-emerald-700">{move.targetClusterCode}</strong>.
+            Vous souhaitez ajouter <strong className="text-slate-900 dark:text-white">{move.communeName}</strong> ({move.communePop.toLocaleString()} habitants) à la zone <strong className="text-emerald-700 dark:text-emerald-300">{move.targetClusterCode}</strong>.
             <br /><br />
             Cela fera passer cette zone à <strong>{move.impact.target.newPop.toLocaleString()}</strong> habitants (<strong>{move.impact.target.newWeeks}</strong> semaines).
             <br /><br />
-            L'ancienne zone <strong className="text-red-700">{move.sourceClusterCode}</strong> passera à <strong>{move.impact.source.newPop.toLocaleString()}</strong> habitants (<strong>{move.impact.source.newWeeks}</strong> semaines).
+            L'ancienne zone <strong className="text-red-700 dark:text-red-300">{move.sourceClusterCode}</strong> passera à <strong>{move.impact.source.newPop.toLocaleString()}</strong> habitants (<strong>{move.impact.source.newWeeks}</strong> semaines).
             <br /><br />
             Souhaitez-vous refaire le calcul des zones en conséquence ?
           </p>

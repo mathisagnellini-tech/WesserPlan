@@ -30,7 +30,7 @@ export const VehicleSection: React.FC<VehicleSectionProps> = ({ cars, onReportDa
                                 <div>
                                     <h3 className="font-bold text-lg text-[var(--text-primary)] flex items-center gap-2">
                                         {car.brand || 'Véhicule'}
-                                        <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-[var(--text-secondary)] text-xs rounded font-mono">{car.plate}</span>
+                                        <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-[var(--text-primary)] text-xs rounded font-mono">{car.plate}</span>
                                     </h3>
                                 </div>
                                 <div className="text-right">

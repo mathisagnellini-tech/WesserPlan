@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Relationship, Person } from '../types';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface ConnectionLayerProps {
   relationships: Relationship[];
@@ -13,6 +14,7 @@ interface ConnectionLayerProps {
 
 export const ConnectionLayer: React.FC<ConnectionLayerProps> = ({ relationships, cards, draggingCardId, highlightedCardId, showAll, isCompact }) => {
   const [paths, setPaths] = useState<React.ReactElement[]>([]);
+  const isDark = useThemeStore((s) => s.isDark);
   
   useEffect(() => {
     const updatePaths = () => {

@@ -27,6 +27,17 @@ export const MainLayout: React.FC = () => {
     document.title = `${title} · Wesser Plan`;
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="min-h-screen bg-[var(--bg-main)] overflow-hidden relative">
       {/* Desktop Top Navigation */}

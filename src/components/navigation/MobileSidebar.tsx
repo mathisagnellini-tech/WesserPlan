@@ -46,7 +46,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={onClose}
         />
       )}
@@ -83,7 +83,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
                 key={tab.id}
                 onClick={() => handleTabChange(tab.path)}
                 className={`
-                  w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300
+                  w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] focus-visible:outline-none
                   ${isActive
                     ? 'bg-[var(--accent-primary)] text-white shadow-lg shadow-[var(--accent-primary)]/25'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-solid)] hover:text-[var(--text-primary)]'
@@ -123,7 +123,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
                 <span className="text-sm font-bold text-[var(--text-primary)] truncate">
                   {userName ?? 'Utilisateur'}
                 </span>
-                <span className="text-[10px] font-semibold text-[var(--text-muted)] truncate">
+                <span className="text-[10px] font-semibold text-[var(--text-secondary)] truncate">
                   {userEmail ?? ''}
                 </span>
               </div>

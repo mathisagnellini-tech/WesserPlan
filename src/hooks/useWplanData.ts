@@ -433,7 +433,7 @@ export function useWplanData() {
             plugins: {
                 legend: { display: false },
                 datalabels: {
-                    color: 'white',
+                    color: isDark ? 'white' : '#1f2937',
                     anchor: 'end',
                     align: 'top',
                     font: { weight: 'bold' },
@@ -445,7 +445,7 @@ export function useWplanData() {
             },
         };
         return { data: barData, options: barOptions, type: 'bar' as const, title: newTitle };
-    }, [departmentGeoJSON, regionGeoJSON, viewingRegion, selectedItem, comparisonItem, isComparing, mapLevel, borderColor, textSecondary, chartTitle, generateDataForItem, getDepartmentSignatures, getMockCommunesForDepartment]);
+    }, [departmentGeoJSON, regionGeoJSON, viewingRegion, selectedItem, comparisonItem, isComparing, mapLevel, borderColor, textSecondary, chartTitle, generateDataForItem, getDepartmentSignatures, getMockCommunesForDepartment, isDark]);
 
     useEffect(() => {
         setChartTitle(chartConfig.title);

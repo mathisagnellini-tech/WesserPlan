@@ -34,7 +34,7 @@ export const SmartMatcher: React.FC<SmartMatcherProps> = ({ smartZoneId, viewMod
                         <span className="font-bold block">Tri Intelligent Actif</span>
                         <span className="text-xs opacity-80">Optimisation distance & coût</span>
                     </div>
-                    <button onClick={() => onZoneChange("")} className="bg-white dark:bg-[var(--bg-card-solid)] p-1 rounded-full hover:bg-orange-100 transition"><X size={14}/></button>
+                    <button onClick={() => onZoneChange("")} className="bg-white dark:bg-[var(--bg-card-solid)] p-1 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900/40 transition"><X size={14}/></button>
                 </div>
             )}
             <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-[var(--border-subtle)] h-fit">

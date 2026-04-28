@@ -21,7 +21,7 @@ export const WeekRatioSelector: React.FC<{ rank: number; total: number; onUpdate
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
                 aria-controls={menuId}
-                className="text-red-600 font-bold cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/30 px-1 rounded transition-colors select-none flex items-center"
+                className="text-red-600 dark:text-red-400 font-bold cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/30 px-1 rounded transition-colors select-none flex items-center"
                 onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
             >
                 {total}
@@ -35,7 +35,7 @@ export const WeekRatioSelector: React.FC<{ rank: number; total: number; onUpdate
                             aria-selected={total === n}
                             key={n}
                             onClick={(e) => { e.stopPropagation(); onUpdateTotal(n); setIsOpen(false); }}
-                            className={`px-3 py-2 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-xs border-b border-slate-50 last:border-0 ${total === n ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30' : 'text-[var(--text-secondary)]'}`}
+                            className={`px-3 py-2 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-xs border-b border-[var(--border-subtle)] last:border-0 ${total === n ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30' : 'text-[var(--text-secondary)]'}`}
                         >
                             {n}
                         </button>
@@ -81,7 +81,7 @@ export const ZoneTimeManager: React.FC<{ startWeek: number; duration: number; on
                     </div>
                 )}
             </div>
-            <span className="text-slate-300">|</span>
+            <span className="text-[var(--text-muted)]">|</span>
             <WeekRatioSelector rank={currentRank} total={duration} onUpdateTotal={onUpdateDuration} />
         </div>
     );

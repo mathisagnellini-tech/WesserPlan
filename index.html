@@ -28,13 +28,13 @@
         --bg-card-solid: #ffffff;
         --text-primary: #1a1a1a;
         --text-secondary: #5a5a5a;
-        --text-muted: #94a3b8;
+        --text-muted: #64748B;
         --accent-primary: #FF5B2B;
         --accent-secondary: #E04A1F;
         --highlight-bg: #FFF0EB;
-        --highlight-text: #FF5B2B;
+        --highlight-text: #C2410C;
         --highlight-bg-hover: #FFE0D4;
-        --border-color: rgba(255, 255, 255, 0.6);
+        --border-color: rgba(15, 23, 42, 0.08);
         --border-subtle: #e2e8f0;
         --shadow-soft: 0 10px 40px rgba(0,0,0,.04);
         --radius-lg: 24px;
@@ -52,8 +52,8 @@
         --bg-card-solid: #1e2130;
         --text-primary: #e8eaed;
         --text-secondary: #9aa0b0;
-        --text-muted: #5a6178;
-        --accent-primary: #FF7A50;
+        --text-muted: #94A3B8;
+        --accent-primary: #FF5B2B;
         --accent-secondary: #FF5B2B;
         --highlight-bg: #2a1510;
         --highlight-text: #FF9A75;
@@ -214,11 +214,14 @@
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
       }
 
-      /* TeamPlanner dark scrollbar (scoped) */
+      /* TeamPlanner scrollbar (light default, dark override) */
       .team-planner-board::-webkit-scrollbar { width: 8px; height: 8px; }
-      .team-planner-board::-webkit-scrollbar-track { background: #2d2d2d; }
-      .team-planner-board::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-      .team-planner-board::-webkit-scrollbar-thumb:hover { background: #666; }
+      .team-planner-board::-webkit-scrollbar-track { background: #e2e8f0; }
+      .team-planner-board::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      .team-planner-board::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      .dark .team-planner-board::-webkit-scrollbar-track { background: #2d2d2d; }
+      .dark .team-planner-board::-webkit-scrollbar-thumb { background: #555; }
+      .dark .team-planner-board::-webkit-scrollbar-thumb:hover { background: #666; }
 
       .custom-scrollbar-light::-webkit-scrollbar { width: 6px; height: 6px; }
       .custom-scrollbar-light::-webkit-scrollbar-track { background: transparent; }
@@ -402,6 +405,10 @@
       @supports (-webkit-touch-callout: none) {
         .overflow-y-auto { -webkit-overflow-scrolling: touch; }
       }
+
+      /* Global focus-visible ring for keyboard accessibility */
+      :focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+      button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
     </style>
 </head>
 <body class="min-h-screen">

@@ -9,11 +9,11 @@ interface SecurityTabProps {
 export const SecurityTab: React.FC<SecurityTabProps> = ({ isUnlocked, onSecureAccess }) => {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="p-5 bg-orange-50 rounded-[28px] border border-orange-100 flex gap-4">
-                <div className="p-2 bg-white text-orange-500 rounded-xl h-fit shadow-sm"><Lock size={18} /></div>
+            <div className="p-5 bg-orange-50 dark:bg-orange-500/10 rounded-[28px] border border-orange-100 dark:border-orange-700/40 flex gap-4">
+                <div className="p-2 bg-white dark:bg-slate-800 text-orange-500 dark:text-orange-400 rounded-xl h-fit shadow-sm"><Lock size={18} /></div>
                 <div>
-                    <h4 className="font-bold text-orange-900 text-sm mb-1">Zone Sécurisée</h4>
-                    <p className="text-xs text-orange-800/70 leading-relaxed font-medium">
+                    <h4 className="font-bold text-orange-900 dark:text-orange-200 text-sm mb-1">Zone Sécurisée</h4>
+                    <p className="text-xs text-orange-800/70 dark:text-orange-200/80 leading-relaxed font-medium">
                         L'accès aux documents est réservé aux managers authentifiés.
                     </p>
                 </div>
@@ -36,7 +36,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isUnlocked, onSecureAc
                         </div>
                         <span className="font-bold text-slate-900 dark:text-white text-sm">{item.label}</span>
                         {isUnlocked ? (
-                            <div className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold flex items-center gap-1">
+                            <div className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full text-[10px] font-bold flex items-center gap-1">
                                 <Check size={10} /> Déverrouillé
                             </div>
                         ) : (

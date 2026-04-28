@@ -49,7 +49,7 @@ export const MultiSelectFilter: React.FC<{
                 aria-expanded={isOpen}
                 aria-controls={listboxId}
                 className={`w-full flex items-center justify-between px-3 py-2 text-sm border rounded-xl bg-white dark:bg-[var(--bg-card-solid)] transition-all
-                ${selected.size > 0 ? 'border-orange-300 ring-1 ring-orange-100 text-orange-700' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-orange-300'}`}
+                ${selected.size > 0 ? 'border-orange-300 ring-1 ring-orange-100 dark:ring-orange-500/20 text-orange-700 dark:text-orange-400' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-orange-300'}`}
             >
                 <div className="flex items-center gap-2 truncate">
                     <span className="font-bold truncate">

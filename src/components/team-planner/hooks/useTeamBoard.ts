@@ -4,15 +4,24 @@ import { initialData, generateIncomingPeople } from '../constants';
 import { BoardData, Person, Column } from '../types';
 import { useTeamStore } from '@/stores/teamStore';
 import { teamPlannerService } from '@/services/teamPlannerService';
+import { reporter } from '@/lib/observability';
+import { computeIsoWeek } from '@/lib/isoWeek';
 
 const DEFAULT_ORG_ID = 'msf';
-const DEFAULT_YEAR = 2025;
 const SAVE_DEBOUNCE_MS = 500;
 
+const BASE_MONDAY = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    d.setHours(0, 0, 0, 0);
+    return d;
+})();
+
+const DEFAULT_YEAR = BASE_MONDAY.getFullYear();
+
 export const getWeekDateRange = (weekOffset: number) => {
-    const baseDate = new Date(2025, 0, 19);
-    const targetDate = new Date(baseDate);
-    targetDate.setDate(baseDate.getDate() + (weekOffset * 7));
+    const targetDate = new Date(BASE_MONDAY);
+    targetDate.setDate(BASE_MONDAY.getDate() + (weekOffset * 7));
 
     const endDate = new Date(targetDate);
     endDate.setDate(targetDate.getDate() + 6);
@@ -20,11 +29,7 @@ export const getWeekDateRange = (weekOffset: number) => {
     const startStr = targetDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     const endStr = endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
-    // Calculate absolute week number
-    const startOfYear = new Date(2025, 0, 1);
-    const diff = targetDate.getTime() - startOfYear.getTime();
-    const oneWeek = 1000 * 60 * 60 * 24 * 7;
-    const weekNumber = Math.ceil((diff + oneWeek) / oneWeek);
+    const weekNumber = computeIsoWeek(targetDate);
 
     return {
         label: `Semaine ${weekNumber}`,
@@ -36,6 +41,14 @@ interface UseTeamBoardOptions {
   orgId?: string;
   year?: number;
 }
+
+type ColumnUpdates = Partial<Omit<Column, 'missionData'>> & {
+  missionData?: {
+    zone?: Partial<NonNullable<Column['missionData']>['zone']>;
+    car?: Partial<NonNullable<Column['missionData']>['car']>;
+    housing?: Partial<NonNullable<Column['missionData']>['housing']>;
+  };
+};
 
 export function useTeamBoard(options: UseTeamBoardOptions = {}) {
   const orgId = options.orgId ?? DEFAULT_ORG_ID;
@@ -65,6 +78,7 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [isLoadingWeek, setIsLoadingWeek] = useState(false);
+  const [loadError, setLoadError] = useState<Error | null>(null);
 
   // Tracks weeks we've already attempted to load from Supabase (avoid re-loading on every state change)
   const loadedWeeksRef = useRef<Set<number>>(new Set());
@@ -89,15 +103,16 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
   // --- LOAD FROM SUPABASE on week change ---
   useEffect(() => {
     if (loadedWeeksRef.current.has(currentWeekIndex)) return;
-    loadedWeeksRef.current.add(currentWeekIndex);
 
     let cancelled = false;
     setIsLoadingWeek(true);
+    setLoadError(null);
 
     teamPlannerService
       .load({ orgId, year, weekIndex: currentWeekIndex })
       .then((result) => {
         if (cancelled) return;
+        loadedWeeksRef.current.add(currentWeekIndex);
         if (result) {
           // Hydrate from DB — suppress save while we apply the loaded state
           suppressSaveRef.current = true;
@@ -113,8 +128,8 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
       })
       .catch((err) => {
         if (cancelled) return;
-        console.error('[useTeamBoard] load failed', err);
-        // Don't set saveError for load failures — fall back silently to mocks
+        reporter.error('load failed', err, { source: 'useTeamBoard' });
+        setLoadError(err as Error);
       })
       .finally(() => {
         if (!cancelled) setIsLoadingWeek(false);
@@ -137,7 +152,7 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
           await teamPlannerService.save({ orgId, year, weekIndex: weekIdx, boardData: board });
           setLastSaved(new Date());
         } catch (err) {
-          console.error('[useTeamBoard] save failed', err);
+          reporter.error('save failed', err, { source: 'useTeamBoard' });
           setSaveError(err as Error);
         } finally {
           setIsSaving(false);
@@ -180,7 +195,7 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
           future: [currentData, ...history.future]
       });
       setWeeksData(prev => ({ ...prev, [currentWeekIndex]: previous }));
-      setActionLog(prev => ["↩️ Annulation", ...prev]);
+      setActionLog(prev => ["↩️ Annulation", ...prev].slice(0, 50));
       triggerSave(previous, currentWeekIndex);
   };
 
@@ -194,7 +209,7 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
           future: newFuture
       });
       setWeeksData(prev => ({ ...prev, [currentWeekIndex]: next }));
-      setActionLog(prev => ["↩️ Rétablissement", ...prev]);
+      setActionLog(prev => ["↩️ Rétablissement", ...prev].slice(0, 50));
       triggerSave(next, currentWeekIndex);
   };
 
@@ -264,14 +279,13 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
       addToHistory(newData, expanded ? `Extension équipe ${column.title}` : `Réduction équipe ${column.title}`);
   };
 
-  const handleUpdateColumn = (columnId: string, updates: Partial<Column> | any) => {
+  const handleUpdateColumn = (columnId: string, updates: ColumnUpdates) => {
     const column = currentData.columns[columnId];
-    let newColumn = { ...column, ...updates };
+    let newColumn: Column = { ...column, ...updates, missionData: column.missionData };
 
     if (updates.missionData) {
         newColumn.missionData = {
             ...column.missionData!,
-            ...updates.missionData,
             zone: { ...column.missionData!.zone, ...updates.missionData.zone },
             car: { ...column.missionData!.car, ...updates.missionData.car },
             housing: { ...column.missionData!.housing, ...updates.missionData.housing }
@@ -480,6 +494,7 @@ export function useTeamBoard(options: UseTeamBoardOptions = {}) {
     isSaving,
     saveError,
     isLoadingWeek,
+    loadError,
     retrySave,
 
     // Setters

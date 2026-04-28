@@ -91,7 +91,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, onFilterChange, o
                 options={availableNgos} 
                 selected={filters.ngos} 
                 onChange={(val) => onFilterChange('ngos', val)}
-                colorClass="bg-slate-800"
+                colorClass="bg-slate-800 dark:bg-slate-200 dark:text-slate-900"
             />
         </div>
 

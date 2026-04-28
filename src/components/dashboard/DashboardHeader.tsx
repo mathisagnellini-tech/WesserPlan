@@ -120,7 +120,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const updatedLabel = formatLastUpdated(lastUpdated, t, updatedTick);
 
   const innerSelectClasses =
-    'bg-transparent text-[var(--text-primary)] font-bold text-sm py-1 px-2 rounded-lg focus:outline-none cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700';
+    'bg-transparent text-[var(--text-primary)] font-bold text-sm py-1 px-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700';
 
   return (
     <header className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 h-12 md:h-16 flex-wrap">
@@ -200,7 +200,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           aria-label={t('refresh')}
           aria-busy={isRefreshing}
           title={t('refresh')}
-          className="flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-2 md:px-3 md:py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-[var(--bg-card-solid)]"
+          className="flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-2 md:px-3 md:py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-[var(--bg-card-solid)] focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
         >
           <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : undefined} />
           <span className="hidden md:inline text-xs">{t('refresh')}</span>

@@ -93,7 +93,7 @@ const ZonePlanner: React.FC = () => {
         onMouseDown={zp.startResizing}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-full p-2 shadow-xl opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
-          <GripVertical size={14} className="text-slate-400" />
+          <GripVertical size={14} className="text-slate-400 dark:text-slate-500" />
         </div>
       </div>
 
@@ -137,14 +137,14 @@ const ZonePlanner: React.FC = () => {
               content="La recherche en direct connectera bientôt l'INSEE/code/nom au filtre carte. Pour l'instant, la valeur n'est pas encore appliquée."
             >
               <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-4 flex items-center gap-4 pointer-events-auto ring-1 ring-black/5 hover:bg-white dark:hover:bg-slate-900 hover:shadow-2xl transition-all duration-500">
-                <Search className="ml-6 text-slate-300" size={22} strokeWidth={2.5} />
+                <Search className="ml-6 text-slate-300 dark:text-slate-500" size={22} strokeWidth={2.5} />
                 <input
                   type="text"
                   placeholder="Rechercher une commune..."
                   aria-label="Rechercher une commune"
                   value={zp.searchQuery}
                   onChange={(e) => zp.setSearchQuery(e.target.value)}
-                  className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-500"
+                  className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-400"
                 />
               </div>
             </Tooltip>
@@ -216,8 +216,8 @@ const ZonePlanner: React.FC = () => {
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        input[type="checkbox"] { accent-color: #2563eb; }
-        body { color: #0F172A; background-color: #F8FAFC; }
+        input[type="checkbox"] { accent-color: #FF5B2B; }
+        :root:not(.dark) body { color: #0F172A; background-color: #F8FAFC; }
         .group:active { transform: scale(0.98); }
         font-mono { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }

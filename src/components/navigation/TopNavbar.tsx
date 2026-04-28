@@ -34,7 +34,7 @@ const TopNavbar: React.FC = () => {
           </div>
 
           {/* Main Tabs - Pill Navigation */}
-          <nav className="flex items-center bg-[var(--bg-card)]/60 backdrop-blur-xl rounded-2xl p-1 lg:p-1.5 border border-[var(--border-color)] shadow-sm mx-auto overflow-x-auto scrollbar-none">
+          <nav className="flex items-center bg-[var(--bg-card)]/80 backdrop-blur-xl rounded-2xl p-1 lg:p-1.5 border border-[var(--border-color)] shadow-sm mx-auto overflow-x-auto scrollbar-none">
             {tabConfig.map((tab) => {
               const isActive = isActivePath(tab.path);
               return (
@@ -43,7 +43,7 @@ const TopNavbar: React.FC = () => {
                   onClick={() => navigate(tab.path)}
                   title={tab.label}
                   className={`
-                    flex items-center gap-1.5 lg:gap-2 px-2.5 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-semibold whitespace-nowrap transition-all duration-250 ease-out shrink-0
+                    flex items-center gap-1.5 lg:gap-2 px-2.5 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-semibold whitespace-nowrap transition-all duration-250 ease-out shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] focus-visible:outline-none
                     ${isActive
                       ? 'bg-[var(--accent-primary)] text-white shadow-md shadow-[var(--accent-primary)]/25'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)]/60'
@@ -65,7 +65,7 @@ const TopNavbar: React.FC = () => {
               onClick={() => navigate('/settings')}
               aria-label="Paramètres"
               title="Paramètres"
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] focus-visible:outline-none
                 ${isActivePath('/settings')
                   ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)]'
@@ -78,11 +78,11 @@ const TopNavbar: React.FC = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggle}
-              className="p-2 lg:p-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)] transition-all duration-200"
+              className="p-2 lg:p-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] focus-visible:outline-none"
               title={isDark ? 'Mode clair' : 'Mode sombre'}
               aria-label={isDark ? 'Activer le mode clair' : 'Activer le mode sombre'}
             >
-              {isDark ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-orange-400" />}
+              {isDark ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-slate-500 dark:text-slate-400" />}
             </button>
 
             {/* User Avatar */}
@@ -103,7 +103,7 @@ const TopNavbar: React.FC = () => {
                   </>
                 )}
               </div>
-              <span aria-hidden="true" className="absolute bottom-0 right-0 w-2 h-2 lg:w-2.5 lg:h-2.5 bg-green-500 border-2 border-[var(--bg-main)] rounded-full"></span>
+              <span aria-hidden="true" className="absolute bottom-0 right-0 w-2 h-2 lg:w-2.5 lg:h-2.5 bg-green-500 border-2 border-[var(--bg-card-solid)] rounded-full"></span>
             </button>
           </div>
         </div>

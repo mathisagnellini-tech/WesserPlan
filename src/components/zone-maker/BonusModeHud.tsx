@@ -23,7 +23,7 @@ const BonusModeHud: React.FC<BonusModeHudProps> = ({ selectedCluster, bonusSelec
           </div>
         </div>
         <div className="flex items-center gap-2 mr-1">
-          <button onClick={onCancel} className="px-5 py-2.5 text-slate-400 hover:text-slate-600 rounded-full text-[10px] font-black uppercase tracking-wider transition-all">Annuler</button>
+          <button onClick={onCancel} className="px-5 py-2.5 text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full text-[10px] font-black uppercase tracking-wider transition-all">Annuler</button>
           <button
             onClick={onNext}
             disabled={bonusSelectionCount === 0}

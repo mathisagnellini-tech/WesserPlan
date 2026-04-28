@@ -316,7 +316,7 @@ const DashboardTab: React.FC = () => {
       ) : (
         <div className="mb-4">
           {kpis.isFallback && (
-            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+            <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
               Affichage de la dernière semaine complète disponible (S{kpis.week}/{kpis.year})
             </p>
           )}
@@ -328,7 +328,7 @@ const DashboardTab: React.FC = () => {
               { label: 'Productivité', value: `${kpis.productivity.toFixed(1)}` },
             ].map(({ label, value }) => (
               <div key={label} className="glass-card px-4 py-3">
-                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                   {label}
                 </p>
                 <p className="text-xl font-black text-[var(--text-primary)]">{value}</p>

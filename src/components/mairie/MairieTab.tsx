@@ -540,18 +540,18 @@ export default function MairieTab() {
                         <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Relations Mairie</h2>
                         <div className="flex items-center gap-3 mt-1 md:mt-2">
                             <p className="text-sm md:text-xl text-[var(--text-secondary)] font-medium">Suivi des prises de contact et organisation des tournées.</p>
-                            <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                            <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
                                 <Database size={10} /> {totalCount.toLocaleString()} mairies
                             </span>
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-2 md:gap-3 items-center">
                         <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1 flex items-center shadow-sm mr-4">
-                            <button type="button" onClick={() => setViewMode('list')} aria-pressed={viewMode === 'list'} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-orange-100 text-orange-600' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Liste">
+                            <button type="button" onClick={() => setViewMode('list')} aria-pressed={viewMode === 'list'} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Liste">
                                 <ListIcon size={20} />
                             </button>
                             <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
-                            <button type="button" onClick={() => setViewMode('grid')} aria-pressed={viewMode === 'grid'} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Grille">
+                            <button type="button" onClick={() => setViewMode('grid')} aria-pressed={viewMode === 'grid'} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Grille">
                                 <LayoutGrid size={20} />
                             </button>
                         </div>
@@ -576,7 +576,7 @@ export default function MairieTab() {
 
                 <div className="flex flex-wrap items-center gap-4">
                     <div className="flex gap-1 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-[var(--border-subtle)] w-fit" role="radiogroup" aria-label="Filtre par organisation">
-                        <button type="button" role="radio" aria-checked={selectedOrgFilter === 'all'} onClick={() => handleOrgFilterChange('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-md' : 'text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}>
+                        <button type="button" role="radio" aria-checked={selectedOrgFilter === 'all'} onClick={() => handleOrgFilterChange('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 shadow-md' : 'text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}>
                             TOUTES
                         </button>
                         {ORG_LIST.map((org) => {
@@ -591,7 +591,7 @@ export default function MairieTab() {
                                     key={org}
                                     onClick={() => handleOrgFilterChange(org)}
                                     title={info.name}
-                                    className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all uppercase flex items-center gap-2 ${isActive ? 'bg-slate-800 text-white shadow-md' : `text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700`}`}
+                                    className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all uppercase flex items-center gap-2 ${isActive ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 shadow-md' : `text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700`}`}
                                 >
                                     <img src={info.logo} alt="" aria-hidden="true" className="h-4 w-auto rounded-sm bg-white p-px" />
                                     <span>{conf.label}</span>

@@ -32,7 +32,7 @@ const CnffReport: React.FC<CnffReportProps> = ({ selectedNGO, cnffData, hasCopie
               {hasCopied ? <Check size={22} strokeWidth={2.5} /> : <Copy size={22} strokeWidth={2.5} />}
               {hasCopied ? 'Copié !' : 'Copier tout'}
             </button>
-            <button onClick={onClose} className="p-6 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-200 dark:hover:border-slate-700 rounded-[1.5rem] transition-all shadow-sm">
+            <button onClick={onClose} className="p-6 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-200 dark:hover:border-slate-700 rounded-[1.5rem] transition-all shadow-sm">
               <X size={28} strokeWidth={2.5} />
             </button>
           </div>
@@ -60,7 +60,7 @@ const CnffReport: React.FC<CnffReportProps> = ({ selectedNGO, cnffData, hasCopie
             <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 border-dashed rounded-[4rem] p-32 text-center shadow-inner">
               <FileText className="mx-auto mb-8 text-slate-100 dark:text-slate-700" size={80} strokeWidth={1.5} />
               <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-3">Aucun déploiement planifié</p>
-              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest leading-relaxed">Placez des zones dans le calendrier pour générer le rapport CNFF.</p>
+              <p className="text-slate-400 dark:text-slate-500 font-bold text-sm uppercase tracking-widest leading-relaxed">Placez des zones dans le calendrier pour générer le rapport CNFF.</p>
             </div>
           )}
         </div>

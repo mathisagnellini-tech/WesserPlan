@@ -92,7 +92,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, comingSoon,
           className="fixed z-[10000] -translate-x-1/2 pointer-events-none"
           style={{ top: coords.top, left: coords.left, transform: placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)' }}
         >
-          <div className="bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-xl border border-slate-800 max-w-[260px] flex flex-col gap-1">
+          <div className="bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-xl border border-slate-700 dark:border-white/10 max-w-[260px] flex flex-col gap-1">
             {comingSoon && (
               <span className="self-start text-[9px] uppercase tracking-wider font-black text-amber-300 bg-amber-500/20 border border-amber-500/30 rounded px-1.5 py-px">
                 Bientôt disponible

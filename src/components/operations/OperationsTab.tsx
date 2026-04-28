@@ -94,10 +94,10 @@ const OperationsTab: React.FC = () => {
                   if (pricePerNight < 80) score += 10;
                   let label = "";
                   let color = "";
-                  if (score > 85) { label = "Top Match"; color = "bg-green-500"; }
-                  else if (dist > 50) { label = "Trop Loin"; color = "bg-red-500"; }
-                  else if (score > 60) { label = "Correct"; color = "bg-orange-500"; }
-                  else { label = "Faible"; color = "bg-slate-400"; }
+                  if (score > 85) { label = "Top Match"; color = "bg-green-700"; }
+                  else if (dist > 50) { label = "Trop Loin"; color = "bg-red-600"; }
+                  else if (score > 60) { label = "Correct"; color = "bg-orange-600"; }
+                  else { label = "Faible"; color = "bg-slate-600"; }
                   return { ...h, _matchScore: Math.round(score), _matchDistance: dist, _matchLabel: label, _matchColor: color };
               });
               data.sort((a, b) => (b._matchScore || 0) - (a._matchScore || 0));
@@ -152,10 +152,10 @@ const OperationsTab: React.FC = () => {
         {/* Navigation & Main Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
             <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl w-full sm:w-fit border border-[var(--border-subtle)]">
-                <button onClick={() => setActiveSubTab('housing')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'housing' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
+                <button onClick={() => setActiveSubTab('housing')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'housing' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 dark:text-orange-400 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
                     🏠 Logements
                 </button>
-                <button onClick={() => setActiveSubTab('cars')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'cars' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
+                <button onClick={() => setActiveSubTab('cars')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'cars' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 dark:text-orange-400 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
                     🚗 Véhicules & Flotte
                 </button>
             </div>

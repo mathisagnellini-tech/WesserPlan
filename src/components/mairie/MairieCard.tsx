@@ -163,7 +163,7 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                                 {formatCommentText(displayComment.texte)}
                             </div>
                         ) : (
-                            <div className="mt-auto text-xs text-slate-300 italic">Aucune note...</div>
+                            <div className="mt-auto text-xs text-slate-500 dark:text-slate-400 italic">Aucune note...</div>
                         )}
                     </div>
                     {onRemove && (
@@ -217,7 +217,7 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); onClick(); }}
-                                className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 text-[var(--text-secondary)] hover:text-orange-600 rounded-full text-xs font-bold transition-colors border border-[var(--border-subtle)] cursor-pointer"
+                                className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-500/10 text-[var(--text-secondary)] hover:text-orange-600 dark:hover:text-orange-400 rounded-full text-xs font-bold transition-colors border border-[var(--border-subtle)] cursor-pointer"
                             >
                                 <Info size={14} /> Information
                             </button>
@@ -235,7 +235,7 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                             <p className="text-sm text-[var(--text-secondary)] font-semibold uppercase tracking-wide">
                                 {mairie.departement} - {deptName} • {mairie.region}
                             </p>
-                            <span className="text-slate-300">•</span>
+                            <span className="text-[var(--text-muted)]">•</span>
                             <p className="text-sm text-[var(--text-secondary)] font-semibold">{mairie.population.toLocaleString()} hab.</p>
                         </div>
                         {requestedDate && (
@@ -264,7 +264,7 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                                     const isActive = idx === mairie.etapeProgression;
                                     const isCompleted = idx < mairie.etapeProgression;
                                     let bgClass = 'bg-slate-50 dark:bg-slate-800/50 text-[var(--text-muted)]';
-                                    if (isCompleted) bgClass = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400';
+                                    if (isCompleted) bgClass = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400';
                                     if (isActive) bgClass = 'bg-emerald-600 text-white font-bold shadow-md z-10';
                                     return (
                                         <button
@@ -272,7 +272,7 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                                             key={idx}
                                             onClick={(e) => handleStepClick(idx, e)}
                                             aria-pressed={isActive}
-                                            className={`flex-1 h-full flex items-center justify-center cursor-pointer transition-all relative ${bgClass} ${idx !== 0 ? 'border-l border-white/50' : ''} ${isActive ? 'scale-105 transform' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                            className={`flex-1 h-full flex items-center justify-center cursor-pointer transition-all relative ${bgClass} ${idx !== 0 ? 'border-l border-[var(--border-subtle)]' : ''} ${isActive ? 'scale-105 transform' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                                         >
                                             <span className="text-[10px] uppercase tracking-tight truncate px-1 text-center leading-none select-none">{step}</span>
                                         </button>
@@ -336,7 +336,7 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                                     <input type="email" placeholder="Email (optionnel)" aria-label="Email" className="text-sm p-1.5 rounded border border-[var(--border-subtle)] outline-none focus:border-orange-400 bg-white dark:bg-slate-800 text-[var(--text-primary)]" value={newContactEmail} onChange={(e) => setNewContactEmail(e.target.value)} />
                                     <div className="flex gap-2 mt-1">
                                         <button type="button" onClick={handleAddContactSubmit} className="flex-1 bg-orange-600 text-white text-xs py-1.5 rounded hover:bg-orange-700 font-medium">Ajouter</button>
-                                        <button type="button" onClick={(e) => { e.stopPropagation(); setIsAddingContact(false); }} className="flex-1 bg-slate-200 dark:bg-slate-700 text-[var(--text-secondary)] text-xs py-1.5 rounded hover:bg-slate-300">Annuler</button>
+                                        <button type="button" onClick={(e) => { e.stopPropagation(); setIsAddingContact(false); }} className="flex-1 bg-slate-200 dark:bg-slate-700 text-[var(--text-secondary)] text-xs py-1.5 rounded hover:bg-slate-300 dark:hover:bg-slate-600">Annuler</button>
                                     </div>
                                 </div>
                             ) : (
@@ -408,12 +408,12 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                                     );
                                 })
                             ) : (
-                                <div className="h-full flex items-center justify-center text-slate-300 italic text-sm">Aucun commentaire</div>
+                                <div className="h-full flex items-center justify-center text-slate-500 dark:text-slate-400 italic text-sm">Aucun commentaire</div>
                             )}
                         </div>
                         <form onSubmit={handleSubmitComment} className="relative w-full mt-auto">
                             <input type="text" value={commentInput} onChange={(e) => setCommentInput(e.target.value)} placeholder="Ajouter une note..." aria-label="Ajouter une note" className="w-full bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-lg pl-3 pr-9 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none text-[var(--text-primary)] shadow-sm" />
-                            <button type="submit" disabled={!commentInput.trim()} aria-label="Envoyer la note" className="absolute right-1 top-1 p-1 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:bg-slate-300 transition-colors">
+                            <button type="submit" disabled={!commentInput.trim()} aria-label="Envoyer la note" className="absolute right-1 top-1 p-1 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:bg-slate-300 dark:disabled:bg-slate-700 transition-colors">
                                 <ArrowRight size={14} />
                             </button>
                         </form>

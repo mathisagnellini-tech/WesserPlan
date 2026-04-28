@@ -10,6 +10,14 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 
+const STATUS_BORDER: Record<CommuneStatus, string> = {
+    pas_demande: 'border-slate-200 dark:border-slate-700',
+    informe: 'border-amber-200 dark:border-amber-500/30',
+    refuse: 'border-red-200 dark:border-red-500/30',
+    telescope: 'border-purple-200 dark:border-purple-500/30',
+    fait: 'border-emerald-200 dark:border-emerald-500/30',
+};
+
 interface CommuneListPanelProps {
     mode: 'list' | 'map';
     setMode: (mode: 'list' | 'map') => void;
@@ -106,7 +114,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 aria-checked={isActive}
                                 onClick={() => setSelectedOrg(org)}
                                 title={info.name}
-                                className={`flex-1 min-w-[60px] py-1 px-1.5 rounded-lg text-xs font-bold uppercase transition-all border flex items-center justify-center gap-1.5 ${isActive ? 'bg-slate-800 text-white border-slate-800' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                                className={`flex-1 min-w-[60px] py-1 px-1.5 rounded-lg text-xs font-bold uppercase transition-all border flex items-center justify-center gap-1.5 ${isActive ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                             >
                                 <img src={info.logo} alt="" aria-hidden="true" className="h-4 w-auto rounded-sm bg-white p-px" />
                                 <span>{info.shortName}</span>
@@ -141,7 +149,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 setSelectedRegions(val ? new Set([val]) : new Set());
                                 setSelectedDepts(new Set());
                             }}
-                            className="w-full px-3 pr-8 py-2.5 text-xs font-semibold rounded-lg border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50 text-[var(--text-primary)] focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat"
+                            className="w-full px-3 pr-8 py-2.5 text-xs font-semibold rounded-lg border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50 text-[var(--text-primary)] focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] dark:bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat"
                         >
                             <option value="">Toutes les régions</option>
                             {availableRegionsOptions.map(r => (
@@ -157,7 +165,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 setSelectedDepts(val ? new Set([val]) : new Set());
                             }}
                             disabled={!activeRegion}
-                            className="w-full px-3 pr-8 py-2.5 text-xs font-semibold rounded-lg border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50 text-[var(--text-primary)] focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-[image:none]"
+                            className="w-full px-3 pr-8 py-2.5 text-xs font-semibold rounded-lg border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50 text-[var(--text-primary)] focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] dark:bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-[image:none]"
                         >
                             <option value="">{activeRegion ? 'Tous les départements' : 'Sélectionner une région d\'abord'}</option>
                             {availableDeptsOptions.map(d => (
@@ -177,8 +185,8 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                         onClick={() => toggleStatus(status)}
                                         className={`px-2 py-1.5 rounded-md text-[10px] font-bold uppercase border transition-all flex items-center justify-center gap-1
                                         ${isSelected
-                                            ? `${conf.bg} ${conf.color} border-${conf.color.split('-')[1]}-200 shadow-sm`
-                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:border-slate-300 dark:hover:border-slate-500'
+                                            ? `${conf.bg} ${conf.color} ${STATUS_BORDER[status]} shadow-sm`
+                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-slate-300 dark:hover:border-slate-500'
                                         }`}
                                     >
                                         {isSelected && <Check size={10} strokeWidth={4}/>}
@@ -187,7 +195,7 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 );
                             })}
                             {selectedStatuses.size > 0 && (
-                                <button onClick={resetStatuses} className="text-[10px] text-[var(--text-muted)] underline px-1">Reset</button>
+                                <button onClick={resetStatuses} className="text-[10px] text-[var(--text-secondary)] underline px-1">Reset</button>
                             )}
                         </div>
                     )}

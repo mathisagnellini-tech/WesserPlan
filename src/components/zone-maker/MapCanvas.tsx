@@ -171,9 +171,9 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
         const isFocused = props.communeId === focusedCommuneId;
 
         let weight = props.isAssigned ? 3 : 0.8;
-        let color = props.isAssigned ? props.color ?? '#cbd5e1' : '#cbd5e1';
-        let fillColor = props.isAssigned ? props.color ?? '#cbd5e1' : '#f8fafc';
-        let fillOpacity = props.isAssigned ? 0.2 : 0.4;
+        let color = props.isAssigned ? props.color ?? '#cbd5e1' : (isDark ? '#475569' : '#cbd5e1');
+        let fillColor = props.isAssigned ? props.color ?? '#cbd5e1' : (isDark ? '#1e293b' : '#f8fafc');
+        let fillOpacity = props.isAssigned ? (isDark ? 0.35 : 0.2) : 0.4;
         let dashArray = props.isAssigned ? '' : '3, 3';
 
         if (isPending) {
@@ -262,8 +262,11 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
       });
 
       if (pathPoints.length > 1) {
+        const routeColor = isDark ? '#a5b4fc' : '#4f46e5';
+        const stepBg = isDark ? '#0f172a' : 'white';
+        const stepBorder = isDark ? '#1e293b' : '#e2e8f0';
         L.polyline(pathPoints, { color: '#6366f1', weight: 12, opacity: 0.1, lineCap: 'round' }).addTo(routeLayerRef.current);
-        L.polyline(pathPoints, { color: '#4f46e5', weight: 4, opacity: 0.8, dashArray: '10, 10', lineCap: 'round' }).addTo(routeLayerRef.current);
+        L.polyline(pathPoints, { color: routeColor, weight: 4, opacity: 0.8, dashArray: '10, 10', lineCap: 'round' }).addTo(routeLayerRef.current);
 
         for (let i = 0; i < pathPoints.length - 1; i++) {
           const start = pathPoints[i] as [number, number];
@@ -275,7 +278,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
           L.marker(mid, {
             icon: L.divIcon({
               className: 'arrow-icon',
-              html: `<div style="transform: rotate(${angle - 90}deg); color: #4f46e5; font-size: 20px; font-weight: bold;">➤</div>`,
+              html: `<div style="transform: rotate(${angle - 90}deg); color: ${routeColor}; font-size: 20px; font-weight: bold;">➤</div>`,
               iconSize: [20, 20],
               iconAnchor: [10, 10],
             }),
@@ -286,15 +289,15 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
         pathPoints.forEach((pt, i) => {
           L.circleMarker(pt, {
             radius: 6,
-            fillColor: 'white',
-            color: '#4f46e5',
+            fillColor: stepBg,
+            color: routeColor,
             weight: 3,
             fillOpacity: 1,
           }).addTo(routeLayerRef.current!);
           L.marker(pt, {
             icon: L.divIcon({
               className: 'step-label',
-              html: `<div style="color: #4f46e5; font-weight: 900; font-size: 10px; margin-top: 15px; background: white; padding: 2px 4px; border-radius: 4px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${escapeHtml(String(i + 1))}</div>`,
+              html: `<div style="color: ${routeColor}; font-weight: 900; font-size: 10px; margin-top: 15px; background: ${stepBg}; padding: 2px 4px; border-radius: 4px; border: 1px solid ${stepBorder}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${escapeHtml(String(i + 1))}</div>`,
               iconSize: [0, 0],
             }),
             interactive: false,
@@ -314,14 +317,16 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
       // through safeColor() to prevent CSS injection via the border style.
       const safeBorder = safeColor(cluster.color, '#3B82F6');
       const safeCode = escapeHtml(cluster.code);
+      const labelBg = isDark ? '#0f172a' : 'white';
+      const labelColor = isDark ? '#f1f5f9' : '#1e293b';
       L.marker([avgY, avgX], {
         icon: L.divIcon({
           className: 'map-label',
           html: `
             <div style="
-              background: white;
+              background: ${labelBg};
               border: 3px solid ${safeBorder};
-              color: #1e293b;
+              color: ${labelColor};
               font-family: 'Inter', sans-serif;
               font-weight: 900;
               padding: 4px 12px;
@@ -356,6 +361,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
     onSelectCluster,
     onCommuneBrush,
     onCommuneHover,
+    isDark,
   ]);
 
   return (

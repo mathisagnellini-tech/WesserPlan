@@ -43,7 +43,7 @@ export const RelationsList: React.FC<RelationsListProps> = ({ person, allPeople,
                         placeholder="Rechercher un collègue..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-50 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
                     />
                     {searchQuery.length > 1 && (
                         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden z-20">
@@ -51,17 +51,17 @@ export const RelationsList: React.FC<RelationsListProps> = ({ person, allPeople,
                                 <div key={p.id} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group cursor-pointer border-b border-slate-50 dark:border-slate-800 last:border-0">
                                     <div className="flex items-center gap-3">
                                         <img src={p.photoUrl} className="w-8 h-8 rounded-full object-cover" alt={p.name} />
-                                        <span className="text-sm font-bold text-slate-700">{p.name}</span>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.name}</span>
                                     </div>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => { onAddRelationship(p.id, 'affinity'); setSearchQuery(''); }} className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100" title="Affinité"><Heart size={14} /></button>
-                                        <button onClick={() => { onAddRelationship(p.id, 'synergy'); setSearchQuery(''); }} className="p-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100" title="Synergie"><Zap size={14} /></button>
-                                        <button onClick={() => { onAddRelationship(p.id, 'conflict'); setSearchQuery(''); }} className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100" title="Conflit"><AlertTriangle size={14} /></button>
+                                        <button onClick={() => { onAddRelationship(p.id, 'affinity'); setSearchQuery(''); }} className="p-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/30" title="Affinité"><Heart size={14} /></button>
+                                        <button onClick={() => { onAddRelationship(p.id, 'synergy'); setSearchQuery(''); }} className="p-1.5 bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-500/30" title="Synergie"><Zap size={14} /></button>
+                                        <button onClick={() => { onAddRelationship(p.id, 'conflict'); setSearchQuery(''); }} className="p-1.5 bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/30" title="Conflit"><AlertTriangle size={14} /></button>
                                     </div>
                                 </div>
                             ))}
                             {searchResults.length === 0 && (
-                                <div className="p-4 text-center text-xs text-slate-400 italic">Aucun résultat</div>
+                                <div className="p-4 text-center text-xs text-slate-400 dark:text-slate-500 italic">Aucun résultat</div>
                             )}
                         </div>
                     )}
@@ -94,20 +94,20 @@ export const RelationsList: React.FC<RelationsListProps> = ({ person, allPeople,
                                         <Icon size={14} />
                                     </div>
                                     <div>
-                                        <div className="text-sm font-bold text-slate-800">{other.name}</div>
+                                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{other.name}</div>
                                         <div className={`text-[10px] font-bold uppercase ${config.color}`}>{config.label}</div>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => onRemoveRelationship(rel.id)}
-                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2 text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors"
                                 >
                                     <X size={14} />
                                 </button>
                             </div>
                         );
                     }) : (
-                        <div className="text-center p-6 border-2 border-dashed border-slate-100 rounded-2xl text-slate-400 text-sm">
+                        <div className="text-center p-6 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-2xl text-slate-400 dark:text-slate-500 text-sm">
                             Aucune relation active.
                         </div>
                     )}
@@ -124,10 +124,10 @@ export const RelationsList: React.FC<RelationsListProps> = ({ person, allPeople,
                         const hasRel = myRelationships.some(r => r.sourceId === teammate.id || r.targetId === teammate.id);
 
                         return (
-                            <div key={teammate.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <div key={teammate.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                                 <div className="flex items-center gap-3">
                                     <img src={teammate.photoUrl} className="w-8 h-8 rounded-full grayscale opacity-70" alt={teammate.name} />
-                                    <span className="text-sm font-medium text-slate-600">{teammate.name}</span>
+                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{teammate.name}</span>
                                 </div>
                                 {!hasRel && (
                                     <button
@@ -138,12 +138,12 @@ export const RelationsList: React.FC<RelationsListProps> = ({ person, allPeople,
                                     </button>
                                 )}
                                 {hasRel && (
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase px-2">Lié</span>
+                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase px-2">Lié</span>
                                 )}
                             </div>
                         );
                     }) : (
-                        <div className="text-center p-4 text-slate-400 text-xs italic">
+                        <div className="text-center p-4 text-slate-400 dark:text-slate-500 text-xs italic">
                             Aucun historique commun trouvé.
                         </div>
                     )}

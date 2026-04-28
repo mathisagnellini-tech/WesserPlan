@@ -54,7 +54,7 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
                     checked={enabled}
                     onChange={() => setEnabled(!enabled)}
                 />
-                <div className={`block w-10 h-6 rounded-full transition ${enabled ? 'bg-orange-500' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
+                <div className={`block w-10 h-6 rounded-full transition ${enabled ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
                 <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition ${enabled ? 'transform translate-x-full' : ''}`}></div>
             </div>
         </label>
@@ -63,7 +63,7 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
 
 const Toast: React.FC<{ message: string }> = ({ message }) => (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-fade-in">
-        <div className="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700">
+        <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700">
             <Check size={18} className="text-orange-400" />
             <span className="font-medium text-sm">{message}</span>
         </div>
@@ -138,7 +138,7 @@ const SettingsTab: React.FC = () => {
                 <div className="space-y-8">
                     <SettingsCard title="Profil Utilisateur" icon={User}>
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-600 dark:text-slate-300 border-2 border-white dark:border-slate-700 shadow-md">
+                            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-white dark:border-slate-700 shadow-md">
                                 {initials}
                             </div>
                             <div>
@@ -146,7 +146,7 @@ const SettingsTab: React.FC = () => {
                                     type="button"
                                     disabled
                                     title="Bientôt disponible"
-                                    className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 px-4 py-2 rounded-lg cursor-not-allowed"
+                                    className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-4 py-2 rounded-lg cursor-not-allowed"
                                 >
                                     Changer d'avatar
                                 </button>
@@ -218,14 +218,14 @@ const SettingsTab: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setTheme('light')}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${!isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${!isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
                                 >
                                     <Sun size={18} /> Clair
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setTheme('dark')}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
                                 >
                                     <Moon size={18} /> Sombre
                                 </button>

@@ -42,18 +42,18 @@ const BonusConfirmModal: React.FC<BonusConfirmModalProps> = ({ selectedCluster, 
           </div>
 
           <div className="flex justify-center -my-4 relative z-10">
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-full p-3 shadow-md"><ArrowRight className="text-slate-400" size={20} /></div>
+            <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-full p-3 shadow-md"><ArrowRight className="text-slate-400 dark:text-slate-500" size={20} /></div>
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Détails des transferts</h4>
+            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-2">Détails des transferts</h4>
             {bonusImpacts.sources.length > 0 ? bonusImpacts.sources.map((src, i) => (
               <div key={i} className={`border rounded-[2rem] p-8 flex items-center justify-between transition-all ${src.isLow ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 ring-2 ring-red-100 dark:ring-red-900/50 shadow-sm' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'}`}>
                 <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-lg ${src.isLow ? 'bg-red-600' : 'bg-slate-700'}`}>{src.code}</div>
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg ${src.isLow ? 'bg-red-600 text-white' : 'bg-slate-700 dark:bg-slate-200 text-white dark:text-slate-900'}`}>{src.code}</div>
                   <div className="space-y-0.5">
                     <div className={`font-black text-lg leading-none ${src.isLow ? 'text-red-900 dark:text-red-200' : 'text-slate-900 dark:text-white'}`}>-{src.lostPop.toLocaleString()} hab.</div>
-                    <div className={`text-[9px] font-bold uppercase tracking-wider ${src.isLow ? 'text-red-400' : 'text-slate-400'}`}>
+                    <div className={`text-[9px] font-bold uppercase tracking-wider ${src.isLow ? 'text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
                       {src.communes.length} commune(s) transférée(s)
                     </div>
                   </div>

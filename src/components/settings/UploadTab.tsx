@@ -157,7 +157,7 @@ function UploadZone<T>({
             isDragOver
               ? 'border-[var(--highlight-text)]'
               : 'border-gray-300 dark:border-slate-600'
-          } border-dashed rounded-xl cursor-pointer hover:border-gray-400 dark:hover:border-slate-500`}
+          } border-dashed rounded-xl cursor-pointer hover:border-[var(--accent-primary)]/60 dark:hover:border-[var(--accent-primary)]/60`}
         >
           <span className="flex items-center space-x-2">
             <UploadCloud
@@ -169,7 +169,7 @@ function UploadZone<T>({
             />
             <span className="font-medium text-[var(--text-secondary)] text-sm">
               Glissez et déposez votre fichier ici, ou{' '}
-              <span className="text-orange-600 dark:text-orange-400 underline">
+              <span className="text-orange-700 dark:text-orange-400 underline">
                 parcourez
               </span>
             </span>
@@ -215,7 +215,7 @@ function UploadZone<T>({
               Import en cours… {progress.inserted} / {progress.total}
             </p>
           </div>
-          <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
             <div
               className="h-full bg-[var(--accent-primary)] transition-all"
               style={{
@@ -296,13 +296,13 @@ function PreviewPanel<T>({
           </p>
           <p className="text-xs text-[var(--text-secondary)]">
             {total} lignes lues ·{' '}
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+            <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
               {rows.length} valides
             </span>
             {errors.length > 0 && (
               <>
                 {' · '}
-                <span className="text-red-600 dark:text-red-400 font-semibold">
+                <span className="text-red-700 dark:text-red-400 font-semibold">
                   {errors.length} erreurs
                 </span>
               </>
@@ -373,7 +373,7 @@ function PreviewPanel<T>({
 
       {errors.length > 0 && (
         <div className="rounded-lg bg-red-500/5 border border-red-500/20 p-3">
-          <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-2">
+          <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">
             {errors.length} ligne(s) rejetée(s) à la validation
           </p>
           <ul className="text-[11px] text-[var(--text-secondary)] space-y-0.5 max-h-32 overflow-y-auto">
@@ -390,7 +390,7 @@ function PreviewPanel<T>({
           </ul>
           <button
             onClick={() => downloadErrorReport(errors, 'erreurs-validation.csv')}
-            className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"
+            className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold bg-red-500/10 text-red-700 dark:text-red-400 hover:bg-red-500/20"
           >
             <Download size={12} />
             Télécharger le rapport d'erreurs
@@ -458,13 +458,13 @@ function DonePanel<T>({
             {allClean ? 'Import terminé' : 'Import partiellement réussi'}
           </p>
           <p className="text-xs text-[var(--text-secondary)]">
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
               {inserted} importés
             </span>
             {failed.length > 0 && (
               <>
                 {' · '}
-                <span className="font-semibold text-red-600 dark:text-red-400">
+                <span className="font-semibold text-red-700 dark:text-red-400">
                   {failed.length} échoués
                 </span>
               </>
@@ -472,7 +472,7 @@ function DonePanel<T>({
             {validationErrors.length > 0 && (
               <>
                 {' · '}
-                <span className="font-semibold text-amber-600 dark:text-amber-400">
+                <span className="font-semibold text-amber-700 dark:text-amber-400">
                   {validationErrors.length} rejetés (validation)
                 </span>
               </>
@@ -490,7 +490,7 @@ function DonePanel<T>({
                 `erreurs-validation-${tableLabel.toLowerCase().replace(/\s+/g, '-')}.csv`,
               )
             }
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20"
           >
             <Download size={14} />
             Erreurs de validation
@@ -504,7 +504,7 @@ function DonePanel<T>({
                 `echecs-insertion-${tableLabel.toLowerCase().replace(/\s+/g, '-')}.csv`,
               )
             }
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 text-red-700 dark:text-red-400 hover:bg-red-500/20"
           >
             <Download size={14} />
             Échecs d'insertion

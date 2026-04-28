@@ -112,14 +112,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Week selector (board only) */}
         {pageMode === 'board' && (
           <div className="flex items-center bg-white/50 dark:bg-slate-800/50 rounded-xl border border-white/60 dark:border-slate-700 p-1 shadow-sm shrink-0">
-            <button onClick={onPrev} disabled={!hasPrev} className={`p-1 rounded-lg transition-colors ${!hasPrev ? 'text-gray-300' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700'}`}>
+            <button onClick={onPrev} disabled={!hasPrev} className={`p-1 rounded-lg transition-colors ${!hasPrev ? 'text-gray-300 dark:text-slate-700' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700'}`}>
               <ChevronLeft size={14} />
             </button>
             <div className="flex flex-col items-center px-3">
               <span className="text-xs font-bold text-slate-800 dark:text-white tracking-wide">{currentWeekLabel}</span>
               <span className="text-[9px] font-medium text-orange-600">{currentDateRange}</span>
             </div>
-            <button onClick={onNext} disabled={!hasNext} className={`p-1 rounded-lg transition-colors ${!hasNext ? 'text-gray-300' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700'}`}>
+            <button onClick={onNext} disabled={!hasNext} className={`p-1 rounded-lg transition-colors ${!hasNext ? 'text-gray-300 dark:text-slate-700' : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700'}`}>
               <ChevronRight size={14} />
             </button>
           </div>
@@ -172,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onUndo}
               disabled={!canUndo}
-              className={`p-1.5 rounded-md transition-colors ${!canUndo ? 'text-gray-300 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
+              className={`p-1.5 rounded-md transition-colors ${!canUndo ? 'text-gray-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
               title="Annuler"
             >
               <Undo2 size={14} />
@@ -180,7 +180,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onRedo}
               disabled={!canRedo}
-              className={`p-1.5 rounded-md transition-colors ${!canRedo ? 'text-gray-300 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
+              className={`p-1.5 rounded-md transition-colors ${!canRedo ? 'text-gray-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
               title="Rétablir"
             >
               <Redo2 size={14} />
@@ -229,8 +229,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             {showHistory && (
               <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-100 dark:border-slate-800 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden z-50">
-                <div className="px-4 py-3 border-b border-slate-50 bg-slate-50/50">
-                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historique récent</h3>
+                <div className="px-4 py-3 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                  <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Historique récent</h3>
                 </div>
                 <div className="max-h-60 overflow-y-auto custom-scrollbar-light">
                   {actionLog.length > 0 ? (
@@ -242,7 +242,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <div className="p-4 text-xs text-slate-400 italic text-center">Aucune action récente.</div>
+                    <div className="p-4 text-xs text-slate-400 dark:text-slate-500 italic text-center">Aucune action récente.</div>
                   )}
                 </div>
               </div>

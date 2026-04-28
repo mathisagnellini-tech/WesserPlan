@@ -32,7 +32,7 @@ const BrushModeHud: React.FC<BrushModeHudProps> = ({ brushStats, onClear, onVali
           </div>
         </div>
         <div className="flex items-center gap-5">
-          <button onClick={onClear} className="p-5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-[1.5rem] transition-all" title="Effacer tout"><Eraser size={26} strokeWidth={2.2} /></button>
+          <button onClick={onClear} className="p-5 text-slate-300 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-[1.5rem] transition-all" title="Effacer tout"><Eraser size={26} strokeWidth={2.2} /></button>
           <button onClick={onValidate} disabled={!brushStats.status.valid} className="flex items-center gap-4 px-10 py-6 bg-orange-600 text-white rounded-[1.5rem] text-[14px] font-black uppercase tracking-wider hover:bg-orange-700 disabled:opacity-30 disabled:grayscale transition-all shadow-xl shadow-orange-200 dark:shadow-orange-900/30 active:scale-95">
             <CheckCircle2 size={20} strokeWidth={2.5} /> Créer Zone
           </button>

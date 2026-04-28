@@ -16,7 +16,7 @@ export const HousingList: React.FC<HousingListProps> = ({ housings, copiedId, on
                 <div
                     key={h.id}
                     onClick={() => onSelect(h)}
-                    className={`group bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer relative ${h._matchLabel === 'Top Match' ? 'border-green-400 ring-2 ring-green-100' : 'border-[var(--border-subtle)]'}`}
+                    className={`group bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer relative ${h._matchLabel === 'Top Match' ? 'border-green-400 ring-2 ring-green-100 dark:ring-green-900/40' : 'border-[var(--border-subtle)]'}`}
                 >
                         {/* Smart Match Badges */}
                         {h._matchLabel && (
@@ -40,7 +40,7 @@ export const HousingList: React.FC<HousingListProps> = ({ housings, copiedId, on
                                 <div className="flex-grow">
                                     <div className="flex items-center gap-2">
                                         <p className="text-xs font-semibold text-[var(--text-secondary)] line-clamp-1">{h.address}</p>
-                                        <button onClick={(e) => onCopy(h.address, h.id, e)} className="text-slate-300 hover:text-orange-500 transition-colors opacity-0 group-hover/addr:opacity-100">
+                                        <button onClick={(e) => onCopy(h.address, h.id, e)} className="text-slate-400 dark:text-slate-500 hover:text-orange-500 transition-colors opacity-0 group-hover/addr:opacity-100">
                                             {copiedId === h.id ? <Check size={14} className="text-green-500"/> : <Copy size={14} />}
                                         </button>
                                     </div>
@@ -70,7 +70,7 @@ export const HousingList: React.FC<HousingListProps> = ({ housings, copiedId, on
                         </div>
 
                         {/* Card Footer */}
-                        <div className="p-4 border-t border-[var(--border-subtle)] flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 group-hover:bg-orange-50/30 dark:group-hover:bg-orange-900/20 transition-colors">
+                        <div className="p-4 border-t border-[var(--border-subtle)] flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/40 group-hover:bg-orange-50/30 dark:group-hover:bg-orange-900/20 transition-colors">
                                 <div>
                                 <p className="text-lg font-extrabold text-[var(--text-primary)]">{h.cost} €</p>
                                 </div>

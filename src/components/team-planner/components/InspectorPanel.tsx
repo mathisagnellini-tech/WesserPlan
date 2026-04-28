@@ -65,7 +65,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
         `}
       >
         {/* Hero Header */}
-        <div className="relative h-72 flex-shrink-0 bg-slate-50 overflow-hidden group">
+        <div className="relative h-72 flex-shrink-0 bg-slate-50 dark:bg-slate-800 overflow-hidden group">
              <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
                 <img src={person.photoUrl} className="w-full h-full object-cover" alt={person.name} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
@@ -92,8 +92,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                     onClick={() => setActiveTab(tab as any)}
                     className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all capitalize whitespace-nowrap
                         ${activeTab === tab
-                            ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20'
-                            : 'bg-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700'}
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md shadow-slate-900/20'
+                            : 'bg-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'}
                     `}
                 >
                     {tab === 'info' ? 'Profil' : tab === 'dates' ? 'Planning' : tab === 'docs' ? 'Sécurité' : tab === 'relations' ? 'Relations' : 'Privé'}
@@ -102,7 +102,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar-light bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar-light bg-slate-50/30 dark:bg-slate-900/30">
             {activeTab === 'info' && <PersonInfo person={person} />}
             {activeTab === 'relations' && (
                 <RelationsList
@@ -127,7 +127,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                        <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 ml-2">Document Sécurisé</h3>
                        <button onClick={() => setSecureView('none')} className="p-2 bg-white dark:bg-[var(--bg-card-solid)] rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white shadow-sm transition-colors"><X size={20}/></button>
                    </div>
-                   <div className="p-10 bg-slate-50 flex items-center justify-center flex-1 overflow-auto">
+                   <div className="p-10 bg-slate-50 dark:bg-slate-800 flex items-center justify-center flex-1 overflow-auto">
                         {secureView === 'score' ? (
                             <div className="w-full bg-white dark:bg-[var(--bg-card-solid)] p-8 rounded-[24px] shadow-sm text-center border border-slate-100 dark:border-slate-800">
                                 <div className="text-7xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter">A+</div>
@@ -137,7 +137,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
                              person.documents[secureView as keyof typeof person.documents] ? (
                                 <img src={person.documents[secureView as keyof typeof person.documents]} className="max-w-full rounded-2xl shadow-lg border border-white" alt="Document" />
                              ) : (
-                                <div className="text-slate-400 font-medium italic">Document non disponible</div>
+                                <div className="text-slate-400 dark:text-slate-500 font-medium italic">Document non disponible</div>
                              )
                         )}
                    </div>

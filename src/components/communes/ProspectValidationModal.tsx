@@ -112,15 +112,15 @@ export const ProspectValidationModal: React.FC<{
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-orange-50 dark:bg-orange-900/30 p-4 rounded-xl border border-orange-100 dark:border-orange-500/20 text-center">
                             <span className="block text-2xl font-black text-orange-700 dark:text-orange-400">{stats.count}</span>
-                            <span className="text-xs font-bold text-orange-400 uppercase">Communes</span>
+                            <span className="text-xs font-bold text-orange-700 dark:text-orange-400 uppercase">Communes</span>
                         </div>
                         <div className="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20 text-center">
                             <span className="block text-2xl font-black text-emerald-700 dark:text-emerald-400">{(stats.pop / 1000).toFixed(1)}k</span>
-                            <span className="text-xs font-bold text-emerald-400 uppercase">Habitants</span>
+                            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase">Habitants</span>
                         </div>
                         <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-100 dark:border-purple-500/20 text-center">
                             <span className="block text-2xl font-black text-purple-700 dark:text-purple-400">{stats.zones}</span>
-                            <span className="text-xs font-bold text-purple-400 uppercase">Zones Estimées</span>
+                            <span className="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase">Zones Estimées</span>
                         </div>
                     </div>
 

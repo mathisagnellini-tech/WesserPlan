@@ -66,7 +66,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               </button>
               <a
                 href="/"
-                className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg hover:bg-[var(--bg-card-solid)] hover:text-[var(--text-primary)] transition"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg hover:bg-slate-50 dark:hover:bg-[var(--bg-card-solid)] hover:text-[var(--text-primary)] transition"
               >
                 <Home size={16} /> Retour à l'accueil
               </a>

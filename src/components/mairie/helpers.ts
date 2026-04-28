@@ -20,12 +20,12 @@ export const ETAPES_PROGRESSION = [
 // canonical ORGANIZATIONS constant; this map adds the Tailwind shorthand
 // used by the existing markup. Keep keys in sync with Organization values.
 export const ORGS_CONFIG: Record<Organization, { color: string; bg: string; border: string; label: string; glow: string; brandColor: string }> = {
-  msf:           { color: 'text-red-600',      bg: 'bg-red-50',     border: 'border-red-200',     label: 'MSF',           glow: 'hover:shadow-red-500/20 hover:border-red-300',     brandColor: ORGANIZATIONS.msf.color },
-  unicef:        { color: 'text-sky-500',      bg: 'bg-sky-50',     border: 'border-sky-200',     label: 'UNICEF',        glow: 'hover:shadow-sky-500/20 hover:border-sky-300',     brandColor: ORGANIZATIONS.unicef.color },
-  wwf:           { color: 'text-green-600',    bg: 'bg-green-50',   border: 'border-green-200',   label: 'WWF',           glow: 'hover:shadow-green-500/20 hover:border-green-300', brandColor: ORGANIZATIONS.wwf.color },
-  mdm:           { color: 'text-blue-700',     bg: 'bg-blue-50',    border: 'border-blue-200',    label: 'MDM',           glow: 'hover:shadow-blue-500/20 hover:border-blue-300',   brandColor: ORGANIZATIONS.mdm.color },
-  aides:         { color: 'text-pink-600',     bg: 'bg-pink-50',    border: 'border-pink-200',    label: 'AIDES',         glow: 'hover:shadow-pink-500/20 hover:border-pink-300',   brandColor: ORGANIZATIONS.aides.color },
-  armeedusalut:  { color: 'text-rose-700',     bg: 'bg-rose-50',    border: 'border-rose-200',    label: 'Armée du Salut', glow: 'hover:shadow-rose-500/20 hover:border-rose-300',   brandColor: ORGANIZATIONS.armeedusalut.color },
+  msf:           { color: 'text-red-600 dark:text-red-400',       bg: 'bg-red-50',     border: 'border-red-200',     label: 'MSF',           glow: 'hover:shadow-red-500/20 hover:border-red-300',     brandColor: ORGANIZATIONS.msf.color },
+  unicef:        { color: 'text-sky-500 dark:text-sky-400',       bg: 'bg-sky-50',     border: 'border-sky-200',     label: 'UNICEF',        glow: 'hover:shadow-sky-500/20 hover:border-sky-300',     brandColor: ORGANIZATIONS.unicef.color },
+  wwf:           { color: 'text-green-600 dark:text-green-400',   bg: 'bg-green-50',   border: 'border-green-200',   label: 'WWF',           glow: 'hover:shadow-green-500/20 hover:border-green-300', brandColor: ORGANIZATIONS.wwf.color },
+  mdm:           { color: 'text-blue-700 dark:text-blue-400',     bg: 'bg-blue-50',    border: 'border-blue-200',    label: 'MDM',           glow: 'hover:shadow-blue-500/20 hover:border-blue-300',   brandColor: ORGANIZATIONS.mdm.color },
+  aides:         { color: 'text-pink-600 dark:text-pink-400',     bg: 'bg-pink-50',    border: 'border-pink-200',    label: 'AIDES',         glow: 'hover:shadow-pink-500/20 hover:border-pink-300',   brandColor: ORGANIZATIONS.aides.color },
+  armeedusalut:  { color: 'text-rose-700 dark:text-rose-400',     bg: 'bg-rose-50',    border: 'border-rose-200',    label: 'Armée du Salut', glow: 'hover:shadow-rose-500/20 hover:border-rose-300',   brandColor: ORGANIZATIONS.armeedusalut.color },
 };
 
 export const orgTheme = (org: Organization | 'all' | undefined) => {

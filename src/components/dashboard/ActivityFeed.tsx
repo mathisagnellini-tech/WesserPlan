@@ -103,7 +103,7 @@ const AddEventModal: React.FC<{
           type="button"
           onClick={onClose}
           aria-label="Fermer"
-          className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
         >
           <X size={20} />
         </button>
@@ -178,7 +178,7 @@ const AddEventModal: React.FC<{
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-orange-600 text-white font-bold py-2 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white font-bold py-2 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
           >
             {submitting ? 'En cours…' : 'Ajouter'}
           </button>
@@ -284,7 +284,7 @@ export const ActivityFeed: React.FC = () => {
               <div key={act.id} className="flex gap-3 items-start group animate-fade-in">
                 <div className="flex flex-col items-center gap-1 min-w-[35px]">
                   <span className="text-[10px] font-bold text-[var(--text-secondary)]">{time}</span>
-                  <span className="text-[8px] font-bold text-slate-300 dark:text-slate-600 uppercase">{date}</span>
+                  <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase">{date}</span>
                   <div className="h-full w-px bg-slate-100 dark:bg-slate-700 group-last:hidden"></div>
                 </div>
                 <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] p-2.5 rounded-xl shadow-sm flex-grow hover:shadow-md transition-shadow">

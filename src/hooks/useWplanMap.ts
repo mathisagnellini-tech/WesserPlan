@@ -183,7 +183,7 @@ export function useWplanMap({
 
         const highlightFeature = (e: L.LeafletEvent) => {
             const layer = e.target as L.Path;
-            layer.setStyle({ weight: 2, color: '#1a1a1a', fillOpacity: 0.9 });
+            layer.setStyle({ weight: 2, color: isDark ? '#fff' : '#1a1a1a', fillOpacity: 0.9 });
             (layer as unknown as { bringToFront: () => void }).bringToFront();
         };
 
@@ -203,8 +203,8 @@ export function useWplanMap({
             const popupHtml =
                 `<div class="text-sm font-sans">` +
                 `<b class="text-base">${escapeHtml(nom)}</b><br>` +
-                `<span class="text-gray-500">${escapeHtml(code)}</span>` +
-                `<hr class="my-1 border-gray-200"/>` +
+                `<span class="text-slate-600 dark:text-slate-400">${escapeHtml(code)}</span>` +
+                `<hr class="my-1 border-[var(--border-subtle)]"/>` +
                 `<div class="flex justify-between items-center">` +
                 `<span>${escapeHtml(metricLabel)}</span>` +
                 `<b class="text-orange-600">${escapeHtml(String(metricVal))}</b>` +

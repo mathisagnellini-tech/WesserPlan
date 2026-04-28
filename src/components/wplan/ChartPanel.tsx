@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Radar, TrendingUp, Shuffle, Info } from 'lucide-react';
 import { Bar, Line, Radar as RadarChart, Scatter } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
@@ -7,6 +7,7 @@ import type { WeatherData } from '@/services/weatherService';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface ChartPanelProps {
     chartTitle: string;
@@ -42,6 +43,24 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
     weatherError,
     selectedDeptCode,
 }) => {
+    const isDark = useThemeStore((s) => s.isDark);
+
+    const textSecondary = useMemo(() => {
+        if (typeof document === 'undefined') return '#6b7280';
+        return getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#6b7280';
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isDark]);
+
+    const borderColor = useMemo(() => {
+        if (typeof document === 'undefined') return '#e5e7eb';
+        return getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim() || '#e5e7eb';
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isDark]);
+
+    const tooltipBg = isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+    const tooltipTitle = isDark ? '#f1f5f9' : '#1f2937';
+    const tooltipBody = isDark ? '#cbd5e1' : '#374151';
+
     // ── Retention chart (real backend-derived data) ───────────────────
     const retentionContent = (() => {
         if (kpisLoading) return <LoadingState fullHeight label="Calcul rétention…" />;
@@ -88,14 +107,27 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
                 legend: { display: false },
                 datalabels: { display: false },
                 tooltip: {
+                    backgroundColor: tooltipBg,
+                    titleColor: tooltipTitle,
+                    bodyColor: tooltipBody,
+                    borderColor: borderColor,
+                    borderWidth: 1,
                     callbacks: {
                         label: (ctx) => `${ctx.parsed.y}% rétention`,
                     },
                 },
             },
             scales: {
-                y: { beginAtZero: true, max: 100, ticks: { callback: (v) => `${v}%` } },
-                x: { grid: { display: false } },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { callback: (v) => `${v}%`, color: textSecondary },
+                    grid: { color: borderColor },
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textSecondary },
+                },
             },
         };
         return <Line data={retentionData} options={retentionOptions} />;
@@ -177,9 +209,14 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: true, position: 'bottom' },
+                legend: { display: true, position: 'bottom', labels: { color: textSecondary } },
                 datalabels: { display: false },
                 tooltip: {
+                    backgroundColor: tooltipBg,
+                    titleColor: tooltipTitle,
+                    bodyColor: tooltipBody,
+                    borderColor: borderColor,
+                    borderWidth: 1,
                     callbacks: {
                         label: (ctx) => `${ctx.parsed.x}mm → ${ctx.parsed.y} sigs`,
                     },
@@ -187,12 +224,16 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Précipitations (mm/jour)' },
+                    title: { display: true, text: 'Précipitations (mm/jour)', color: textSecondary },
                     beginAtZero: true,
+                    ticks: { color: textSecondary },
+                    grid: { color: borderColor },
                 },
                 y: {
-                    title: { display: true, text: 'Signatures (proxy)' },
+                    title: { display: true, text: 'Signatures (proxy)', color: textSecondary },
                     beginAtZero: true,
+                    ticks: { color: textSecondary },
+                    grid: { color: borderColor },
                 },
             },
         };
@@ -248,7 +289,7 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
                         <Shuffle size={16} className="text-orange-500" />
                         Corrélation Pluie × Signatures
                         <span
-                            className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                             title="L'axe Y (signatures) est un proxy calculé à partir des KPI nationaux pondéré par département. À remplacer par /Dashboard/daily-by-department dès disponible."
                         >
                             <Info size={10} />

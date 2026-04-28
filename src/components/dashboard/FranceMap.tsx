@@ -77,7 +77,7 @@ function buildPopupContent(team: TeamData): string {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           </div>
           <div style="flex:1;">
-            <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Logement</p>
+            <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:0.5px;">Logement</p>
             <p class="wp-popup-value" style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; line-height:1.3;">${housing}</p>
           </div>
         </div>
@@ -87,7 +87,7 @@ function buildPopupContent(team: TeamData): string {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
           </div>
           <div style="flex:1;">
-            <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Vehicule</p>
+            <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:0.5px;">Vehicule</p>
             <p class="wp-popup-car-badge" style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; font-family:monospace; background:#e2e8f0; display:inline-block; padding:2px 6px; border-radius:4px;">${car}</p>
           </div>
         </div>

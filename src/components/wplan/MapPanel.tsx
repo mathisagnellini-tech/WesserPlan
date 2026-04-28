@@ -41,7 +41,7 @@ const MapPanel: React.FC<MapPanelProps> = ({
                     <h3 className="font-extrabold text-xl sm:text-2xl text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
                         {isComparing ? (
                             <>
-                                <span className={selectedItem ? 'text-orange-600' : 'text-gray-400'}>
+                                <span className={selectedItem ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-slate-500'}>
                                     {selectedItem ? (
                                         <>
                                             {selectedItem.properties.nom}
@@ -58,7 +58,7 @@ const MapPanel: React.FC<MapPanelProps> = ({
                                 <span className="text-sm text-[var(--text-muted)] font-bold uppercase bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
                                     VS
                                 </span>
-                                <span className={comparisonItem ? 'text-orange-600' : 'text-gray-400'}>
+                                <span className={comparisonItem ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-slate-500'}>
                                     {comparisonItem ? (
                                         <>
                                             {comparisonItem.properties.nom}
@@ -171,7 +171,7 @@ const MapPanel: React.FC<MapPanelProps> = ({
                         {METRICS_CONFIG[activeMetric].colors.map((color, idx) => (
                             <div key={idx} className="flex items-center gap-2">
                                 <span
-                                    className="w-4 h-4 rounded shadow-sm border border-black/5"
+                                    className="w-4 h-4 rounded shadow-sm border border-black/5 dark:border-white/10"
                                     style={{ backgroundColor: color }}
                                 ></span>
                                 <span className="text-xs text-[var(--text-secondary)] font-medium">

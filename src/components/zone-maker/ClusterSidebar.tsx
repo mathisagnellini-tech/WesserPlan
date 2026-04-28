@@ -97,7 +97,7 @@ const ClusterSidebar: React.FC<ClusterSidebarProps> = ({
               <FileText size={18} strokeWidth={2.2} />
             </button>
             <button onClick={onShowSectorPolicy} className="p-3 bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-orange-600 hover:border-orange-100 dark:hover:border-orange-800 transition-all shadow-sm"><Info size={18} strokeWidth={2.2} /></button>
-            <button onClick={onUndo} disabled={historyLength === 0} className={`p-3 rounded-2xl border transition-all ${historyLength > 0 ? 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-900 dark:text-white border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm' : 'bg-white/50 dark:bg-slate-800/50 text-slate-200 dark:text-slate-600 border-slate-100 dark:border-slate-800 shadow-none cursor-not-allowed'}`}><Undo2 size={18} strokeWidth={2.2} /></button>
+            <button onClick={onUndo} disabled={historyLength === 0} className={`p-3 rounded-2xl border transition-all ${historyLength > 0 ? 'bg-white dark:bg-[var(--bg-card-solid)] text-slate-900 dark:text-white border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm' : 'bg-white/50 dark:bg-slate-800/50 text-slate-200 dark:text-slate-500 border-slate-100 dark:border-slate-800 shadow-none cursor-not-allowed'}`}><Undo2 size={18} strokeWidth={2.2} /></button>
             {onGenerate && (
               <button
                 onClick={onGenerate}
@@ -137,7 +137,7 @@ const ClusterSidebar: React.FC<ClusterSidebarProps> = ({
       <div className={`flex-none bg-white/20 dark:bg-slate-800/20 border-b border-slate-200/40 dark:border-slate-700/40 transition-all duration-500 ${draftClusters.length === 0 ? 'h-0 opacity-0 overflow-hidden' : 'p-8 h-auto opacity-100'}`}>
         {draftClusters.length > 0 && (
           <>
-            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5 mb-6 px-1"><Package size={14} className="text-slate-300" strokeWidth={2.5} /> Brouillons</h2>
+            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5 mb-6 px-1"><Package size={14} className="text-slate-300 dark:text-slate-500" strokeWidth={2.5} /> Brouillons</h2>
             <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar">
               {draftClusters.map(c => {
                 const isLow = c.totalPopulation < MIN_1W;
@@ -150,12 +150,12 @@ const ClusterSidebar: React.FC<ClusterSidebarProps> = ({
                           {isLow && <AlertTriangle size={15} className="text-red-500 animate-pulse" strokeWidth={2.5} />}
                           {c.isBonus && <Zap size={15} className="text-emerald-500" strokeWidth={2.5} />}
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); onDeleteCluster(c.id); }} className="text-slate-200 dark:text-slate-600 hover:text-red-500 transition-colors p-1"><Trash2 size={13} strokeWidth={2.2} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); onDeleteCluster(c.id); }} className="text-slate-200 dark:text-slate-500 hover:text-red-500 transition-colors p-1"><Trash2 size={13} strokeWidth={2.2} /></button>
                       </div>
                       <div className="h-1.5 w-10 rounded-full mb-8" style={{ backgroundColor: c.color }}></div>
                       <div className="mt-auto flex items-center justify-between">
-                        <div className={`text-[11px] font-black uppercase flex items-center gap-2 ${isLow ? 'text-red-600' : 'text-slate-400'}`}><Users size={14} strokeWidth={2.2} className={isLow ? 'text-red-400' : 'text-slate-200'} /> {(c.totalPopulation / 1000).toFixed(1)}k</div>
-                        <div className="text-[10px] font-black text-white bg-slate-900 px-2.5 py-1 rounded-xl uppercase tracking-wider shadow-sm">{c.durationWeeks}s</div>
+                        <div className={`text-[11px] font-black uppercase flex items-center gap-2 ${isLow ? 'text-red-600' : 'text-slate-400'}`}><Users size={14} strokeWidth={2.2} className={isLow ? 'text-red-400' : 'text-slate-200 dark:text-slate-600'} /> {(c.totalPopulation / 1000).toFixed(1)}k</div>
+                        <div className="text-[10px] font-black text-white dark:text-slate-900 bg-slate-900 dark:bg-slate-200 px-2.5 py-1 rounded-xl uppercase tracking-wider shadow-sm">{c.durationWeeks}s</div>
                       </div>
                     </div>
                   </div>

@@ -75,7 +75,7 @@ export const RefusalModal: React.FC<{ isOpen: boolean; onClose: () => void; onCo
     <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div ref={dialogRef} className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
-        <div className="flex items-center gap-3 mb-4 text-red-600">
+        <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-400">
           <Ban size={28} />
           <h3 id={titleId} className="text-xl font-bold text-[var(--text-primary)]">Motif du refus</h3>
         </div>
@@ -129,7 +129,7 @@ export const DocRequiredModal: React.FC<{ isOpen: boolean; onClose: () => void; 
     <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div ref={dialogRef} className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
-        <div className="flex items-center gap-3 mb-4 text-amber-600">
+        <div className="flex items-center gap-3 mb-4 text-amber-600 dark:text-amber-400">
           <FileText size={28} />
           <h3 id={titleId} className="text-xl font-bold text-[var(--text-primary)]">Documents Requis</h3>
         </div>
@@ -157,7 +157,7 @@ export const DocRequiredModal: React.FC<{ isOpen: boolean; onClose: () => void; 
               }
             }}
             disabled={!docName.trim()}
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             Confirmer
           </button>
@@ -277,12 +277,12 @@ export const MairieDetailModal: React.FC<{ mairie: Mairie | null; onClose: () =>
               </h3>
               <div className="bg-orange-50 dark:bg-orange-500/10 p-4 rounded-xl space-y-3">
                 <div>
-                  <p className="text-xs text-orange-600 font-semibold uppercase tracking-wider">Maire</p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 font-semibold uppercase tracking-wider">Maire</p>
                   <p className="font-medium text-[var(--text-primary)]">{mairie.infos.maire}</p>
                 </div>
                 {mairie.contact.nomContact && (
                   <div>
-                    <p className="text-xs text-orange-600 font-semibold uppercase tracking-wider">Gatekeeper / Secrétaire</p>
+                    <p className="text-xs text-orange-600 dark:text-orange-400 font-semibold uppercase tracking-wider">Gatekeeper / Secrétaire</p>
                     <p className="font-medium text-[var(--text-primary)]">{mairie.contact.nomContact}</p>
                     <p className="text-xs text-[var(--text-secondary)]">{mairie.contact.fonctionContact}</p>
                   </div>
