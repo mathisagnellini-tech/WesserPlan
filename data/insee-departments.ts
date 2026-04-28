@@ -38,6 +38,7 @@ export const DEPARTMENT_INSEE_DATA: Record<string, DepartmentInseeData> = {
   "67": { code: "67", nom: "Bas-Rhin", population: 1141980, surface: 4755, density: 240, medianIncome: 22680, unemploymentRate: 6.4, medianAge: 40, ownershipRate: 55, povertyRate: 13.5, macron2022T2: 69.0, urbanRate: 78 },
   "57": { code: "57", nom: "Moselle", population: 1049900, surface: 6216, density: 169, medianIncome: 21120, unemploymentRate: 7.5, medianAge: 42, ownershipRate: 59, povertyRate: 14.8, macron2022T2: 61.8, urbanRate: 72 },
   "60": { code: "60", nom: "Oise", population: 829419, surface: 5860, density: 142, medianIncome: 22080, unemploymentRate: 8.0, medianAge: 39, ownershipRate: 60, povertyRate: 13.5, macron2022T2: 55.5, urbanRate: 70 },
+  "80": { code: "80", nom: "Somme", population: 572443, surface: 6170, density: 93, medianIncome: 20040, unemploymentRate: 9.5, medianAge: 41, ownershipRate: 58, povertyRate: 16.8, macron2022T2: 58.0, urbanRate: 62 },
   "62": { code: "62", nom: "Pas-de-Calais", population: 1468672, surface: 6671, density: 220, medianIncome: 19200, unemploymentRate: 10.8, medianAge: 40, ownershipRate: 58, povertyRate: 19.2, macron2022T2: 56.3, urbanRate: 76 },
 };
 

@@ -57,7 +57,7 @@ export const communesData: Record<Organization, Commune[]> = {
   ],
 };
 
-export const departmentMap: DepartmentMap = { '06': 'Alpes-Maritimes', '11': 'Aude', '13': 'Bouches-du-Rhône', '17': 'Charente-Maritime', '22': "Côtes-d'Armor", '29': 'Finistère', '30': 'Gard', '31': 'Haute-Garonne', '33': 'Gironde', '34': 'Hérault', '35': 'Ille-et-Vilaine', '44': 'Loire-Atlantique', '50': 'Manche', '56': 'Morbihan', '59': 'Nord', '60': 'Oise', '66': "Pyrénées-Orientales", '67': 'Bas-Rhin', '69': 'Rhône', '73': 'Savoie', '74': 'Haute-Savoie', '75': 'Paris', '76': 'Seine-Maritime', '77': 'Seine-et-Marne', '78': 'Yvelines', '79': 'Deux-Sèvres', '83': 'Var', '84': 'Vaucluse', '91': 'Essonne', '92': 'Hauts-de-Seine', '93': 'Seine-Saint-Denis', '94': 'Val-de-Marne', '95': "Val-d'Oise" };
+export const departmentMap: DepartmentMap = { '06': 'Alpes-Maritimes', '11': 'Aude', '13': 'Bouches-du-Rhône', '17': 'Charente-Maritime', '22': "Côtes-d'Armor", '29': 'Finistère', '30': 'Gard', '31': 'Haute-Garonne', '33': 'Gironde', '34': 'Hérault', '35': 'Ille-et-Vilaine', '44': 'Loire-Atlantique', '50': 'Manche', '56': 'Morbihan', '59': 'Nord', '60': 'Oise', '62': 'Pas-de-Calais', '66': "Pyrénées-Orientales", '67': 'Bas-Rhin', '69': 'Rhône', '73': 'Savoie', '74': 'Haute-Savoie', '75': 'Paris', '76': 'Seine-Maritime', '77': 'Seine-et-Marne', '78': 'Yvelines', '79': 'Deux-Sèvres', '80': 'Somme', '83': 'Var', '84': 'Vaucluse', '91': 'Essonne', '92': 'Hauts-de-Seine', '93': 'Seine-Saint-Denis', '94': 'Val-de-Marne', '95': "Val-d'Oise" };
 
 export const statusMap: StatusMap = {
   'pas_demande': { text: 'Pas demandé', color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' },
@@ -78,6 +78,8 @@ export const departmentToRegionMap: { [key: string]: string } = {
   '67': 'Grand Est',
   '59': 'Hauts-de-France',
   '60': 'Hauts-de-France',
+  '62': 'Hauts-de-France',
+  '80': 'Hauts-de-France',
   '75': 'Île-de-France',
   '77': 'Île-de-France',
   '78': 'Île-de-France',
