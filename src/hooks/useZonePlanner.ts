@@ -5,19 +5,36 @@ import {
   API_GEO_URL, TARGET_COMMUNES_LIST, DEPT_CODE, CLUSTER_COLORS, MIN_1W, TARGET_POPULATION
 } from '@/components/zone-maker/constants';
 import { useZoneStore } from '@/stores/zoneStore';
+import { reporter } from '@/lib/observability';
+import { computeIsoWeek } from '@/lib/isoWeek';
+import { ORGANIZATIONS } from '@/constants/organizations';
 
+// NGO list for the zone-maker. Brand colours come from the canonical
+// ORGANIZATIONS constant where available; the others (HI, 4P, FA) are
+// zone-maker-specific placeholders until they're added to the canonical
+// org constant or removed from the workflow.
 export const ASSOCIATIONS = [
-  { id: 'MSF', label: 'MSF', color: '#ee0000' },
-  { id: 'MDM', label: 'MDM', color: '#0095ff' },
-  { id: 'UNICEF', label: 'UNICEF', color: '#1ca9e1' },
-  { id: 'WWF', label: 'WWF', color: '#111111' },
-  { id: 'AIDES', label: 'AIDES', color: '#e4002b' },
+  { id: 'MSF', label: 'MSF', color: ORGANIZATIONS.msf.color },
+  { id: 'MDM', label: 'MDM', color: ORGANIZATIONS.mdm.color },
+  { id: 'UNICEF', label: 'UNICEF', color: ORGANIZATIONS.unicef.color },
+  { id: 'WWF', label: 'WWF', color: ORGANIZATIONS.wwf.color },
+  { id: 'AIDES', label: 'AIDES', color: ORGANIZATIONS.aides.color },
   { id: 'HI', label: 'HI', color: '#0055a4' },
   { id: '4P', label: '4P', color: '#4a90e2' },
-  { id: 'FA', label: 'FA', color: '#f39c12' }
+  { id: 'FA', label: 'FA', color: '#f39c12' },
 ];
 
-export const CURRENT_WEEK = 2;
+// Real ISO week — was previously hardcoded to 2 (a year-2024 leftover).
+export const getCurrentWeek = () => computeIsoWeek(new Date());
+/** @deprecated Prefer `getCurrentWeek()` so the value tracks the calendar. */
+export const CURRENT_WEEK = getCurrentWeek();
+
+const newClusterId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `cl-${crypto.randomUUID()}`;
+  }
+  return `cl-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
 
 export function useZonePlanner() {
   const selectedNGO = useZoneStore((s) => s.selectedNGO);
@@ -137,12 +154,20 @@ export function useZonePlanner() {
     };
   }, [resize, stopResizing]);
 
+  const [geoLoadError, setGeoLoadError] = useState<Error | null>(null);
+  const [geoReloadKey, setGeoReloadKey] = useState(0);
+  const retryGeoLoad = useCallback(() => setGeoReloadKey((k) => k + 1), []);
+
   useEffect(() => {
+    const ctrl = new AbortController();
     const loadData = async () => {
       setIsLoading(true);
+      setGeoLoadError(null);
       try {
-        const response = await fetch(API_GEO_URL);
+        const response = await fetch(API_GEO_URL, { signal: ctrl.signal });
+        if (!response.ok) throw new Error(`GeoAPI ${response.status}`);
         const geoJson = await response.json();
+        if (ctrl.signal.aborted) return;
         const features = geoJson.features as GeoFeature[];
         const targetNamesSet = new Set(TARGET_COMMUNES_LIST.map(n => n.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
 
@@ -209,15 +234,19 @@ export function useZonePlanner() {
           }
         });
 
-        setCommunes(initialCommunes);
+        if (!ctrl.signal.aborted) setCommunes(initialCommunes);
       } catch (err) {
-        console.error(err);
+        if (ctrl.signal.aborted) return;
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        reporter.error('zone-maker GeoJSON load failed', err, { source: 'useZonePlanner' });
+        setGeoLoadError(err instanceof Error ? err : new Error(String(err)));
       } finally {
-        setIsLoading(false);
+        if (!ctrl.signal.aborted) setIsLoading(false);
       }
     };
     loadData();
-  }, []);
+    return () => ctrl.abort();
+  }, [geoReloadKey]);
 
   // Hydrate clusters for the active NGO from Supabase (once per NGO).
   useEffect(() => {
@@ -237,7 +266,7 @@ export function useZonePlanner() {
         }
       } catch (err) {
         if (cancelled) return;
-        console.error('[useZonePlanner] cluster load failed', err);
+        reporter.error('cluster load failed', err, { source: 'useZonePlanner', tags: { ngo: selectedNGO } });
         setPersistenceError(err instanceof Error ? err.message : 'Erreur de chargement des zones');
       }
     })();
@@ -253,7 +282,7 @@ export function useZonePlanner() {
     saveTimerRef.current = setTimeout(() => {
       clusterPersistence.replaceAll(ngoToSave, clustersToSave)
         .catch(err => {
-          console.error('[useZonePlanner] cluster save failed', err);
+          reporter.error('cluster save failed', err, { source: 'useZonePlanner', tags: { ngo: ngoToSave } });
           setPersistenceError(err instanceof Error ? err.message : 'Erreur de sauvegarde des zones');
         });
     }, 500);
@@ -332,7 +361,7 @@ export function useZonePlanner() {
     let letterPart = index < 26 ? letters[index] : letters[Math.floor(index / 26) - 1] + letters[index % 26];
 
     const newCluster: Cluster = {
-      id: `cluster-${Date.now()}`,
+      id: newClusterId(),
       code: `${DEPT_CODE}${letterPart}`,
       communes: selectedComs,
       totalPopulation: pop,
@@ -340,7 +369,7 @@ export function useZonePlanner() {
       durationWeeks: calculateDuration(pop),
       startWeek: 0,
       assignedTeam: 0,
-      sortLat: selectedComs[0]?.centroid?.[1] || 0
+      sortLat: selectedComs[0]?.centroid?.[1] || 0,
     };
 
     setData(prev => ({ ...prev, clusters: [...prev.clusters, newCluster] }));
@@ -566,11 +595,15 @@ export function useZonePlanner() {
     return cnffData.map(w => `Semaine ${w.week} :\n${w.towns.map(t => ` - ${t}`).join('\n')}`).join('\n\n');
   }, [cnffData]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(cnffContent);
-    setHasCopied(true);
-    setTimeout(() => setHasCopied(false), 2000);
-  };
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(cnffContent);
+      setHasCopied(true);
+      setTimeout(() => setHasCopied(false), 2000);
+    } catch (err) {
+      reporter.error('clipboard write failed', err, { source: 'useZonePlanner' });
+    }
+  }, [cnffContent]);
 
   return {
     // State
@@ -608,5 +641,7 @@ export function useZonePlanner() {
     setSelectedCluster,
     handleGenerate,
     persistenceError,
+    geoLoadError,
+    retryGeoLoad,
   };
 }

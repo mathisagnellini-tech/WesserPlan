@@ -9,7 +9,8 @@ import BonusModeHud from './BonusModeHud';
 import BonusConfirmModal from './BonusConfirmModal';
 import SectorPolicyModal from './SectorPolicyModal';
 import FilterPanel from './FilterPanel';
-import { Search, GripVertical } from 'lucide-react';
+import { Search, GripVertical, AlertTriangle } from 'lucide-react';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 const ZonePlanner: React.FC = () => {
   const zp = useZonePlanner();
@@ -126,12 +127,45 @@ const ZonePlanner: React.FC = () => {
           onToggleStatus={zp.toggleStatusVisibility}
         />
 
-        {/* SEARCH */}
+        {/* SEARCH — wrapped in a "Bientôt disponible" tooltip because the
+            value isn't yet wired into any filter pipeline. The input stays
+            visible to preview the eventual UX. */}
         {!zp.isBrushMode && (
           <div className="absolute top-12 left-1/2 -translate-x-1/2 z-[400] w-full max-w-xl px-12 pointer-events-none">
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-4 flex items-center gap-4 pointer-events-auto ring-1 ring-black/5 hover:bg-white dark:hover:bg-slate-900 hover:shadow-2xl transition-all duration-500">
-              <Search className="ml-6 text-slate-300" size={22} strokeWidth={2.5} />
-              <input type="text" placeholder="Rechercher une commune..." value={zp.searchQuery} onChange={(e) => zp.setSearchQuery(e.target.value)} className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-500" />
+            <Tooltip
+              comingSoon
+              content="La recherche en direct connectera bientôt l'INSEE/code/nom au filtre carte. Pour l'instant, la valeur n'est pas encore appliquée."
+            >
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-4 flex items-center gap-4 pointer-events-auto ring-1 ring-black/5 hover:bg-white dark:hover:bg-slate-900 hover:shadow-2xl transition-all duration-500">
+                <Search className="ml-6 text-slate-300" size={22} strokeWidth={2.5} />
+                <input
+                  type="text"
+                  placeholder="Rechercher une commune..."
+                  aria-label="Rechercher une commune"
+                  value={zp.searchQuery}
+                  onChange={(e) => zp.setSearchQuery(e.target.value)}
+                  className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-500"
+                />
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
+        {/* GeoJSON load error — surface a retry button instead of a silent failure. */}
+        {zp.geoLoadError && !zp.isLoading && (
+          <div role="alert" className="absolute top-32 left-1/2 -translate-x-1/2 z-[700] w-full max-w-md px-6">
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/20 rounded-2xl p-4 flex items-start gap-3 shadow-xl">
+              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
+              <div className="flex-1">
+                <p className="text-sm text-red-800 dark:text-red-300 font-bold mb-2">Carte indisponible — chargement de la topographie impossible.</p>
+                <button
+                  type="button"
+                  onClick={zp.retryGeoLoad}
+                  className="text-xs font-bold px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                >
+                  Réessayer
+                </button>
+              </div>
             </div>
           </div>
         )}

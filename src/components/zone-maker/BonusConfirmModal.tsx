@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Cluster } from './types';
-import { Zap, ArrowRight, X } from 'lucide-react';
+import { Zap, ArrowRight } from 'lucide-react';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
 interface BonusImpacts {
   addedPop: number;
@@ -16,13 +18,16 @@ interface BonusConfirmModalProps {
 }
 
 const BonusConfirmModal: React.FC<BonusConfirmModalProps> = ({ selectedCluster, bonusImpacts, onCancel, onConfirm }) => {
-  return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in duration-300">
+  const titleId = useId();
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  const { dialogRef } = useDialogA11y({ isOpen: true, onClose: onCancel, initialFocusRef: confirmRef });
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+      <div ref={dialogRef} className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in duration-300">
         <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
           <div className="flex items-center gap-4 mb-2">
             <div className="p-3 bg-orange-600 text-white rounded-2xl shadow-lg shadow-orange-100 dark:shadow-orange-900/30"><Zap size={24} /></div>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Confirmation Zone Bonus</h3>
+            <h3 id={titleId} className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Confirmation Zone Bonus</h3>
           </div>
           <p className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest text-center">Les communes ajoutées n'augmenteront pas la durée de la zone cible.</p>
         </div>
@@ -63,11 +68,12 @@ const BonusConfirmModal: React.FC<BonusConfirmModalProps> = ({ selectedCluster, 
         </div>
 
         <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex gap-4">
-          <button onClick={onCancel} className="flex-1 py-5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Annuler</button>
-          <button onClick={onConfirm} className="flex-[2] py-5 bg-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl shadow-orange-100 dark:shadow-orange-900/30 hover:bg-orange-700 transition-all">Confirmer Zone Bonus</button>
+          <button type="button" onClick={onCancel} className="flex-1 py-5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Annuler</button>
+          <button ref={confirmRef} type="button" onClick={onConfirm} className="flex-[2] py-5 bg-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl shadow-orange-100 dark:shadow-orange-900/30 hover:bg-orange-700 transition-all">Confirmer Zone Bonus</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

@@ -1,4 +1,5 @@
 import { Cluster } from '@/components/zone-maker/types';
+import { reporter } from '@/lib/observability';
 
 // Calls the Supabase Edge Function `analyze-cluster`, which proxies to Gemini
 // with the API key held server-side. Frontend never sees GEMINI_API_KEY.
@@ -40,7 +41,7 @@ export const analyzeCluster = async (cluster: Cluster): Promise<string> => {
     if (data.error) throw new Error(data.error);
     return data.text ?? 'Pas de réponse générée.';
   } catch (error) {
-    console.error('Gemini Edge Function error:', error);
+    reporter.error('analyzeCluster failed', error, { source: 'geminiService' });
     return "Erreur lors de l'analyse IA. Vérifiez la console.";
   }
 };

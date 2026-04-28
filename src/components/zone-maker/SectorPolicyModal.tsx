@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ClusteringResult } from './types';
 import { MIN_1W, MAX_1W, MIN_2W, MAX_2W, MIN_3W, MAX_3W } from './constants';
 import { Info, X, Clock, Users, AlertCircle, BarChart3, Target } from 'lucide-react';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
 interface SectorPolicyModalProps {
   selectedNGO: string;
@@ -10,18 +12,21 @@ interface SectorPolicyModalProps {
 }
 
 const SectorPolicyModal: React.FC<SectorPolicyModalProps> = ({ selectedNGO, data, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col animate-in zoom-in duration-300">
+  const titleId = useId();
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const { dialogRef } = useDialogA11y({ isOpen: true, onClose, initialFocusRef: closeRef });
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+      <div ref={dialogRef} className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col animate-in zoom-in duration-300">
         <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-slate-900 dark:bg-slate-700 text-white rounded-[1.5rem] shadow-xl"><Info size={28} strokeWidth={2.5} /></div>
             <div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Information Plan</h3>
+              <h3 id={titleId} className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Information Plan</h3>
               <p className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">{selectedNGO} &bull; R&eacute;glementation &amp; Chiffres</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-4 bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-[1.5rem] transition-all"><X size={24} /></button>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fermer" className="p-4 bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-[1.5rem] transition-all"><X size={24} /></button>
         </div>
 
         <div className="p-10 space-y-10 overflow-y-auto max-h-[70vh]">
@@ -78,10 +83,11 @@ const SectorPolicyModal: React.FC<SectorPolicyModalProps> = ({ selectedNGO, data
         </div>
 
         <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-          <button onClick={onClose} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 dark:shadow-slate-900">Compris</button>
+          <button type="button" onClick={onClose} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 dark:shadow-slate-900">Compris</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
