@@ -1,10 +1,16 @@
+import { ORGANIZATIONS } from '@/constants/organizations';
+import type { Organization } from '@/types/commune';
 
 export interface TeamData {
     id: string;
     name: string;
     coords: [number, number];
+    /** Brand colour — used for the pin tail, border, and fallback fill. */
     color: string;
-    icon: string;
+    /** Public asset path of the org logo, or null when unknown. */
+    logo: string | null;
+    /** Short org label — used for alt text and fallback initials. */
+    orgShort: string;
     leader: string;
     housing: string;
     car: string;
@@ -17,21 +23,8 @@ export interface GlobalWeather {
     walking: 'Excellente' | 'Bonne' | 'Difficile' | 'Extreme';
 }
 
-// SVG Icons for map markers
-const svgs = {
-    wwf: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7h6V5a3 3 0 0 0-3-3Z"/><path d="M19 8a3 3 0 0 0-3 3v4h6v-4a3 3 0 0 0-3-3Z"/><path d="M5 8a3 3 0 0 0-3 3v4h6v-4a3 3 0 0 0-3-3Z"/><path d="M12 14a5 5 0 0 0-5 5v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2a5 5 0 0 0-5-5Z"/></svg>`,
-    msf: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
-    mdm: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
-    unicef: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 20.5a3.5 3.5 0 1 0-7 0 3.5 3.5 0 0 0 7 0Z"/><path d="M12 17v-3"/><path d="M8 10a4 4 0 0 1 8 0"/></svg>`
-};
-
 export function generateTeamsData(): { teams: TeamData[]; weather: GlobalWeather } {
-    const orgConfigs = [
-        { id: 'wwf', color: '#16a34a', icon: svgs.wwf, name: 'WWF' },
-        { id: 'msf', color: '#dc2626', icon: svgs.msf, name: 'MSF' },
-        { id: 'mdm', color: '#1e3a8a', icon: svgs.mdm, name: 'MDM' },
-        { id: 'unicef', color: '#38bdf8', icon: svgs.unicef, name: 'UNICEF' }
-    ];
+    const orgIds: Organization[] = ['wwf', 'msf', 'mdm', 'unicef'];
 
     const bounds = { latMin: 44.0, latMax: 49.0, lngMin: -0.5, lngMax: 6.5 };
     const leaders = ['Thomas', 'Sarah', 'Julie', 'Marc', 'Lucas', 'Emma', 'Hugo', 'Chloe'];
@@ -54,18 +47,20 @@ export function generateTeamsData(): { teams: TeamData[]; weather: GlobalWeather
 
     const teamsData: TeamData[] = [];
 
-    orgConfigs.forEach((org, idx) => {
+    orgIds.forEach((orgId, idx) => {
+        const org = ORGANIZATIONS[orgId];
         for (let i = 0; i < 2; i++) {
             const w = weathers[Math.floor(Math.random() * weathers.length)];
             teamsData.push({
-                id: `${org.id}-${i}`,
-                name: `Equipe ${org.name} ${i + 1}`,
+                id: `${orgId}-${i}`,
+                name: `Equipe ${org.shortName} ${i + 1}`,
                 coords: [
                     bounds.latMin + Math.random() * (bounds.latMax - bounds.latMin),
                     bounds.lngMin + Math.random() * (bounds.lngMax - bounds.lngMin)
                 ],
                 color: org.color,
-                icon: org.icon,
+                logo: org.logo,
+                orgShort: org.shortName,
                 leader: leaders[(idx * 2 + i) % leaders.length],
                 housing: housingAddresses[(idx * 2 + i) % housingAddresses.length],
                 car: carPlates[(idx * 2 + i) % carPlates.length],

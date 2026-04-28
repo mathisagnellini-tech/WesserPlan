@@ -5,91 +5,112 @@ import type { CarType } from '@/components/operations/types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Cars schema client
-const supabaseCars = createClient(supabaseUrl, supabaseAnonKey, {
-  db: { schema: 'cars' },
+// Fleet lives in plan.vehicles (migration_003_plan_schema.sql). The legacy
+// `cars` schema this service used to point at no longer exists on the
+// project — PostgREST returned "Invalid schema: cars" for every read.
+const supabasePlan = createClient(supabaseUrl, supabaseAnonKey, {
+  db: { schema: 'plan' },
 });
 
-// ── Row types (cars schema) ──
-
 interface VehicleRow {
-  vehicle_id: number;
-  license_plate: string;
-  model: string | null;
+  id: number;
+  plate: string;
+  brand: string;
+  location: string | null;
+  km: number | null;
+  next_service: string | null;
+  owner: string | null;
+  lat: number;
+  lng: number;
+  fuel_declared: number | null;
+  tank_size: number | null;
+  damages: DamageEntry[] | null;
   created_at: string;
+  updated_at: string;
 }
 
-interface DamageRow {
-  damage_id: number;
-  vehicle_id: number;
-  source_type: string;
-  damage_json: { part: string; type: string; detail: string };
-  recorded_at: string;
-  created_by: string | null;
+interface DamageEntry {
+  date: string;
+  description: string;
+  author: string;
 }
 
-function rowToCar(row: VehicleRow, damages: DamageRow[]): CarType {
-  const vehicleDamages = damages
-    .filter(d => d.vehicle_id === row.vehicle_id)
-    .map(d => ({
-      date: d.recorded_at,
-      description: `${d.damage_json.part} — ${d.damage_json.type}: ${d.damage_json.detail}`,
-      author: d.created_by ?? d.source_type,
-    }));
-
+function rowToCar(row: VehicleRow): CarType {
   return {
-    id: String(row.vehicle_id),
-    plate: row.license_plate,
-    brand: row.model ?? '',
-    where: '',
-    km: 0,
-    service: '',
-    owner: '',
-    // Note: cars.vehicles has no lat/lng columns yet, and no UI currently
-    // renders cars on a map. If/when geolocation lands in the schema, add
-    // lat/lng back to CarType and surface them here.
-    fuelStats: { declared: 0, tankSize: 50 },
-    damages: vehicleDamages,
+    id: String(row.id),
+    plate: row.plate,
+    brand: row.brand ?? '',
+    where: row.location ?? '',
+    km: row.km ?? 0,
+    service: row.next_service ?? '',
+    owner: row.owner ?? '',
+    fuelStats: {
+      declared: row.fuel_declared ?? 0,
+      tankSize: row.tank_size ?? 50,
+    },
+    damages: Array.isArray(row.damages) ? row.damages : [],
   };
 }
 
 export const carsService = {
   async getAll(): Promise<CarType[]> {
-    const [vehiclesRes, damagesRes] = await Promise.all([
-      supabaseCars.from('vehicles').select('*').order('license_plate'),
-      supabaseCars.from('vehicle_damages').select('*'),
-    ]);
+    const { data, error } = await supabasePlan
+      .from('vehicles')
+      .select('*')
+      .order('plate');
 
-    if (vehiclesRes.error) throw new Error(`Vehicles fetch failed: ${vehiclesRes.error.message}`);
-
-    const damages = (damagesRes.data as DamageRow[]) ?? [];
-    return (vehiclesRes.data as VehicleRow[]).map(row => rowToCar(row, damages));
+    if (error) throw new Error(`Vehicles fetch failed: ${error.message}`);
+    return (data as VehicleRow[]).map(rowToCar);
   },
 
   async getById(id: number): Promise<CarType | null> {
-    const [vehicleRes, damagesRes] = await Promise.all([
-      supabaseCars.from('vehicles').select('*').eq('vehicle_id', id).single(),
-      supabaseCars.from('vehicle_damages').select('*').eq('vehicle_id', id),
-    ]);
+    const { data, error } = await supabasePlan
+      .from('vehicles')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (vehicleRes.error) return null;
-    const damages = (damagesRes.data as DamageRow[]) ?? [];
-    return rowToCar(vehicleRes.data as VehicleRow, damages);
+    if (error) return null;
+    return rowToCar(data as VehicleRow);
   },
 
-  async reportDamage(vehicleId: number, damage: { part: string; type: string; detail: string }): Promise<void> {
-    const oid = getCurrentUserOid();
-    const { error } = await supabaseCars
-      .from('vehicle_damages')
-      .insert({
-        vehicle_id: vehicleId,
-        source_type: 'app',
-        damage_json: damage,
-        // cars.vehicle_damages already has a created_by column — populate it
-        // with the Azure AD OID for audit (Phase 1 of FINISH_PLAN.md).
-        ...(oid ? { created_by: oid } : {}),
-      });
+  async reportDamage(
+    vehicleId: number,
+    damage: { part: string; type: string; detail: string },
+  ): Promise<void> {
+    // Damages are a JSONB array on plan.vehicles. Read-modify-write is
+    // racy under concurrent reports — acceptable for now (single-user
+    // operations flow); switch to an RPC with jsonb_insert if that changes.
+    const { data: existing, error: readErr } = await supabasePlan
+      .from('vehicles')
+      .select('damages')
+      .eq('id', vehicleId)
+      .single();
 
-    if (error) throw new Error(`Damage report failed: ${error.message}`);
+    if (readErr) throw new Error(`Damage report failed: ${readErr.message}`);
+
+    const oid = getCurrentUserOid();
+    const prev: DamageEntry[] = Array.isArray((existing as { damages?: unknown })?.damages)
+      ? ((existing as { damages: DamageEntry[] }).damages)
+      : [];
+
+    const next: DamageEntry[] = [
+      {
+        date: new Date().toISOString(),
+        description: `${damage.part} — ${damage.type}: ${damage.detail}`,
+        author: oid ?? 'app',
+      },
+      ...prev,
+    ];
+
+    const { error: writeErr } = await supabasePlan
+      .from('vehicles')
+      .update({
+        damages: next,
+        ...(oid ? { updated_by_oid: oid } : {}),
+      })
+      .eq('id', vehicleId);
+
+    if (writeErr) throw new Error(`Damage report failed: ${writeErr.message}`);
   },
 };

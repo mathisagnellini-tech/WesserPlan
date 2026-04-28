@@ -8,16 +8,33 @@ import type { TeamData } from '@/mocks/dashboardMocks';
 export { generateTeamsData } from '@/mocks/dashboardMocks';
 export type { TeamData, GlobalWeather } from '@/mocks/dashboardMocks';
 
-// `team.icon` is a raw SVG markup string. It MUST originate from a trusted
-// hardcoded source (ORG_PRESETS / FALLBACK_PRESET in DashboardTab) — never
-// from the backend. See mapTeamsResponseToTeamData where `row.icon` is
-// intentionally not threaded through.
-function createDivIcon(color: string, iconSvg: string): L.DivIcon {
+// Render the visual content inside a pin/popup head. When a logo asset is
+// available, render an <img> with object-contain on a white field so the
+// brand mark stays legible. Otherwise fall back to the org short label
+// rendered in white on the brand-colour fill.
+//
+// `logo` and `orgShort` come from the canonical ORGANIZATIONS map (see
+// src/constants/organizations.ts) — never from the backend. They're still
+// HTML-escaped on interpolation as defence in depth.
+function buildBadgeInner(logo: string | null, orgShort: string): string {
+  if (logo) {
+    return `<img src="${escapeHtml(logo)}" alt="${escapeHtml(orgShort)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;display:block;" />`;
+  }
+  const initials = orgShort.slice(0, 3).toUpperCase();
+  return `<span style="font:700 11px/1 'Inter',sans-serif;color:#fff;letter-spacing:0.02em;">${escapeHtml(initials)}</span>`;
+}
+
+function createDivIcon(color: string, logo: string | null, orgShort: string): L.DivIcon {
   const safeBg = safeColor(color, '#FF5B2B');
+  // Pins with a logo: white fill so the brand mark reads cleanly, brand-coloured
+  // border + tail. Pins without a logo: brand-colour fill with white initials.
+  const fill = logo ? '#ffffff' : safeBg;
+  const inner = buildBadgeInner(logo, orgShort);
+
   const pinHtml = `
     <div class="relative group cursor-pointer" style="transform: translateY(-20px);">
-      <div style="background-color: ${safeBg};" class="w-12 h-12 rounded-full border-4 border-white shadow-lg flex items-center justify-center relative z-20 group-hover:scale-110 transition-transform duration-200">
-        <div class="text-white">${iconSvg}</div>
+      <div style="background-color: ${fill}; border-color: ${safeBg};" class="w-12 h-12 rounded-full border-[3px] shadow-lg overflow-hidden flex items-center justify-center relative z-20 group-hover:scale-110 transition-transform duration-200 p-1">
+        ${inner}
       </div>
       <div style="border-top-color: ${safeBg};" class="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] absolute left-1/2 -translate-x-1/2 top-[40px] z-10"></div>
       <div class="w-8 h-2 bg-black/20 blur-sm rounded-full absolute left-1/2 -translate-x-1/2 top-[52px]"></div>
@@ -42,11 +59,8 @@ function buildPopupContent(team: TeamData): string {
   const leader = escapeHtml(team.leader);
   const housing = escapeHtml(team.housing);
   const car = escapeHtml(team.car);
-  // team.icon is trusted SVG (preset). DO NOT escape it — escaping breaks the
-  // SVG. The mapTeamsResponseToTeamData pipeline must enforce this.
-  const iconSvg = team.icon
-    .replace('width="20"', 'width="18"')
-    .replace('height="20"', 'height="18"');
+  const fill = team.logo ? '#ffffff' : safeBg;
+  const badgeInner = buildBadgeInner(team.logo, team.orgShort);
 
   return `
     <style>
@@ -62,8 +76,8 @@ function buildPopupContent(team: TeamData): string {
     </style>
     <div style="font-family: 'Inter', sans-serif; min-width: 240px; padding: 4px;">
       <div class="wp-popup-border" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #f1f5f9;">
-        <div style="background:${safeBg}; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          ${iconSvg}
+        <div style="background:${fill}; border:2px solid ${safeBg}; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:3px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          ${badgeInner}
         </div>
         <div>
           <h3 class="wp-popup-heading" style="font-weight: 800; margin:0; color: #1e293b; font-size:15px; letter-spacing: -0.02em;">${name}</h3>
@@ -122,7 +136,7 @@ export const FranceMap: React.FC<{ teams: TeamData[] }> = ({ teams }) => {
   // re-renders (theme toggle, parent state churn).
   const icons = useMemo(() => {
     const out = new Map<string, L.DivIcon>();
-    for (const t of teams) out.set(t.id, createDivIcon(t.color, t.icon));
+    for (const t of teams) out.set(t.id, createDivIcon(t.color, t.logo, t.orgShort));
     return out;
   }, [teams]);
 
@@ -141,7 +155,7 @@ export const FranceMap: React.FC<{ teams: TeamData[] }> = ({ teams }) => {
         <Marker
           key={team.id}
           position={team.coords}
-          icon={icons.get(team.id) ?? createDivIcon(team.color, team.icon)}
+          icon={icons.get(team.id) ?? createDivIcon(team.color, team.logo, team.orgShort)}
         >
           <Popup>
             <div dangerouslySetInnerHTML={{ __html: buildPopupContent(team) }} />

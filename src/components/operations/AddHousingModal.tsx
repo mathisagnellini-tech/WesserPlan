@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, MapPin, Upload, Loader2, CheckCircle2, Save, AlertCircle } from 'lucide-react';
 import type { Housing } from './types';
 import { getWeekNumberLabel } from './helpers';
 import { housingsService } from '@/services/housingsService';
 import { geocodeAddress } from '@/services/geocodingService';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { reporter } from '@/lib/observability';
 
 // Local form state (UI shape, before mapping to HousingRow for the DB)
 interface HousingFormState {
@@ -84,6 +88,11 @@ export const AddHousingModal: React.FC<{
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const titleId = useId();
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const scanTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+    const { dialogRef } = useDialogA11y({ isOpen, onClose, initialFocusRef: closeRef });
+
     useEffect(() => {
         if (isOpen) {
             setMode(initialMode);
@@ -94,6 +103,18 @@ export const AddHousingModal: React.FC<{
             setIsSubmitting(false);
         }
     }, [isOpen, initialMode]);
+
+    // Cancel any pending scan timers when the modal closes / unmounts
+    useEffect(() => {
+        if (!isOpen) {
+            scanTimersRef.current.forEach(clearTimeout);
+            scanTimersRef.current = [];
+        }
+        return () => {
+            scanTimersRef.current.forEach(clearTimeout);
+            scanTimersRef.current = [];
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -107,7 +128,6 @@ export const AddHousingModal: React.FC<{
 
         const address = formData.address!.trim();
 
-        // Map UI form to HousingRow DB columns
         const nights = Number(formData.nights);
         const startDate = formData.date!;
         const endDate = addDays(startDate, nights);
@@ -115,9 +135,6 @@ export const AddHousingModal: React.FC<{
 
         setIsSubmitting(true);
         try {
-            // Geocode the address via the BAN API. Coordinates are required for
-            // the smart matcher, so block submission if geocoding fails — surface
-            // an inline error and let the user correct the address.
             const geo = await geocodeAddress(address);
             if (!geo) {
                 setErrors(prev => ({
@@ -157,6 +174,7 @@ export const AddHousingModal: React.FC<{
             await onCreated(created);
             onClose();
         } catch (err) {
+            reporter.error('Failed to create housing', err, { source: 'operations/AddHousingModal' });
             setSubmitError(err instanceof Error ? err.message : 'Erreur lors de la création du logement');
         } finally {
             setIsSubmitting(false);
@@ -165,7 +183,7 @@ export const AddHousingModal: React.FC<{
 
     const handleScanFile = () => {
         setScanStatus('scanning');
-        setTimeout(() => {
+        const t1 = setTimeout(() => {
             setScanStatus('done');
             setFormData({
                 ...initialForm,
@@ -179,27 +197,55 @@ export const AddHousingModal: React.FC<{
                 org: 'MSF',
                 date: new Date().toISOString().split('T')[0],
             });
-            setTimeout(() => setMode('manual'), 800);
+            const t2 = setTimeout(() => setMode('manual'), 800);
+            scanTimersRef.current.push(t2);
         }, 2000);
+        scanTimersRef.current.push(t1);
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                onClick={onClose}
+                aria-hidden="true"
+            />
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] outline-none"
+            >
                 <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-[var(--text-primary)]">{mode === 'manual' ? 'Saisie Manuelle' : 'Scanner un document'}</h3>
-                    <button onClick={onClose}><X className="text-[var(--text-muted)] hover:text-slate-600 dark:hover:text-slate-300" /></button>
+                    <h3 id={titleId} className="font-bold text-lg text-[var(--text-primary)]">
+                        {mode === 'manual' ? 'Saisie Manuelle' : 'Scanner un document'}
+                    </h3>
+                    <button
+                        ref={closeRef}
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Fermer"
+                    >
+                        <X className="text-[var(--text-muted)] hover:text-slate-600 dark:hover:text-slate-300" />
+                    </button>
                 </div>
                 <div className="p-6 overflow-y-auto">
                     {mode === 'scan' && (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             {scanStatus === 'idle' && (
-                                <div onClick={handleScanFile} className="w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
-                                    <Upload size={48} className="text-[var(--text-muted)] mb-4" />
-                                    <p className="font-medium text-[var(--text-secondary)]">Cliquez pour uploader le reçu</p>
-                                    <p className="text-xs text-[var(--text-muted)] mt-1">PDF, JPG, PNG acceptés</p>
-                                </div>
+                                <Tooltip comingSoon content="Le scan de reçu par IA est en cours d'intégration. Saisissez les informations manuellement pour le moment.">
+                                    <button
+                                        type="button"
+                                        onClick={handleScanFile}
+                                        className="w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                                    >
+                                        <Upload size={48} className="text-[var(--text-muted)] mb-4" />
+                                        <p className="font-medium text-[var(--text-secondary)]">Cliquez pour uploader le reçu</p>
+                                        <p className="text-xs text-[var(--text-muted)] mt-1">PDF, JPG, PNG acceptés</p>
+                                    </button>
+                                </Tooltip>
                             )}
                             {scanStatus === 'scanning' && (
                                 <div className="py-12">
@@ -214,7 +260,7 @@ export const AddHousingModal: React.FC<{
                                     <p className="font-bold">Analyse terminée !</p>
                                 </div>
                             )}
-                            <button onClick={() => setMode('manual')} className="mt-6 text-orange-600 text-sm hover:underline font-medium">Passer à la saisie manuelle</button>
+                            <button type="button" onClick={() => setMode('manual')} className="mt-6 text-orange-600 text-sm hover:underline font-medium">Passer à la saisie manuelle</button>
                         </div>
                     )}
                     {mode === 'manual' && (
@@ -411,6 +457,7 @@ export const AddHousingModal: React.FC<{
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 };

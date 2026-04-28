@@ -36,22 +36,69 @@ export interface InsertResult {
 /** All upload-target tables live in the `plan` schema. */
 export type UploadTable = 'town_halls' | 'housings' | 'vehicles';
 
-const SUPPORTED_EXTS = ['csv', 'xlsx', 'xls', 'json'] as const;
+export const SUPPORTED_EXTS = ['csv', 'xlsx', 'xls', 'json'] as const;
+export type SupportedExt = (typeof SUPPORTED_EXTS)[number];
+
+/** Hard cap on uploaded file size. Above this we refuse before reading the
+ * file at all — large CSV/XLSX files will block the main thread when parsed
+ * synchronously by Papa/XLSX. */
+export const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50 MB
+
+export class UploadAbortedError extends Error {
+  constructor(message = "Opération annulée") {
+    super(message);
+    this.name = 'UploadAbortedError';
+  }
+}
+
+function getExt(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() ?? '';
+}
+
+export function isSupportedExt(ext: string): ext is SupportedExt {
+  return (SUPPORTED_EXTS as readonly string[]).includes(ext);
+}
+
+/** Cheap, synchronous pre-flight before reading file bytes. Throws on
+ * unsupported extension or oversized file. Used by the UI to fail fast. */
+export function validateFile(file: File): void {
+  const ext = getExt(file.name);
+  if (!isSupportedExt(ext)) {
+    throw new Error(
+      `Format non supporté: .${ext || '(inconnu)'}. Formats acceptés: ${SUPPORTED_EXTS.join(', ')}.`,
+    );
+  }
+  if (file.size === 0) {
+    throw new Error('Fichier vide.');
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    const maxMb = (MAX_FILE_BYTES / 1024 / 1024).toFixed(0);
+    throw new Error(`Fichier trop volumineux (${mb} Mo). Limite: ${maxMb} Mo.`);
+  }
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new UploadAbortedError();
+  }
+}
 
 /** Parse + validate a file against a Zod schema. */
 export async function parseFile<T>(
   file: File,
   schema: z.ZodType<T>,
+  signal?: AbortSignal,
 ): Promise<ParseResult<T>> {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-  if (!SUPPORTED_EXTS.includes(ext as (typeof SUPPORTED_EXTS)[number])) {
-    throw new Error(`Format de fichier non supporté: .${ext || '(inconnu)'}`);
-  }
+  validateFile(file);
+  throwIfAborted(signal);
 
+  const ext = getExt(file.name) as SupportedExt;
   let raw: unknown[] = [];
 
   if (ext === 'csv') {
     const text = await file.text();
+    throwIfAborted(signal);
     const parsed = Papa.parse<Record<string, unknown>>(text, {
       header: true,
       skipEmptyLines: true,
@@ -60,6 +107,7 @@ export async function parseFile<T>(
     raw = parsed.data;
   } else if (ext === 'xlsx' || ext === 'xls') {
     const buf = await file.arrayBuffer();
+    throwIfAborted(signal);
     const wb = XLSX.read(buf, { type: 'array' });
     const sheetName = wb.SheetNames[0];
     if (!sheetName) {
@@ -69,6 +117,7 @@ export async function parseFile<T>(
     raw = XLSX.utils.sheet_to_json(ws, { defval: null, raw: true });
   } else if (ext === 'json') {
     const text = await file.text();
+    throwIfAborted(signal);
     let data: unknown;
     try {
       data = JSON.parse(text);
@@ -79,6 +128,8 @@ export async function parseFile<T>(
     }
     raw = Array.isArray(data) ? data : [data];
   }
+
+  throwIfAborted(signal);
 
   const rows: T[] = [];
   const errors: ParseError[] = [];
@@ -106,11 +157,13 @@ const BATCH_SIZE = 500;
 /**
  * Bulk-insert rows into a `plan.<table>`, batched and audit-stamped.
  * On batch failure, retries one-by-one to identify the offending rows.
+ * Honours an AbortSignal between batches and between per-row retries.
  */
 export async function bulkInsert(
   table: UploadTable,
   rows: Record<string, unknown>[],
   onProgress?: (inserted: number, total: number) => void,
+  signal?: AbortSignal,
 ): Promise<InsertResult> {
   let inserted = 0;
   const failed: InsertFailure[] = [];
@@ -118,6 +171,7 @@ export async function bulkInsert(
   onProgress?.(0, total);
 
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    throwIfAborted(signal);
     const slice = rows.slice(i, i + BATCH_SIZE);
     const stamped = slice.map((r) => withAudit(r, 'insert'));
 
@@ -126,6 +180,7 @@ export async function bulkInsert(
     if (error) {
       // Fall back to per-row inserts to surface the bad rows
       for (const row of slice) {
+        throwIfAborted(signal);
         const { error: oneErr } = await supabasePlan
           .from(table)
           .insert([withAudit(row, 'insert')]);
@@ -145,6 +200,20 @@ export async function bulkInsert(
   return { inserted, failed };
 }
 
+function triggerCsvDownload(csv: string, filename: string): void {
+  // BOM so Excel detects UTF-8
+  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /** Triggers a browser download of the error rows as CSV. */
 export function downloadErrorReport(
   errors: ParseError[],
@@ -158,16 +227,7 @@ export function downloadErrorReport(
       raw: JSON.stringify(e.raw),
     })),
   );
-  // BOM so Excel detects UTF-8
-  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  triggerCsvDownload(csv, filename);
 }
 
 /** Triggers a browser download of insert failures (post-parse, DB-level). */
@@ -183,13 +243,5 @@ export function downloadInsertFailures(
       row: JSON.stringify(f.row),
     })),
   );
-  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  triggerCsvDownload(csv, filename);
 }

@@ -7,14 +7,9 @@ interface VehicleSectionProps {
     onReportDamage: (car: CarType) => void;
 }
 
-// Stripped-down vehicle card: only renders fields that exist in the cars schema.
-// Removed (no backing column / always empty):
-//   - "Conducteur" / car.owner   — no driver column on cars.vehicles
-//   - "Kilométrage" / car.km     — no odometer column populated
-//   - "Prochaine révision" / car.service — no service-date column
-//   - Maintenance progress bar   — fabricated 65% width with no metric
-//   - "Changer Conducteur" button — no driver column to update
-// Re-add these once the schema gains the corresponding columns.
+// Stripped-down vehicle card: only renders plate + brand + damages today.
+// plan.vehicles also carries owner / km / next_service / fuel_declared /
+// tank_size / lat / lng — surface them here when the design needs them.
 export const VehicleSection: React.FC<VehicleSectionProps> = ({ cars, onReportDamage }) => {
     return (
         <div className="animate-fade-in space-y-8">

@@ -1,3 +1,5 @@
+import { computeIsoWeek } from '@/lib/isoWeek';
+
 export { MOCK_ZONES } from '@/mocks/operationsMocks';
 
 export const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
@@ -25,12 +27,11 @@ export const estimateFuelStops = (housingLat: number, housingLng: number, zoneLa
 
 export const getWeekNumberLabel = (dateString: string) => {
     const date = new Date(dateString);
-    if(isNaN(date.getTime())) return "S--";
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-    return `S${weekNo}-${d.getUTCFullYear()}`;
+    if (isNaN(date.getTime())) return "S--";
+    const weekNo = computeIsoWeek(date);
+    // Anchor the year at the Thursday of the same ISO week so that
+    // late-December / early-January dates report the correct ISO year.
+    const utc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    utc.setUTCDate(utc.getUTCDate() + 4 - (utc.getUTCDay() || 7));
+    return `S${weekNo}-${utc.getUTCFullYear()}`;
 };
-

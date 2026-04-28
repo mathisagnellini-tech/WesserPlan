@@ -11,6 +11,8 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { departmentCapitals } from '@/constants/departments';
+import { ORGANIZATIONS, ORG_FALLBACK_COLOR } from '@/constants/organizations';
+import type { Organization } from '@/types/commune';
 import { usePreferencesStore } from '@/stores/preferencesStore';
 import { reporter } from '@/lib/observability';
 import { computeIsoWeek } from '@/lib/isoWeek';
@@ -23,18 +25,10 @@ import type {
   TeamListItemDto,
 } from '@/types/api';
 
-const ORG_PRESETS: Record<string, { color: string; icon: string }> = {
-  wwf: { color: '#16a34a', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7h6V5a3 3 0 0 0-3-3Z"/><path d="M19 8a3 3 0 0 0-3 3v4h6v-4a3 3 0 0 0-3-3Z"/><path d="M5 8a3 3 0 0 0-3 3v4h6v-4a3 3 0 0 0-3-3Z"/><path d="M12 14a5 5 0 0 0-5 5v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2a5 5 0 0 0-5-5Z"/></svg>' },
-  msf: { color: '#dc2626', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>' },
-  mdm: { color: '#1e3a8a', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' },
-  unicef: { color: '#38bdf8', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 20.5a3.5 3.5 0 1 0-7 0 3.5 3.5 0 0 0 7 0Z"/><path d="M12 17v-3"/><path d="M8 10a4 4 0 0 1 8 0"/></svg>' },
-};
-
-const FALLBACK_PRESET = { color: '#FF5B2B', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V12a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' };
-
-// Backend rows (loose typing for forward-compat). Note: `color` / `icon`
-// are intentionally NOT consumed from the backend — those are rendered as
-// raw HTML/CSS and must come from a trusted hardcoded preset (see XSS audit).
+// Backend rows (loose typing for forward-compat). Note: `color` and `logo`
+// are intentionally NOT consumed from the backend — they're rendered into
+// HTML/attribute contexts and must come from the canonical ORGANIZATIONS
+// constant (see XSS audit + canonical org assets work).
 interface BackendTeamRow extends TeamListItemDto {
   latitude?: number;
   longitude?: number;
@@ -85,7 +79,10 @@ function mapTeamsResponseToTeamData(rows: unknown): TeamData[] {
     const parsed = parseTeamName(rawName);
 
     const orgKey = (parsed.org ?? row.organization ?? '').toString().toLowerCase();
-    const preset = ORG_PRESETS[orgKey] ?? FALLBACK_PRESET;
+    const orgInfo = ORGANIZATIONS[orgKey as Organization];
+    const color = orgInfo?.color ?? ORG_FALLBACK_COLOR;
+    const logo = orgInfo?.logo ?? null;
+    const orgShort = orgInfo?.shortName ?? (orgKey ? orgKey.toUpperCase() : '—');
 
     const lat = pickFirstNumber(row.latitude, row.lat);
     const lng = pickFirstNumber(row.longitude, row.lng);
@@ -117,9 +114,10 @@ function mapTeamsResponseToTeamData(rows: unknown): TeamData[] {
       id,
       name,
       coords,
-      // color + icon ALWAYS from preset — never from backend (XSS).
-      color: preset.color,
-      icon: preset.icon,
+      // color + logo ALWAYS from canonical org map — never from backend (XSS).
+      color,
+      logo,
+      orgShort,
       leader,
       housing,
       car,

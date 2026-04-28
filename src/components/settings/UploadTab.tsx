@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   UploadCloud,
   FileText,
@@ -18,6 +18,8 @@ import {
   bulkInsert,
   downloadErrorReport,
   downloadInsertFailures,
+  validateFile,
+  UploadAbortedError,
   type ParseResult,
   type InsertResult,
   type UploadTable,
@@ -34,6 +36,9 @@ import {
   vehicleUploadSchema,
   mapVehicleToDb,
 } from '@/lib/schemas/vehicles.schema';
+import { reporter } from '@/lib/observability';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 // ──────────────────────────────────────────────────────────────────────
 // Generic UploadZone — handles full lifecycle for one upload type.
@@ -67,9 +72,27 @@ function UploadZone<T>({
   const [progress, setProgress] = useState({ inserted: 0, total: 0 });
   const [insertResult, setInsertResult] = useState<InsertResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmAbortOpen, setConfirmAbortOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const mountedRef = useRef(true);
+
+  // Abort any in-flight parse/insert if the component unmounts.
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  const safeSet = useCallback(<S,>(setter: (v: S) => void, value: S) => {
+    if (mountedRef.current) setter(value);
+  }, []);
 
   const reset = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     setStep('idle');
     setFileName('');
     setParseResult(null);
@@ -81,23 +104,44 @@ function UploadZone<T>({
 
   const handleFile = useCallback(
     async (file: File) => {
+      // Pre-flight: extension + size. Surfaces problems before reading bytes.
+      try {
+        validateFile(file);
+      } catch (e) {
+        setFileName(file.name);
+        setError(e instanceof Error ? e.message : 'Fichier invalide');
+        setStep('error');
+        return;
+      }
+
+      // Abort any previous run, then start a fresh controller for this one.
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       setFileName(file.name);
       setStep('parsing');
       setError(null);
       try {
-        const result = await parseFile<T>(file, schema);
-        setParseResult(result);
-        setStep('preview');
+        const result = await parseFile<T>(file, schema, controller.signal);
+        if (controller.signal.aborted) return;
+        safeSet(setParseResult, result);
+        safeSet(setStep, 'preview' as Step);
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Erreur de parsing');
-        setStep('error');
+        if (e instanceof UploadAbortedError || controller.signal.aborted) return;
+        reporter.error('upload parse failed', e, {
+          source: 'UploadTab',
+          tags: { table, file: file.name },
+        });
+        safeSet(setError, e instanceof Error ? e.message : 'Erreur de parsing');
+        safeSet(setStep, 'error' as Step);
       }
     },
-    [schema],
+    [schema, table, safeSet],
   );
 
   const handleDrop = useCallback(
-    (event: React.DragEvent<HTMLLabelElement>) => {
+    (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       setIsDragOver(false);
       const file = event.dataTransfer.files?.[0];
@@ -114,23 +158,69 @@ function UploadZone<T>({
     [handleFile],
   );
 
+  const openFilePicker = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleDropzoneKey = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openFilePicker();
+      }
+    },
+    [openFilePicker],
+  );
+
   const handleConfirm = useCallback(async () => {
     if (!parseResult || parseResult.rows.length === 0) return;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setStep('inserting');
     setError(null);
     setProgress({ inserted: 0, total: parseResult.rows.length });
     try {
       const dbRows = parseResult.rows.map(mapToDb);
-      const result = await bulkInsert(table, dbRows, (inserted, total) => {
-        setProgress({ inserted, total });
-      });
-      setInsertResult(result);
-      setStep('done');
+      const result = await bulkInsert(
+        table,
+        dbRows,
+        (inserted, total) => {
+          if (controller.signal.aborted || !mountedRef.current) return;
+          setProgress({ inserted, total });
+        },
+        controller.signal,
+      );
+      if (controller.signal.aborted) return;
+      safeSet(setInsertResult, result);
+      safeSet(setStep, 'done' as Step);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur d'insertion");
-      setStep('error');
+      if (e instanceof UploadAbortedError || controller.signal.aborted) return;
+      reporter.error('upload bulkInsert failed', e, {
+        source: 'UploadTab',
+        tags: { table },
+      });
+      safeSet(setError, e instanceof Error ? e.message : "Erreur d'insertion");
+      safeSet(setStep, 'error' as Step);
     }
-  }, [parseResult, mapToDb, table]);
+  }, [parseResult, mapToDb, table, safeSet]);
+
+  // Cancel button shown during inserting needs confirmation: aborting mid-import
+  // can leave a partial result in the database (already-committed batches stay).
+  const requestAbortInsert = useCallback(() => {
+    setConfirmAbortOpen(true);
+  }, []);
+
+  const confirmAbortInsert = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setStep('error');
+    setError(
+      "Import interrompu. Les lignes déjà insérées avant l'annulation restent enregistrées.",
+    );
+  }, []);
 
   return (
     <div className="glass-card p-6 flex flex-col gap-4">
@@ -143,7 +233,10 @@ function UploadZone<T>({
       </div>
 
       {step === 'idle' && (
-        <label
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label={`Déposer un fichier pour : ${title}`}
           onDragOver={(e) => {
             e.preventDefault();
             setIsDragOver(true);
@@ -153,11 +246,13 @@ function UploadZone<T>({
             setIsDragOver(false);
           }}
           onDrop={handleDrop}
-          className={`flex justify-center items-center w-full h-32 px-4 transition bg-white/50 dark:bg-[var(--bg-card-solid)]/50 border-2 ${
+          onClick={openFilePicker}
+          onKeyDown={handleDropzoneKey}
+          className={`flex flex-col justify-center items-center w-full h-32 px-4 transition bg-white/50 dark:bg-[var(--bg-card-solid)]/50 border-2 ${
             isDragOver
               ? 'border-[var(--highlight-text)]'
               : 'border-gray-300 dark:border-slate-600'
-          } border-dashed rounded-xl cursor-pointer hover:border-[var(--accent-primary)]/60 dark:hover:border-[var(--accent-primary)]/60`}
+          } border-dashed rounded-xl cursor-pointer hover:border-[var(--accent-primary)]/60 dark:hover:border-[var(--accent-primary)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/60`}
         >
           <span className="flex items-center space-x-2">
             <UploadCloud
@@ -174,27 +269,45 @@ function UploadZone<T>({
               </span>
             </span>
           </span>
+          <span className="text-[10px] text-[var(--text-muted)] mt-1">
+            Max. 50 Mo · {acceptedExts.replace(/\./g, '').toUpperCase()}
+          </span>
           <input
             ref={fileInputRef}
             type="file"
             accept={acceptedExts}
             className="hidden"
             onChange={handleSelect}
+            aria-hidden="true"
+            tabIndex={-1}
           />
-        </label>
+        </div>
       )}
 
       {step === 'parsing' && (
-        <div className="flex items-center gap-3 px-4 py-6 rounded-xl bg-[var(--bg-card-solid)]/50 border border-[var(--border-subtle)]">
-          <Loader2 className="animate-spin text-[var(--accent-primary)]" size={20} />
-          <div>
-            <p className="text-sm font-semibold text-[var(--text-primary)]">
-              Analyse de {fileName}…
-            </p>
-            <p className="text-xs text-[var(--text-secondary)]">
-              Lecture et validation en cours
-            </p>
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center justify-between gap-3 px-4 py-6 rounded-xl bg-[var(--bg-card-solid)]/50 border border-[var(--border-subtle)]"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <Loader2 className="animate-spin text-[var(--accent-primary)] shrink-0" size={20} />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                Analyse de {fileName}…
+              </p>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Lecture et validation en cours
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={reset}
+            className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 py-1 rounded shrink-0"
+          >
+            Annuler
+          </button>
         </div>
       )}
 
@@ -208,14 +321,33 @@ function UploadZone<T>({
       )}
 
       {step === 'inserting' && (
-        <div className="flex flex-col gap-3 px-4 py-5 rounded-xl bg-[var(--bg-card-solid)]/50 border border-[var(--border-subtle)]">
-          <div className="flex items-center gap-3">
-            <Loader2 className="animate-spin text-[var(--accent-primary)]" size={18} />
-            <p className="text-sm font-semibold text-[var(--text-primary)]">
-              Import en cours… {progress.inserted} / {progress.total}
-            </p>
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex flex-col gap-3 px-4 py-5 rounded-xl bg-[var(--bg-card-solid)]/50 border border-[var(--border-subtle)]"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Loader2 className="animate-spin text-[var(--accent-primary)] shrink-0" size={18} />
+              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                Import en cours… {progress.inserted} / {progress.total}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={requestAbortInsert}
+              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded shrink-0"
+            >
+              Annuler
+            </button>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+          <div
+            className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={progress.total || 100}
+            aria-valuenow={progress.inserted}
+          >
             <div
               className="h-full bg-[var(--accent-primary)] transition-all"
               style={{
@@ -239,7 +371,11 @@ function UploadZone<T>({
       )}
 
       {step === 'error' && (
-        <div className="flex flex-col gap-3 px-4 py-5 rounded-xl bg-red-500/10 border border-red-500/30">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="flex flex-col gap-3 px-4 py-5 rounded-xl bg-red-500/10 border border-red-500/30"
+        >
           <div className="flex items-center gap-3">
             <AlertTriangle className="text-red-500" size={20} />
             <p className="text-sm font-semibold text-[var(--text-primary)]">
@@ -258,6 +394,17 @@ function UploadZone<T>({
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmAbortOpen}
+        onClose={() => setConfirmAbortOpen(false)}
+        onConfirm={confirmAbortInsert}
+        title="Interrompre l'import ?"
+        message="Les lignes déjà insérées avant l'annulation resteront enregistrées en base. Voulez-vous continuer ?"
+        confirmLabel="Interrompre"
+        cancelLabel="Continuer l'import"
+        variant="danger"
+      />
     </div>
   );
 }
@@ -290,8 +437,8 @@ function PreviewPanel<T>({
   return (
     <div className="flex flex-col gap-4 px-4 py-4 rounded-xl bg-[var(--bg-card-solid)]/50 border border-[var(--border-subtle)]">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div>
-          <p className="text-sm font-semibold text-[var(--text-primary)]">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
             {fileName}
           </p>
           <p className="text-xs text-[var(--text-secondary)]">
@@ -441,6 +588,8 @@ function DonePanel<T>({
 
   return (
     <div
+      role="status"
+      aria-live="polite"
       className={`flex flex-col gap-3 px-4 py-4 rounded-xl border ${
         allClean
           ? 'bg-emerald-500/10 border-emerald-500/30'
@@ -523,7 +672,8 @@ function DonePanel<T>({
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Reports zone — placeholder (out of scope)
+// Reports zone — placeholder (out of scope). Wrapped in Tooltip(comingSoon)
+// per project rule: never ship non-functional buttons that look real.
 // ──────────────────────────────────────────────────────────────────────
 
 const ReportsPlaceholder: React.FC = () => (
@@ -537,17 +687,27 @@ const ReportsPlaceholder: React.FC = () => (
         Chargez les rapports hebdomadaires ou mensuels pour analyse. Formats prévus : PDF, XLSX.
       </p>
     </div>
-    <div className="flex items-center justify-center w-full h-32 px-4 rounded-xl bg-white/30 dark:bg-[var(--bg-card-solid)]/30 border-2 border-dashed border-gray-300 dark:border-slate-700">
-      <div className="text-center">
-        <FileText className="mx-auto h-8 w-8 text-[var(--text-muted)] mb-1" />
-        <p className="text-sm font-semibold text-[var(--text-secondary)]">
-          Bientôt disponible
-        </p>
-        <p className="text-[11px] text-[var(--text-muted)]">
-          Module en cours de développement
-        </p>
-      </div>
-    </div>
+    <Tooltip
+      comingSoon
+      content="L'import des rapports de performance sera disponible une fois le module d'analyse hebdomadaire/mensuel finalisé."
+    >
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        className="flex items-center justify-center w-full h-32 px-4 rounded-xl bg-white/30 dark:bg-[var(--bg-card-solid)]/30 border-2 border-dashed border-gray-300 dark:border-slate-700 cursor-not-allowed"
+      >
+        <span className="text-center">
+          <FileText className="mx-auto h-8 w-8 text-[var(--text-muted)] mb-1" />
+          <span className="block text-sm font-semibold text-[var(--text-secondary)]">
+            Bientôt disponible
+          </span>
+          <span className="block text-[11px] text-[var(--text-muted)]">
+            Module en cours de développement
+          </span>
+        </span>
+      </button>
+    </Tooltip>
   </div>
 );
 

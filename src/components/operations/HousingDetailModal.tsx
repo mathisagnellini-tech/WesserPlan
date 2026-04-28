@@ -1,9 +1,143 @@
-import React from 'react';
+import React, { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, MapPin, User, Bed, Star, CheckCircle2, Phone } from 'lucide-react';
 import type { Housing } from './types';
 import { getWeekNumberLabel } from './helpers';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
 
-export const HousingDetailModal: React.FC<{ housing: Housing | null; onClose: () => void; }> = ({ housing, onClose }) => {
+interface HousingDetailModalProps {
+    housing: Housing | null;
+    onClose: () => void;
+}
+
+export const HousingDetailModal: React.FC<HousingDetailModalProps> = ({ housing, onClose }) => {
+    const titleId = useId();
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const isOpen = housing !== null;
+    const { dialogRef } = useDialogA11y({ isOpen, onClose, initialFocusRef: closeRef });
+
     if (!housing) return null;
-    return ( <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in"> <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div> <div className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"> <div className="h-40 bg-slate-100 dark:bg-slate-800 relative"> <div className="absolute inset-0 flex items-center justify-center text-[var(--text-muted)]"> <MapPin size={48} opacity={0.2}/> <span className="ml-2 text-sm font-medium">Aperçu carte indisponible</span> </div> <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-[var(--bg-card-solid)]/80 hover:bg-white rounded-full text-[var(--text-secondary)] transition-colors shadow-sm"> <X size={20} /> </button> <div className="absolute bottom-4 left-6"> <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${housing.org === 'MSF' ? 'bg-red-600' : housing.org === 'UNICEF' ? 'bg-orange-600' : 'bg-green-600'}`}> Utilisé par {housing.org} </span> </div> </div> <div className="p-8 overflow-y-auto"> <div className="flex justify-between items-start mb-6"> <div> <h2 className="text-2xl font-bold text-[var(--text-primary)] leading-tight mb-1">{housing.name}</h2> <p className="text-[var(--text-secondary)] text-sm">{housing.address}</p> <div className="flex items-center gap-2 mt-1"> <span className="text-xs font-bold bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded">{getWeekNumberLabel(housing.date)}</span> <span className="text-xs text-[var(--text-secondary)]">{housing.region} ({housing.dept})</span> </div> </div> <div className="text-right"> <div className="text-2xl font-extrabold text-[var(--text-primary)]">{housing.cost.toLocaleString('fr-FR')} €</div> <div className="text-xs text-[var(--text-muted)] uppercase font-bold tracking-wider">Coût total</div> {housing.nights > 0 && <div className="text-sm text-[var(--text-secondary)] mt-1">{(housing.cost / housing.nights).toFixed(0)} € / nuit</div>} </div> </div> <div className="grid grid-cols-3 gap-4 mb-8"> <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center"> <User className="text-orange-500 mb-2" size={24} /> <span className="font-bold text-[var(--text-primary)] text-lg">{housing.people}</span> <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Personnes</span> </div> <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center"> <Bed className="text-orange-500 mb-2" size={24} /> <span className="font-bold text-[var(--text-primary)] text-lg">{housing.nights}</span> <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Nuits min.</span> </div> <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center"> <Star className="text-yellow-500 mb-2" size={24} fill="currentColor" /> <span className="font-bold text-[var(--text-primary)] text-lg">{housing.rating}/5</span> <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Avis Équipe</span> </div> </div> <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8"> <div> <h3 className="font-bold text-[var(--text-primary)] mb-3">Commentaire Chef d'Équipe</h3> <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl text-sm text-[var(--text-primary)] italic border border-yellow-100 dark:border-yellow-800/40 relative"> <span className="absolute top-2 left-2 text-4xl text-yellow-200 dark:text-yellow-700/50 font-serif leading-none">"</span> <p className="relative z-10">{housing.comment || "Aucun commentaire spécifique."}</p> <p className="text-right mt-2 text-xs font-bold not-italic text-[var(--text-muted)]">- {housing.lead}</p> </div> </div> <div> <h3 className="font-bold text-[var(--text-primary)] mb-3">Commodités</h3> <div className="space-y-2"> {housing.amenities.map(am => ( <div key={am} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]"> <CheckCircle2 size={16} className="text-green-500"/> {am} </div> ))} </div> </div> </div> <div className="border-t border-[var(--border-subtle)] pt-6 flex items-center justify-between"> <div className="flex items-center gap-3"> <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center text-[var(--text-secondary)]"> <User size={20} /> </div> <div> <p className="text-sm font-bold text-[var(--text-primary)]">{housing.ownerName}</p> <p className="text-xs text-[var(--text-secondary)]">{housing.channel}</p> </div> </div> <button className="px-6 py-3 bg-slate-900 text-white dark:bg-orange-600 dark:hover:bg-orange-700 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 dark:shadow-slate-900 flex items-center gap-2"> <Phone size={18} /> {housing.owner} </button> </div> </div> </div> </div> );
+
+    const orgBadgeColor =
+        housing.org === 'MSF' ? 'bg-red-600'
+        : housing.org === 'UNICEF' ? 'bg-orange-600'
+        : 'bg-green-600';
+
+    return createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+            <div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+                onClick={onClose}
+                aria-hidden="true"
+            />
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] outline-none"
+            >
+                <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
+                    <div className="absolute inset-0 flex items-center justify-center text-[var(--text-muted)]">
+                        <MapPin size={48} opacity={0.2} />
+                        <span className="ml-2 text-sm font-medium">Aperçu carte indisponible</span>
+                    </div>
+                    <button
+                        ref={closeRef}
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Fermer"
+                        className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-[var(--bg-card-solid)]/80 hover:bg-white rounded-full text-[var(--text-secondary)] transition-colors shadow-sm"
+                    >
+                        <X size={20} />
+                    </button>
+                    <div className="absolute bottom-4 left-6">
+                        <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${orgBadgeColor}`}>
+                            Utilisé par {housing.org}
+                        </span>
+                    </div>
+                </div>
+                <div className="p-8 overflow-y-auto">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 id={titleId} className="text-2xl font-bold text-[var(--text-primary)] leading-tight mb-1">{housing.name}</h2>
+                            <p className="text-[var(--text-secondary)] text-sm">{housing.address}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs font-bold bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded">{getWeekNumberLabel(housing.date)}</span>
+                                <span className="text-xs text-[var(--text-secondary)]">{housing.region} ({housing.dept})</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-2xl font-extrabold text-[var(--text-primary)]">{housing.cost.toLocaleString('fr-FR')} €</div>
+                            <div className="text-xs text-[var(--text-muted)] uppercase font-bold tracking-wider">Coût total</div>
+                            {housing.nights > 0 && <div className="text-sm text-[var(--text-secondary)] mt-1">{(housing.cost / housing.nights).toFixed(0)} € / nuit</div>}
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-8">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center">
+                            <User className="text-orange-500 mb-2" size={24} />
+                            <span className="font-bold text-[var(--text-primary)] text-lg">{housing.people}</span>
+                            <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Personnes</span>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center">
+                            <Bed className="text-orange-500 mb-2" size={24} />
+                            <span className="font-bold text-[var(--text-primary)] text-lg">{housing.nights}</span>
+                            <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Nuits min.</span>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center">
+                            <Star className="text-yellow-500 mb-2" size={24} fill="currentColor" />
+                            <span className="font-bold text-[var(--text-primary)] text-lg">{housing.rating}/5</span>
+                            <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Avis Équipe</span>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <h3 className="font-bold text-[var(--text-primary)] mb-3">Commentaire Chef d'Équipe</h3>
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl text-sm text-[var(--text-primary)] italic border border-yellow-100 dark:border-yellow-800/40 relative">
+                                <span className="absolute top-2 left-2 text-4xl text-yellow-200 dark:text-yellow-700/50 font-serif leading-none">"</span>
+                                <p className="relative z-10">{housing.comment || "Aucun commentaire spécifique."}</p>
+                                <p className="text-right mt-2 text-xs font-bold not-italic text-[var(--text-muted)]">- {housing.lead}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-[var(--text-primary)] mb-3">Commodités</h3>
+                            <div className="space-y-2">
+                                {housing.amenities.map(am => (
+                                    <div key={am} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+                                        <CheckCircle2 size={16} className="text-green-500" />
+                                        {am}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="border-t border-[var(--border-subtle)] pt-6 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center text-[var(--text-secondary)]">
+                                <User size={20} />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-[var(--text-primary)]">{housing.ownerName}</p>
+                                <p className="text-xs text-[var(--text-secondary)]">{housing.channel}</p>
+                            </div>
+                        </div>
+                        {housing.owner ? (
+                            <a
+                                href={`tel:${housing.owner.replace(/\s+/g, '')}`}
+                                className="px-6 py-3 bg-slate-900 text-white dark:bg-orange-600 dark:hover:bg-orange-700 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 dark:shadow-slate-900 flex items-center gap-2"
+                            >
+                                <Phone size={18} /> {housing.owner}
+                            </a>
+                        ) : (
+                            <span className="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-[var(--text-muted)] rounded-xl font-bold flex items-center gap-2 cursor-not-allowed">
+                                <Phone size={18} /> N/A
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body,
+    );
 };

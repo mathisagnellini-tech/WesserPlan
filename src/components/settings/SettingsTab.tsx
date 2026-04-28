@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   User,
@@ -17,6 +17,9 @@ import {
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuth } from '@/hooks/useAuth';
 import { usePreferencesStore } from '@/stores/preferencesStore';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { reporter } from '@/lib/observability';
 
 const SettingsCard: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
     <div className="glass-card p-6">
@@ -41,7 +44,7 @@ const slugify = (s: string) =>
 const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: boolean) => void }> = ({ label, enabled, setEnabled }) => {
     const id = `toggle-${slugify(label)}`;
     return (
-        <label htmlFor={id} className="flex items-center justify-between cursor-pointer">
+        <label htmlFor={id} className="flex items-center justify-between cursor-pointer group">
             <span className="text-sm text-[var(--text-secondary)]">{label}</span>
             <div className="relative">
                 <input
@@ -49,12 +52,11 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
                     type="checkbox"
                     role="switch"
                     aria-checked={enabled}
-                    aria-label={label}
-                    className="sr-only"
+                    className="peer sr-only"
                     checked={enabled}
                     onChange={() => setEnabled(!enabled)}
                 />
-                <div className={`block w-10 h-6 rounded-full transition ${enabled ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
+                <div className={`block w-10 h-6 rounded-full transition peer-focus-visible:ring-2 peer-focus-visible:ring-orange-500 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-page)] ${enabled ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
                 <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition ${enabled ? 'transform translate-x-full' : ''}`}></div>
             </div>
         </label>
@@ -62,7 +64,11 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
 };
 
 const Toast: React.FC<{ message: string }> = ({ message }) => (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-fade-in">
+    <div
+        role="status"
+        aria-live="polite"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-fade-in"
+    >
         <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700">
             <Check size={18} className="text-orange-400" />
             <span className="font-medium text-sm">{message}</span>
@@ -87,6 +93,9 @@ const clearLocalCache = (): number => {
     return keysToRemove.length;
 };
 
+const PROFILE_SYNC_HINT =
+    "Votre profil est synchronisé depuis Microsoft 365. Pour modifier votre nom ou votre adresse e-mail, rendez-vous dans votre compte Microsoft.";
+
 const SettingsTab: React.FC = () => {
     const navigate = useNavigate();
     const { isDark, setTheme } = useThemeStore();
@@ -98,6 +107,11 @@ const SettingsTab: React.FC = () => {
     const setLanguage = usePreferencesStore((s) => s.setLanguage);
 
     const [toast, setToast] = useState<string | null>(null);
+    const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+
+    const nameId = useId();
+    const emailId = useId();
+    const profileHintId = useId();
 
     const showToast = (message: string) => {
         setToast(message);
@@ -109,14 +123,14 @@ const SettingsTab: React.FC = () => {
       : 'U';
 
     const handleClearCache = () => {
-        const confirmed = window.confirm(
-            "Vider le cache local ?\n\n" +
-                "Cela supprimera votre thème, votre langue, vos préférences de notifications et toutes les données mises en cache par WesserPlan dans ce navigateur. " +
-                "Les données serveur ne sont pas affectées.\n\n" +
-                "La page sera rechargée pour appliquer tous les changements.",
-        );
-        if (!confirmed) return;
-        const removed = clearLocalCache();
+        let removed = 0;
+        try {
+            removed = clearLocalCache();
+        } catch (err) {
+            reporter.error('Échec du vidage du cache local', err, { source: 'SettingsTab.handleClearCache' });
+            showToast('Impossible de vider le cache local. Réessayez ou contactez le support.');
+            return;
+        }
         showToast(
             removed > 0
                 ? `Cache local vidé (${removed} clé${removed > 1 ? 's' : ''} supprimée${removed > 1 ? 's' : ''}). Rechargement…`
@@ -138,46 +152,67 @@ const SettingsTab: React.FC = () => {
                 <div className="space-y-8">
                     <SettingsCard title="Profil Utilisateur" icon={User}>
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-white dark:border-slate-700 shadow-md">
+                            <div
+                                className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-white dark:border-slate-700 shadow-md"
+                                aria-hidden="true"
+                            >
                                 {initials}
                             </div>
                             <div>
-                                <button
-                                    type="button"
-                                    disabled
-                                    title="Bientôt disponible"
-                                    className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-4 py-2 rounded-lg cursor-not-allowed"
-                                >
-                                    Changer d'avatar
-                                </button>
+                                <Tooltip comingSoon content="Le changement d'avatar sera disponible prochainement.">
+                                    <button
+                                        type="button"
+                                        aria-disabled="true"
+                                        onClick={(e) => e.preventDefault()}
+                                        className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-4 py-2 rounded-lg cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
+                                    >
+                                        Changer d'avatar
+                                    </button>
+                                </Tooltip>
                                 <p className="text-xs text-[var(--text-secondary)] mt-1">Bientôt disponible.</p>
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-sm text-blue-900 dark:text-blue-300">
-                            <Info size={16} className="mt-0.5 shrink-0" />
-                            <span>
-                                Votre profil est synchronisé depuis Microsoft 365. Pour modifier votre nom ou votre adresse e-mail,
-                                rendez-vous dans votre compte Microsoft.
-                            </span>
+                        <div
+                            id={profileHintId}
+                            className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-sm text-blue-900 dark:text-blue-300"
+                        >
+                            <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                            <span>{PROFILE_SYNC_HINT}</span>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Nom complet</label>
+                            <label
+                                htmlFor={nameId}
+                                className="block text-sm font-medium text-[var(--text-secondary)] mb-1"
+                            >
+                                Nom complet
+                            </label>
                             <input
+                                id={nameId}
                                 type="text"
                                 value={userName ?? ''}
                                 readOnly
-                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-80"
+                                aria-readonly="true"
+                                aria-describedby={profileHintId}
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Adresse e-mail</label>
+                            <label
+                                htmlFor={emailId}
+                                className="block text-sm font-medium text-[var(--text-secondary)] mb-1"
+                            >
+                                Adresse e-mail
+                            </label>
                             <input
+                                id={emailId}
                                 type="email"
                                 value={userEmail ?? ''}
                                 readOnly
-                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-80"
+                                aria-readonly="true"
+                                aria-describedby={profileHintId}
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50"
                             />
                         </div>
                         {isAuthenticated && (
@@ -185,9 +220,9 @@ const SettingsTab: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={logout}
-                                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition"
+                                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
                                 >
-                                    <LogOut size={16} /> Déconnexion
+                                    <LogOut size={16} aria-hidden="true" /> Déconnexion
                                 </button>
                             </div>
                         )}
@@ -201,10 +236,10 @@ const SettingsTab: React.FC = () => {
                         <div className="flex justify-start">
                             <button
                                 type="button"
-                                onClick={handleClearCache}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-500/10 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/20 transition"
+                                onClick={() => setConfirmClearOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-500/10 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/20 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
                             >
-                                <Trash2 size={16} /> Vider le cache local
+                                <Trash2 size={16} aria-hidden="true" /> Vider le cache local
                             </button>
                         </div>
                     </SettingsCard>
@@ -213,21 +248,25 @@ const SettingsTab: React.FC = () => {
                 <div className="space-y-8">
                     <SettingsCard title="Préférences" icon={Palette}>
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Thème de l'application</label>
-                            <div className="flex gap-2">
+                            <span id="theme-label" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                                Thème de l'application
+                            </span>
+                            <div className="flex gap-2" role="group" aria-labelledby="theme-label">
                                 <button
                                     type="button"
                                     onClick={() => setTheme('light')}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${!isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
+                                    aria-pressed={!isDark}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)] ${!isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
                                 >
-                                    <Sun size={18} /> Clair
+                                    <Sun size={18} aria-hidden="true" /> Clair
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setTheme('dark')}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all ${isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
+                                    aria-pressed={isDark}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)] ${isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
                                 >
-                                    <Moon size={18} /> Sombre
+                                    <Moon size={18} aria-hidden="true" /> Sombre
                                 </button>
                             </div>
                         </div>
@@ -235,25 +274,28 @@ const SettingsTab: React.FC = () => {
                             <div className="flex items-center gap-2 mb-1">
                                 <label className="block text-sm font-medium text-[var(--text-secondary)]" htmlFor="language-select">Langue</label>
                                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                    <Clock size={10} /> Bientôt
+                                    <Clock size={10} aria-hidden="true" /> Bientôt
                                 </span>
                             </div>
-                            {/* TODO: i18n is not wired up yet (no react-i18next). The selection is
-                                persisted but the UI strings remain in French until translation
-                                infrastructure is added. The selector is disabled to avoid misleading
-                                users into thinking switching to "English" changes the UI. */}
-                            <select
-                                id="language-select"
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value as 'fr' | 'en')}
-                                disabled
-                                aria-disabled="true"
-                                title="Bientôt disponible"
-                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition p-2.5 cursor-not-allowed opacity-60"
-                            >
-                                <option value="fr">Français</option>
-                                <option value="en">English</option>
-                            </select>
+                            {/* i18n is not wired up yet (no react-i18next), so the selector is held
+                                in placeholder mode behind a Tooltip rather than letting users pick a
+                                value that has no UI effect. */}
+                            <Tooltip comingSoon content="La traduction de l'interface arrivera prochainement.">
+                                <select
+                                    id="language-select"
+                                    value={language}
+                                    onChange={(e) => {
+                                        const next = e.target.value;
+                                        if (next === 'fr' || next === 'en') setLanguage(next);
+                                    }}
+                                    disabled
+                                    aria-disabled="true"
+                                    className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50 transition p-2.5 cursor-not-allowed opacity-60"
+                                >
+                                    <option value="fr">Français</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </Tooltip>
                             <p className="text-xs text-[var(--text-muted)] mt-1">
                                 La traduction de l'interface arrivera prochainement.
                             </p>
@@ -287,14 +329,33 @@ const SettingsTab: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => navigate('/upload')}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[var(--accent-primary)] rounded-lg hover:bg-[var(--accent-primary)]/90 transition shadow-sm"
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[var(--accent-primary)] rounded-lg hover:bg-[var(--accent-primary)]/90 transition shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
                             >
-                                <Upload size={16} /> Ouvrir l'import
+                                <Upload size={16} aria-hidden="true" /> Ouvrir l'import
                             </button>
                         </div>
                     </SettingsCard>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={confirmClearOpen}
+                onClose={() => setConfirmClearOpen(false)}
+                onConfirm={handleClearCache}
+                title="Vider le cache local ?"
+                message={
+                    <>
+                        Cela supprimera votre thème, votre langue, vos préférences de notifications
+                        et toutes les données mises en cache par WesserPlan dans ce navigateur. Les
+                        données serveur ne sont pas affectées.
+                        <br />
+                        <br />
+                        La page sera rechargée pour appliquer tous les changements.
+                    </>
+                }
+                confirmLabel="Vider le cache"
+                variant="danger"
+            />
 
             {toast && <Toast message={toast} />}
         </section>
