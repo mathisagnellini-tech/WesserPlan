@@ -184,7 +184,20 @@ export default function App() {
                 )}
 
                 {!isCinemaMode && (
-                    <BoardHeader viewMode={viewMode} onViewModeChange={setViewMode} density={density} onDensityChange={setDensity} showRelationships={relationships.showRelationships} onToggleRelationships={() => relationships.setShowRelationships(!relationships.showRelationships)} searchQuery={filtering.searchQuery} isFocusMode={isFocusMode} />
+                    <BoardHeader
+                        viewMode={viewMode}
+                        onViewModeChange={setViewMode}
+                        density={density}
+                        onDensityChange={setDensity}
+                        showRelationships={relationships.showRelationships}
+                        onToggleRelationships={() => relationships.setShowRelationships(!relationships.showRelationships)}
+                        searchQuery={filtering.searchQuery}
+                        isFocusMode={isFocusMode}
+                        lastSaved={board.lastSaved}
+                        isSaving={board.isSaving}
+                        saveError={board.saveError}
+                        onRetrySave={board.retrySave}
+                    />
                 )}
 
                 {isCinemaMode && (

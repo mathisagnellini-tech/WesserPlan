@@ -14,7 +14,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isUnlocked, onSecureAc
                 <div>
                     <h4 className="font-bold text-orange-900 text-sm mb-1">Zone Sécurisée</h4>
                     <p className="text-xs text-orange-800/70 leading-relaxed font-medium">
-                        L'accès aux documents nécessite une authentification PIN manager.
+                        L'accès aux documents est réservé aux managers authentifiés.
                     </p>
                 </div>
             </div>

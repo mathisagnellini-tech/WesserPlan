@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { LayoutGrid, Rows, GitMerge, Grip, BarChart2, User, Briefcase } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { LayoutGrid, Rows, GitMerge, Grip, BarChart2, User, Briefcase, Cloud, CloudOff, Check, Loader2 } from 'lucide-react';
 import type { ViewMode, ViewDensity } from '../TeamPlannerApp';
 
 interface BoardHeaderProps {
@@ -12,7 +12,74 @@ interface BoardHeaderProps {
     onToggleRelationships: () => void;
     searchQuery: string;
     isFocusMode: boolean;
+    // Persistence indicator (optional — falls back to no indicator)
+    lastSaved?: Date | null;
+    isSaving?: boolean;
+    saveError?: Error | null;
+    onRetrySave?: () => void;
 }
+
+function formatRelativeTime(date: Date): string {
+    const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+    if (seconds < 5) return "à l'instant";
+    if (seconds < 60) return `il y a ${seconds} s`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `il y a ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `il y a ${hours} h`;
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
+const SaveIndicator: React.FC<{
+    lastSaved?: Date | null;
+    isSaving?: boolean;
+    saveError?: Error | null;
+    onRetry?: () => void;
+}> = ({ lastSaved, isSaving, saveError, onRetry }) => {
+    // Tick every 10s so the relative time updates while the user is idle
+    const [, setTick] = useState(0);
+    useEffect(() => {
+        const id = setInterval(() => setTick((n) => n + 1), 10000);
+        return () => clearInterval(id);
+    }, []);
+
+    if (saveError) {
+        return (
+            <button
+                onClick={onRetry}
+                title={saveError.message}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+            >
+                <CloudOff size={12} /> Erreur — Réessayer
+            </button>
+        );
+    }
+
+    if (isSaving) {
+        return (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                <Loader2 size={12} className="animate-spin" /> Enregistrement…
+            </div>
+        );
+    }
+
+    if (lastSaved) {
+        return (
+            <div
+                title={lastSaved.toLocaleString('fr-FR')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-sm"
+            >
+                <Check size={12} className="text-emerald-500" /> Enregistré {formatRelativeTime(lastSaved)}
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800/80 text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+            <Cloud size={12} /> Non enregistré
+        </div>
+    );
+};
 
 export const BoardHeader: React.FC<BoardHeaderProps> = ({
     viewMode,
@@ -23,6 +90,10 @@ export const BoardHeader: React.FC<BoardHeaderProps> = ({
     onToggleRelationships,
     searchQuery,
     isFocusMode,
+    lastSaved,
+    isSaving,
+    saveError,
+    onRetrySave,
 }) => {
     return (
         <div className="mb-4 z-10 sticky left-0 px-2 w-[calc(100vw-48px)]">
@@ -97,6 +168,16 @@ export const BoardHeader: React.FC<BoardHeaderProps> = ({
                     >
                         <GitMerge size={12} /> Relations
                     </button>
+                </div>
+
+                {/* Persistence indicator — pushed right */}
+                <div className="ml-auto">
+                    <SaveIndicator
+                        lastSaved={lastSaved}
+                        isSaving={isSaving}
+                        saveError={saveError}
+                        onRetry={onRetrySave}
+                    />
                 </div>
             </div>
         </div>

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { X, MapPin, ShieldCheck } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
 import { Person, Relationship } from '../types';
 import { PersonInfo } from './inspector/PersonInfo';
 import { RelationsList } from './inspector/RelationsList';
 import { PlanningTab } from './inspector/PlanningTab';
 import { SecurityTab } from './inspector/SecurityTab';
 import { PrivateTab } from './inspector/PrivateTab';
+import { useAuthStore } from '@/stores/authStore';
 
 interface InspectorPanelProps {
   person: Person;
@@ -20,10 +21,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'info' | 'dates' | 'docs' | 'relations' | 'private'>('info');
 
-  // Security State
-  const [pin, setPin] = useState('');
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [showPinInput, setShowPinInput] = useState(false);
+  // Security: gated on Azure AD authentication. The whole app is wrapped in
+  // AuthProvider so by the time the user reaches this panel they are signed in.
+  // The previous hardcoded PIN ('2003') was removed — it added no real security
+  // and was visible in the source.
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isUnlocked = isAuthenticated;
   const [secureView, setSecureView] = useState<'none' | 'cni' | 'license' | 'badge' | 'score' | 'notes'>('none');
 
   useEffect(() => {
@@ -37,23 +40,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
   };
 
   const handleSecureAccess = (view: 'cni' | 'license' | 'badge' | 'score') => {
-      if (isUnlocked) {
-          setSecureView(view);
-      } else {
-          setSecureView(view);
-          setShowPinInput(true);
-      }
-  };
-
-  const handlePinSubmit = () => {
-      if (pin === '2003') {
-          setIsUnlocked(true);
-          setShowPinInput(false);
-          setPin('');
-      } else {
-          alert('Code incorrect');
-          setPin('');
-      }
+      if (!isUnlocked) return;
+      setSecureView(view);
   };
 
   if (!person) return null;
@@ -127,38 +115,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
             )}
             {activeTab === 'dates' && <PlanningTab person={person} />}
             {activeTab === 'docs' && <SecurityTab isUnlocked={isUnlocked} onSecureAccess={handleSecureAccess} />}
-            {activeTab === 'private' && <PrivateTab person={person} isUnlocked={isUnlocked} onRequestUnlock={() => setShowPinInput(true)} />}
+            {activeTab === 'private' && <PrivateTab person={person} isUnlocked={isUnlocked} onRequestUnlock={() => { /* unreachable: gated by auth */ }} />}
         </div>
       </div>
 
-      {/* Security PIN Modal */}
-      {showPinInput && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-white/40 backdrop-blur-xl animate-in fade-in duration-200">
-              <div className="bg-white dark:bg-slate-900 p-10 rounded-[32px] shadow-2xl border border-slate-100 dark:border-slate-800 w-full max-w-sm text-center animate-in zoom-in-95 duration-200">
-                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
-                      <ShieldCheck size={32} />
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Code PIN</h3>
-                  <p className="text-slate-500 text-sm mb-8 font-medium">Entrez "2003" pour accéder</p>
-                  <input
-                    autoFocus
-                    type="password"
-                    maxLength={4}
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    className="w-full text-center text-4xl font-black tracking-[0.5em] text-slate-900 dark:text-white border-none focus:outline-none bg-transparent placeholder:text-slate-200 mb-8"
-                    placeholder="••••"
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                      <button onClick={() => setShowPinInput(false)} className="py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-colors">Annuler</button>
-                      <button onClick={handlePinSubmit} className="py-4 rounded-2xl font-bold bg-slate-900 text-white hover:bg-black transition-colors shadow-lg shadow-slate-900/20">Valider</button>
-                  </div>
-              </div>
-          </div>
-      )}
-
       {/* Secure Content Viewer */}
-      {isUnlocked && secureView !== 'none' && secureView !== 'notes' && !showPinInput && (
+      {isUnlocked && secureView !== 'none' && secureView !== 'notes' && (
            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-xl animate-in fade-in">
                <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden max-w-2xl w-full max-h-[80vh] flex flex-col animate-in zoom-in-95">
                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
