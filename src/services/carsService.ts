@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getCurrentUserOid } from '@/stores/authStore';
 import type { CarType } from '@/components/operations/types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -44,8 +45,9 @@ function rowToCar(row: VehicleRow, damages: DamageRow[]): CarType {
     km: 0,
     service: '',
     owner: '',
-    lat: 48.58,  // default Strasbourg
-    lng: 7.75,
+    // Note: cars.vehicles has no lat/lng columns yet, and no UI currently
+    // renders cars on a map. If/when geolocation lands in the schema, add
+    // lat/lng back to CarType and surface them here.
     fuelStats: { declared: 0, tankSize: 50 },
     damages: vehicleDamages,
   };
@@ -76,12 +78,16 @@ export const carsService = {
   },
 
   async reportDamage(vehicleId: number, damage: { part: string; type: string; detail: string }): Promise<void> {
+    const oid = getCurrentUserOid();
     const { error } = await supabaseCars
       .from('vehicle_damages')
       .insert({
         vehicle_id: vehicleId,
         source_type: 'app',
         damage_json: damage,
+        // cars.vehicle_damages already has a created_by column — populate it
+        // with the Azure AD OID for audit (Phase 1 of FINISH_PLAN.md).
+        ...(oid ? { created_by: oid } : {}),
       });
 
     if (error) throw new Error(`Damage report failed: ${error.message}`);

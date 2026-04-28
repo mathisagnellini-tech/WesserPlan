@@ -1,20 +1,29 @@
 import React from 'react';
-import { Euro, Bed, Wallet, AlertTriangle, TrendingDown, Calendar } from 'lucide-react';
+import { Euro, Users, Wallet, AlertTriangle, ShieldCheck } from 'lucide-react';
 import type { Housing, CarType } from './types';
 
 export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[] }> = ({ housings, cars }) => {
     const totalCost = housings.reduce((acc, h) => acc + h.cost, 0);
     const totalNights = housings.reduce((acc, h) => acc + h.nights, 0);
-    const avgCostPerNight = totalNights > 0 ? (totalCost / totalNights).toFixed(0) : 0;
+    const avgCostPerNight = totalNights > 0 ? (totalCost / totalNights).toFixed(0) : '0';
 
-    // Occupancy (Mock: capacity used vs available)
-    const totalCapacity = housings.reduce((acc, h) => acc + (h.people > 0 ? 8 : 0), 0); // Mock max capacity 8 per housing
-    const usedCapacity = housings.reduce((acc, h) => acc + h.people, 0);
-    const occupancyRate = totalCapacity > 0 ? Math.round((usedCapacity / totalCapacity) * 100) : 0;
+    // Personnes hébergées: real sum of people across housings.
+    // Removed the previous "Taux d'Occupation" ratio which assumed a fake
+    // capacity of 8 per housing (no capacity column exists in the schema).
+    const peopleHoused = housings.reduce((acc, h) => acc + h.people, 0);
 
-    const budgetTotal = 5000;
-    const budgetUsed = totalCost;
-    const budgetPercent = Math.round((budgetUsed / budgetTotal) * 100);
+    // Fleet alerts derived from real `cars` data only.
+    // Note: cars schema has no `next_service` column — service-due alerts
+    // cannot be computed and were removed (previously hardcoded "J-5").
+    // Recent damages = any damage recorded within the last 30 days.
+    const now = Date.now();
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const carsWithRecentDamage = cars.filter(c =>
+        (c.damages ?? []).some(d => {
+            const t = new Date(d.date).getTime();
+            return !isNaN(t) && (now - t) < THIRTY_DAYS_MS;
+        })
+    ).length;
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -25,45 +34,30 @@ export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[]
                 <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Coût Moyen / Nuit</h4>
                 <div className="flex items-end gap-2 mt-2">
                     <span className="text-3xl font-black text-[var(--text-primary)]">{avgCostPerNight}€</span>
-                    <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded mb-1 flex items-center gap-1">
-                        <TrendingDown size={10} /> -5%
-                    </span>
                 </div>
-                <p className="text-[10px] text-[var(--text-muted)] mt-1">Objectif: &lt; 30€/pers/nuit</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">Coût total / nuits cumulées</p>
             </div>
 
             <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-4 border border-[var(--border-subtle)] shadow-sm flex flex-col justify-between relative overflow-hidden group">
                 <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Bed size={48} />
+                    <Users size={48} />
                 </div>
-                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Taux d'Occupation</h4>
+                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Personnes Hébergées</h4>
                 <div className="flex items-end gap-2 mt-2">
-                    <span className="text-3xl font-black text-[var(--text-primary)]">{occupancyRate}%</span>
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded mb-1 ${occupancyRate < 70 ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30' : 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'}`}>
-                        {occupancyRate < 70 ? 'Sous-optimisé' : 'Optimal'}
-                    </span>
+                    <span className="text-3xl font-black text-[var(--text-primary)]">{peopleHoused}</span>
                 </div>
-                 {/* Mini Bar */}
-                 <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                    <div className="h-full bg-orange-500 rounded-full" style={{ width: `${occupancyRate}%` }}></div>
-                </div>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">{housings.length} logement(s)</p>
             </div>
 
             <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-4 border border-[var(--border-subtle)] shadow-sm flex flex-col justify-between relative overflow-hidden group">
                 <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
                     <Wallet size={48} />
                 </div>
-                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Budget Hebdo (S42)</h4>
+                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Coût Total</h4>
                 <div className="flex items-end gap-2 mt-2">
-                    <span className="text-3xl font-black text-[var(--text-primary)]">{budgetUsed}€</span>
-                    <span className="text-xs font-bold text-[var(--text-muted)] mb-1">/ {budgetTotal}€</span>
+                    <span className="text-3xl font-black text-[var(--text-primary)]">{totalCost.toLocaleString('fr-FR')}€</span>
                 </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden relative">
-                    <div className={`h-full rounded-full transition-all duration-500 ${budgetPercent > 90 ? 'bg-red-500' : 'bg-emerald-500'}`} style={{ width: `${budgetPercent}%` }}></div>
-                </div>
-                <p className={`text-[10px] mt-1 font-bold ${budgetPercent > 90 ? 'text-red-500' : 'text-emerald-600'}`}>
-                    {budgetPercent > 90 ? 'Attention budget critique' : 'Budget maîtrisé'}
-                </p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">Cumul logements affichés</p>
             </div>
 
             <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700 shadow-sm flex flex-col justify-between relative overflow-hidden text-white">
@@ -72,18 +66,19 @@ export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[]
                 </div>
                 <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Alertes Flotte</h4>
                 <div className="mt-2 space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-orange-300">
-                        <Calendar size={14}/>
-                        <span>1 Véhicule en révision (J-5)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm font-medium text-red-300">
-                        <AlertTriangle size={14}/>
-                        <span>1 Choc signalé non réparé</span>
-                    </div>
+                    {carsWithRecentDamage === 0 ? (
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-300">
+                            <ShieldCheck size={14}/>
+                            <span>Aucune alerte</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 text-sm font-medium text-red-300">
+                            <AlertTriangle size={14}/>
+                            <span>{carsWithRecentDamage} choc{carsWithRecentDamage > 1 ? 's' : ''} récent{carsWithRecentDamage > 1 ? 's' : ''} (&lt; 30j)</span>
+                        </div>
+                    )}
                 </div>
-                <button className="mt-auto text-xs font-bold text-center bg-white/10 hover:bg-white/20 py-2 rounded-lg transition-colors">
-                    Voir Parc Auto
-                </button>
+                <p className="text-[10px] text-[var(--text-muted)] mt-2">{cars.length} véhicule(s) suivi(s)</p>
             </div>
         </div>
     );

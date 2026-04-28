@@ -33,8 +33,6 @@ export interface CarType {
   km: number;
   service: string;
   owner: string;
-  lat: number;
-  lng: number;
   fuelStats: {
     declared: number;
     tankSize: number;

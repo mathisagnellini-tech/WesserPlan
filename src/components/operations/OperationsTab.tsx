@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Plus, Loader2, AlertTriangle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { Housing, CarType } from './types';
 import { getDistance, MOCK_ZONES } from './helpers';
 import { LogisticsDashboard } from './LogisticsDashboard';
@@ -14,21 +14,10 @@ import { VehicleSection } from './VehicleSection';
 import { useOperationsStore } from '@/stores/operationsStore';
 import { housingsService } from '@/services/housingsService';
 import { carsService } from '@/services/carsService';
-
-// --- FALLBACK DATA (used when Supabase is unavailable) ---
-const FALLBACK_HOUSINGS: Housing[] = [
-    { id: '1', name: "Appartement Croix-Rousse", date: "2025-10-29", lead: "Aboubacar N.", region: "Rhône-Alpes", dept: "69", org: "MSF", people: 5, nights: 7, cost: 660, channel: "Airbnb Pro", address: "12 Rue de la République, 69001 Lyon", owner: "+33 6 00 00 00 00", ownerName: "M. Dupuis", rating: 4, comment: "Très bon emplacement, parking difficile pour le Trafic.", lat: 45.7640, lng: 4.8357, amenities: ["Wifi Haut Débit", "Cuisine équipée", "Lave-linge"] },
-    { id: '2', name: "Maison Alsacienne", date: "2025-11-03", lead: "Mickaël P.", region: "Alsace", dept: "67", org: "UNICEF", people: 5, nights: 7, cost: 610, channel: "Booking", address: "5 Avenue des Vosges, 67000 Strasbourg", owner: "+33 6 11 22 33 44", ownerName: "Sarl ImmoEst", rating: 3, comment: "Correct, un peu bruyant le matin.", lat: 48.5839, lng: 7.7455, amenities: ["Wifi", "TV", "Draps fournis"] },
-    { id: '3', name: "Gîte des Vignes", date: "2025-11-10", lead: "Sarah L.", region: "Alsace", dept: "68", org: "WWF", people: 8, nights: 4, cost: 820, channel: "Gîtes de France", address: "Route du Vin, 68000 Colmar", owner: "+33 6 55 44 33 22", ownerName: "Mme. Weber", rating: 5, comment: "Super gîte, grand parking, proprio adorable.", lat: 48.0794, lng: 7.3585, amenities: ["Parking Privé", "Wifi", "Jardin", "Barbecue"] },
-    { id: '4', name: "T3 Centre Rennes", date: "2025-09-15", lead: "Thomas R.", region: "Bretagne", dept: "35", org: "MSF", people: 6, nights: 6, cost: 550, channel: "Leboncoin", address: "Rue de Saint-Malo, 35000 Rennes", owner: "+33 6 99 88 77 66", ownerName: "Julien B.", rating: 4, comment: "Bien situé, bon rapport qualité prix.", lat: 48.1173, lng: -1.6778, amenities: ["Wifi", "Parking rue gratuit"] },
-    { id: '5', name: "Duplex Fosse", date: "2025-10-01", lead: "Julie B.", region: "Pays de la Loire", dept: "44", org: "WWF", people: 5, nights: 7, cost: 700, channel: "Airbnb", address: "Quai de la Fosse, 44000 Nantes", owner: "+33 6 12 34 56 78", ownerName: "Agence Loire", rating: 3, comment: "Appartement sombre mais fonctionnel.", lat: 47.2100, lng: -1.5600, amenities: ["Wifi", "Proche Tram"] },
-    { id: '6', name: "Maison Cronenbourg", date: "2025-11-05", lead: "Moussa D.", region: "Alsace", dept: "67", org: "MSF", people: 6, nights: 7, cost: 580, channel: "Pap", address: "Rue Principale, 67200 Strasbourg (Cronenbourg)", owner: "+33 6 98 76 54 32", ownerName: "Famille Muller", rating: 4, comment: "A 10 min du centre en tram, calme.", lat: 48.5900, lng: 7.7200, amenities: ["Wifi", "Garage", "Lave-vaisselle"] },
-];
-
-const FALLBACK_CARS: CarType[] = [
-    { id: 'c1', plate: "GA-123-AB", brand: "Peugeot 2008", where: "Strasbourg", km: 42850, service: "2026-01-10", owner: "Léa", lat: 48.5734, lng: 7.7521, fuelStats: { declared: 1, tankSize: 50 }, damages: [] },
-    { id: 'c2', plate: "GB-456-CD", brand: "Renault Clio", where: "Nantes", km: 31870, service: "2025-12-01", owner: "Maëva", lat: 47.2184, lng: -1.5536, fuelStats: { declared: 0, tankSize: 45 }, damages: [] }
-];
+import { LoadingState } from '@/components/ui/LoadingState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Home, Car as CarIcon } from 'lucide-react';
 
 const OperationsTab: React.FC = () => {
   const { activeSubTab, setActiveSubTab, viewMode, setViewMode, selectedHousingId, setSelectedHousingId, reportingCarId, setReportingCarId } = useOperationsStore();
@@ -38,39 +27,54 @@ const OperationsTab: React.FC = () => {
   const [housingData, setHousingData] = useState<Housing[]>([]);
   const [carsData, setCarsData] = useState<CarType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dataSource, setDataSource] = useState<'supabase' | 'mock'>('mock');
+  const [error, setError] = useState<Error | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Load data from Supabase, fall back to mock
+  // Load data from Supabase. Surface errors via ErrorState.
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
+    setError(null);
 
     Promise.all([
-      housingsService.getAll().catch(() => null),
-      carsService.getAll().catch(() => null),
-    ]).then(([housings, cars]) => {
-      if (cancelled) return;
-
-      if (housings && housings.length > 0) {
+      housingsService.getAll(),
+      carsService.getAll(),
+    ])
+      .then(([housings, cars]) => {
+        if (cancelled) return;
         setHousingData(housings);
-        setDataSource('supabase');
-      } else {
-        setHousingData(FALLBACK_HOUSINGS);
-        setDataSource('mock');
-      }
-
-      if (cars && cars.length > 0) {
         setCarsData(cars);
-      } else {
-        setCarsData(FALLBACK_CARS);
-      }
-
-      setIsLoading(false);
-    });
+      })
+      .catch((err: Error) => {
+        if (cancelled) return;
+        setError(err);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
     return () => { cancelled = true; };
   }, []);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    setError(null);
+    try {
+      const [housings, cars] = await Promise.all([
+        housingsService.getAll(),
+        carsService.getAll(),
+      ]);
+      setHousingData(housings);
+      setCarsData(cars);
+    } catch (err) {
+      setError(err as Error);
+    }
+  }, []);
+
+  const retryLoad = useCallback(async () => {
+    setIsLoading(true);
+    await refresh();
+    setIsLoading(false);
+  }, [refresh]);
 
   const selectedHousing = useMemo(() => selectedHousingId ? housingData.find(h => h.id === selectedHousingId) ?? null : null, [selectedHousingId, housingData]);
   const reportingCar = useMemo(() => reportingCarId ? carsData.find(c => c.id === reportingCarId) ?? null : null, [reportingCarId, carsData]);
@@ -102,13 +106,15 @@ const OperationsTab: React.FC = () => {
       return data;
   }, [housingData, smartZoneId]);
 
-  const handleAddNewHousing = (newHousing: Housing) => { setHousingData([newHousing, ...housingData]); };
-  const handleReportDamage = (desc: string) => {
-      if (reportingCar) {
-          const newDamage = { date: new Date().toISOString(), description: desc, author: "Moi" };
-          setCarsData(carsData.map(c => c.id === reportingCar.id ? { ...c, damages: [...(c.damages || []), newDamage] } : c));
-          setReportingCarId(null);
-      }
+  const handleHousingCreated = useCallback(async () => {
+    await refresh();
+  }, [refresh]);
+
+  const handleReportDamage = async (damage: { part: string; type: string; detail: string }) => {
+    if (!reportingCar) return;
+    await carsService.reportDamage(Number(reportingCar.id), damage);
+    setReportingCarId(null);
+    await refresh();
   };
 
   const copyToClipboard = (text: string, id: string, e: React.MouseEvent) => {
@@ -126,27 +132,18 @@ const OperationsTab: React.FC = () => {
   const handleSelectHousing = useCallback((h: Housing) => setSelectedHousingId(h.id), [setSelectedHousingId]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 size={24} className="animate-spin text-[var(--text-muted)]" />
-        <span className="ml-3 text-sm text-[var(--text-secondary)]">Chargement des données...</span>
-      </div>
-    );
+    return <LoadingState fullHeight label="Chargement des logements et véhicules…" />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} onRetry={retryLoad} fullHeight />;
   }
 
   return (
     <div className="min-h-screen pb-10 relative">
-        {/* Data source indicator */}
-        {dataSource === 'mock' && (
-          <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 mb-3">
-            <AlertTriangle size={12} />
-            <span>Supabase hors ligne — données de démonstration</span>
-          </div>
-        )}
-
         {/* Modals */}
         <HousingDetailModal housing={selectedHousing} onClose={() => setSelectedHousingId(null)} />
-        <AddHousingModal isOpen={isAddModalOpen} initialMode={addModalMode} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddNewHousing} />
+        <AddHousingModal isOpen={isAddModalOpen} initialMode={addModalMode} onClose={() => setIsAddModalOpen(false)} onCreated={handleHousingCreated} />
         {reportingCar && <ReportDamageModal car={reportingCar} onClose={() => setReportingCarId(null)} onReport={handleReportDamage} />}
 
         {/* Logistics Dashboard */}
@@ -175,13 +172,37 @@ const OperationsTab: React.FC = () => {
         {activeSubTab === 'housing' && (
             <div className="animate-fade-in space-y-6">
                 <SmartMatcher smartZoneId={smartZoneId} viewMode={viewMode} onZoneChange={setSmartZoneId} onViewModeChange={setViewMode} />
-                {viewMode === 'map' && <HousingMap housings={filteredHousing} smartZoneId={smartZoneId} onSelectHousing={handleSelectHousing} />}
-                {viewMode === 'list' && <HousingList housings={filteredHousing} copiedId={copiedId} onSelect={handleSelectHousing} onCopy={copyToClipboard} />}
+                {housingData.length === 0 ? (
+                    <div className="glass-card">
+                        <EmptyState
+                            title="Aucun logement"
+                            message="Aucun logement enregistré. Cliquez sur Ajouter pour en créer un."
+                            icon={<Home size={22} />}
+                        />
+                    </div>
+                ) : (
+                    <>
+                        {viewMode === 'map' && <HousingMap housings={filteredHousing} smartZoneId={smartZoneId} onSelectHousing={handleSelectHousing} />}
+                        {viewMode === 'list' && <HousingList housings={filteredHousing} copiedId={copiedId} onSelect={handleSelectHousing} onCopy={copyToClipboard} />}
+                    </>
+                )}
             </div>
         )}
 
         {/* CARS TAB */}
-        {activeSubTab === 'cars' && <VehicleSection cars={carsData} onReportDamage={(car) => setReportingCarId(car.id)} />}
+        {activeSubTab === 'cars' && (
+            carsData.length === 0 ? (
+                <div className="glass-card">
+                    <EmptyState
+                        title="Aucun véhicule"
+                        message="Aucun véhicule dans le parc."
+                        icon={<CarIcon size={22} />}
+                    />
+                </div>
+            ) : (
+                <VehicleSection cars={carsData} onReportDamage={(car) => setReportingCarId(car.id)} />
+            )
+        )}
 
         {/* STATS TAB */}
         {activeSubTab === 'stats' && (
