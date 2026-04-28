@@ -76,10 +76,10 @@ export const ConnectionLayer: React.FC<ConnectionLayerProps> = ({ relationships,
           newPaths.push(
             <g key={rel.id} style={{ transition: 'opacity 0.4s ease-in-out', opacity }}>
                 {/* Shadow path for depth on light background */}
-                <path 
+                <path
                     d={d}
                     fill="none"
-                    stroke="rgba(0,0,0,0.1)" // Darker shadow for light mode
+                    stroke={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
                     strokeWidth={strokeWidth + 2}
                     className="blur-[2px]"
                 />
@@ -132,7 +132,7 @@ export const ConnectionLayer: React.FC<ConnectionLayerProps> = ({ relationships,
       resizeObserver.disconnect();
       if (container) container.removeEventListener('scroll', updatePaths);
     };
-  }, [relationships, cards, draggingCardId, highlightedCardId, showAll, isCompact]); 
+  }, [relationships, cards, draggingCardId, highlightedCardId, showAll, isCompact, isDark]);
 
   return (
     <svg 

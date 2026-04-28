@@ -95,14 +95,14 @@ export const MapView: React.FC<MapViewProps> = ({ data }) => {
                                  {/* Tooltip */}
                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none min-w-[140px] transform translate-y-2 group-hover:translate-y-0">
                                      <div className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight mb-0.5">{col.title}</div>
-                                     <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                                     <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
                                          <MapPin size={10} /> {city}
                                      </div>
                                      <div className="mt-2 flex items-center gap-1">
                                          {col.cardIds.slice(0, 3).map((_, i) => (
                                              <div key={i} className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 border border-white dark:border-slate-800"></div>
                                          ))}
-                                         {col.cardIds.length > 3 && <span className="text-[9px] text-slate-400">+{col.cardIds.length - 3}</span>}
+                                         {col.cardIds.length > 3 && <span className="text-[9px] text-slate-400 dark:text-slate-500">+{col.cardIds.length - 3}</span>}
                                      </div>
                                      {/* Arrow */}
                                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-white dark:border-t-slate-900"></div>
