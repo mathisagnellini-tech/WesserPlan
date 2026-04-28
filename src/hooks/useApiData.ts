@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface UseApiDataResult<T> {
   data: T | null;
@@ -10,6 +10,7 @@ interface UseApiDataResult<T> {
 export function useApiData<T>(
   fetcher: () => Promise<T>,
   fallback?: T,
+  deps: React.DependencyList = [],
 ): UseApiDataResult<T> {
   const [data, setData] = useState<T | null>(fallback ?? null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +25,7 @@ export function useApiData<T>(
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur de chargement';
       setError(message);
-      console.warn('[useApiData] Falling back to mock data:', message);
+      console.warn('[useApiData]', message);
       // Keep fallback data if API fails
       if (fallback && !data) {
         setData(fallback);
@@ -32,8 +33,8 @@ export function useApiData<T>(
     } finally {
       setIsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 
   useEffect(() => {
     fetch();
