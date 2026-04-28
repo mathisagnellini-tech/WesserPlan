@@ -1,7 +1,7 @@
 
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Plus, Trash2, FileText, Search, MapPin, LayoutGrid, List as ListIcon, Fuel, AlertTriangle, Gauge, Calendar, Phone, User, Euro, CheckCircle2, Navigation, Hotel, X, Bed, Wifi, Car, Star, ArrowRight, Scan, Upload, Loader2, Save, Copy, Check, Camera, MousePointer2, ShieldCheck, Target, Zap, TrendingDown, Percent, Wallet } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { HOUSINGS_SEED, CARS_SEED } from '../data/operations-seed';
 
 // To satisfy TypeScript for global variables loaded from CDNs
 declare const L: any;
@@ -305,73 +305,10 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
   // Smart Matcher State
   const [smartZoneId, setSmartZoneId] = useState<string>("");
 
-  // Data State
-  const [housingData, setHousingData] = useState<Housing[]>([]);
-  const [carsData, setCarsData] = useState<Car[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // --- Supabase: Load data with fallback ---
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [housingsRes, carsRes] = await Promise.all([
-        supabase.from('housings').select('*').order('date_start', { ascending: false }),
-        supabase.from('cars').select('*').order('km', { ascending: false }),
-      ]);
-
-      const hasHousings = housingsRes.data && housingsRes.data.length > 0;
-      const hasCars = carsRes.data && carsRes.data.length > 0;
-
-      if (hasHousings) {
-        setHousingData(housingsRes.data.map((h: any) => ({
-          id: String(h.id),
-          name: h.name || '',
-          date: h.date_start || '',
-          lead: h.lead || '',
-          region: h.region || '',
-          dept: h.dept || '',
-          org: h.org || '',
-          people: h.people || 0,
-          nights: h.nights || 0,
-          cost: Number(h.cost_total) || 0,
-          channel: h.channel || '',
-          address: h.address || '',
-          owner: '',
-          ownerName: '',
-          rating: 0,
-          comment: h.team_note || '',
-          lat: h.lat || 0,
-          lng: h.lng || 0,
-          amenities: [],
-        })));
-      }
-
-      if (hasCars) {
-        setCarsData(carsRes.data.map((c: any) => ({
-          id: String(c.id),
-          plate: c.plate,
-          brand: c.brand || 'Non renseigné',
-          where: c.location || '',
-          km: c.km || 0,
-          service: c.next_service || '',
-          owner: c.owner || '',
-          lat: c.lat || 0,
-          lng: c.lng || 0,
-          fuelStats: { declared: c.fuel_declared || 0, tankSize: c.tank_size || 50 },
-          damages: c.damages || [],
-        })));
-      }
-
-      if (!hasHousings && !hasCars) {
-        console.warn('[WesserPlan] Supabase tables vides ou inexistantes. Exécute supabase/setup.sql dans le SQL Editor.');
-      }
-    } catch (err) {
-      console.error('[WesserPlan] Erreur Supabase:', err);
-    }
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => { loadData(); }, [loadData]);
+  // Data State (local seed data, no backend)
+  const [housingData, setHousingData] = useState<Housing[]>(HOUSINGS_SEED as Housing[]);
+  const [carsData, setCarsData] = useState<Car[]>(CARS_SEED as Car[]);
+  const [isLoading] = useState(false);
 
   const [selectedHousing, setSelectedHousing] = useState<Housing | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -495,37 +432,14 @@ const OperationsTab: React.FC<OperationsTabProps> = ({ isActive }) => {
     }
   }, [isActive, activeSubTab, viewMode, filteredHousing, smartZoneId]);
 
-  const handleAddNewHousing = async (newHousing: Housing) => {
-    const { data, error } = await supabase.from('housings').insert({
-      name: newHousing.name,
-      date_start: newHousing.date || null,
-      lead: newHousing.lead,
-      region: newHousing.region,
-      dept: newHousing.dept,
-      org: newHousing.org,
-      people: newHousing.people,
-      nights: newHousing.nights,
-      cost_total: newHousing.cost,
-      cost_final: newHousing.cost,
-      channel: newHousing.channel,
-      address: newHousing.address,
-      team_note: newHousing.comment,
-      lat: newHousing.lat || null,
-      lng: newHousing.lng || null,
-    }).select().single();
-
-    if (data && !error) {
-      setHousingData([{ ...newHousing, id: String(data.id) }, ...housingData]);
-    } else {
-      setHousingData([newHousing, ...housingData]);
-    }
+  const handleAddNewHousing = (newHousing: Housing) => {
+    setHousingData([newHousing, ...housingData]);
   };
 
-  const handleReportDamage = async (desc: string) => {
+  const handleReportDamage = (desc: string) => {
       if (reportingCar) {
           const newDamage = { date: new Date().toISOString(), description: desc, author: "Moi" };
           const updatedDamages = [...(reportingCar.damages || []), newDamage];
-          await supabase.from('cars').update({ damages: updatedDamages }).eq('id', Number(reportingCar.id));
           setCarsData(carsData.map(c => c.id === reportingCar.id ? { ...c, damages: updatedDamages } : c));
           setReportingCar(null);
       }
