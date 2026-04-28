@@ -23,6 +23,8 @@ const MobileBottomNav: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => isMore ? openMobileMenu() : navigate(tab.path)}
+              aria-label={isMore ? 'Ouvrir le menu' : tab.label}
+              aria-current={isActive && !isMore ? 'page' : undefined}
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 rounded-xl transition-all duration-200
                 ${isActive && !isMore ? 'text-[var(--accent-primary)]' : 'text-[var(--text-muted)]'}
               `}

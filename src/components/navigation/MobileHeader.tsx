@@ -22,6 +22,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuPress }) => {
       <div className="flex items-center h-14 px-4">
         <button
           onClick={onMenuPress}
+          aria-label="Ouvrir le menu"
           className="p-2 -ml-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-card-solid)] transition-colors"
         >
           <Menu size={22} />

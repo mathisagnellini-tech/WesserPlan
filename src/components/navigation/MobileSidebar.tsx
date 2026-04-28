@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { X, Moon, Sun, User, LogOut } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
+import { useAuth } from '@/hooks/useAuth';
 import { tabConfig, secondaryTabs } from './navConfig';
 
 interface MobileSidebarProps {
@@ -13,7 +14,23 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggle } = useThemeStore();
+  const { userName, userEmail, logout } = useAuth();
   const allTabs = [...tabConfig, ...secondaryTabs];
+
+  const userInitials = userName
+    ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '';
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const isActivePath = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -48,7 +65,11 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
               <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Suite v5.0</span>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)]">
+          <button
+            onClick={onClose}
+            aria-label="Fermer le menu"
+            className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)]"
+          >
             <X size={20} />
           </button>
         </div>
@@ -90,15 +111,28 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-3">
               <div className="relative shrink-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center text-white border-2 border-white/20 shadow-md">
-                  <User size={18} />
+                  {userInitials ? (
+                    <span className="text-sm font-bold">{userInitials}</span>
+                  ) : (
+                    <User size={18} />
+                  )}
                 </div>
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[var(--bg-card-solid)] rounded-full"></span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-[var(--text-primary)]">G\u00e9rard Larcher</span>
-                <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase">Administrateur</span>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+                  {userName ?? 'Utilisateur'}
+                </span>
+                <span className="text-[10px] font-semibold text-[var(--text-muted)] truncate">
+                  {userEmail ?? ''}
+                </span>
               </div>
-              <button className="ml-auto p-1.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+              <button
+                onClick={logout}
+                title="Se déconnecter"
+                aria-label="Se déconnecter"
+                className="ml-auto p-1.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+              >
                 <LogOut size={16} />
               </button>
             </div>

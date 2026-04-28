@@ -27,6 +27,17 @@ const TopNavbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!showMore) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowMore(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showMore]);
+
   const isActivePath = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
@@ -75,6 +86,9 @@ const TopNavbar: React.FC = () => {
             <div className="relative" ref={moreRef}>
               <button
                 onClick={() => setShowMore(!showMore)}
+                aria-label="Plus d'options"
+                aria-haspopup="menu"
+                aria-expanded={showMore}
                 className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200
                   ${secondaryTabs.some(t => isActivePath(t.path))
                     ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
@@ -115,12 +129,19 @@ const TopNavbar: React.FC = () => {
               onClick={toggle}
               className="p-2 lg:p-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)] transition-all duration-200"
               title={isDark ? 'Mode clair' : 'Mode sombre'}
+              aria-label={isDark ? 'Activer le mode clair' : 'Activer le mode sombre'}
             >
               {isDark ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-orange-400" />}
             </button>
 
             {/* User Avatar */}
-            <div className="relative ml-0.5 lg:ml-1 group cursor-pointer" onClick={() => navigate('/settings')}>
+            <button
+              type="button"
+              onClick={() => navigate('/settings')}
+              aria-label={userName ? `Paramètres — ${userName}` : 'Paramètres du compte'}
+              title="Paramètres"
+              className="relative ml-0.5 lg:ml-1 group cursor-pointer rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
+            >
               <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center text-white border-2 border-white/20 shadow-md hover:scale-105 transition-transform">
                 {userInitials ? (
                   <span className="text-xs lg:text-sm font-bold">{userInitials}</span>
@@ -131,8 +152,8 @@ const TopNavbar: React.FC = () => {
                   </>
                 )}
               </div>
-              <span className="absolute bottom-0 right-0 w-2 h-2 lg:w-2.5 lg:h-2.5 bg-green-500 border-2 border-[var(--bg-main)] rounded-full"></span>
-            </div>
+              <span aria-hidden="true" className="absolute bottom-0 right-0 w-2 h-2 lg:w-2.5 lg:h-2.5 bg-green-500 border-2 border-[var(--bg-main)] rounded-full"></span>
+            </button>
           </div>
         </div>
       </div>

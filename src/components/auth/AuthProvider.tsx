@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MsalProvider, useMsal } from '@azure/msal-react';
-import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import { msalInstance, msalConfig, loginRequest, apiRequest } from '@/lib/auth';
+import { msalInstance, loginRequest, apiRequest } from '@/lib/auth';
 import { LogIn, Loader2 } from 'lucide-react';
 
 // Module-level token getter for services
