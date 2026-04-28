@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Bell, ChevronDown, CalendarDays } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronDown, CalendarDays, RefreshCw } from 'lucide-react';
+import { weeksInIsoYear } from '@/lib/isoWeek';
 import type { CampaignMetricsDto } from '@/types/api';
 
 const translations = {
@@ -8,12 +9,20 @@ const translations = {
     year: 'Year',
     campaign: 'Campaign',
     allCampaigns: 'All campaigns',
+    refresh: 'Refresh',
+    updatedJustNow: 'Updated just now',
+    updatedMinutesAgo: 'Updated {n}m ago',
+    updatedHoursAgo: 'Updated {n}h ago',
   },
   fr: {
     week: 'Semaine',
     year: 'Année',
     campaign: 'Campagne',
     allCampaigns: 'Toutes les campagnes',
+    refresh: 'Actualiser',
+    updatedJustNow: 'Mis à jour à l’instant',
+    updatedMinutesAgo: 'Il y a {n} min',
+    updatedHoursAgo: 'Il y a {n} h',
   },
 };
 
@@ -28,6 +37,22 @@ export interface DashboardHeaderProps {
   selectedCampaignId: string | null;
   setSelectedCampaignId: (id: string | null) => void;
   campaigns: CampaignMetricsDto[];
+  onRefresh: () => void;
+  lastUpdated: number | null;
+}
+
+// Pure date math — keep outside the component so the formatter doesn't
+// re-allocate on every render.
+function formatLastUpdated(ts: number | null, t: DashboardHeaderProps['t'], tick: number): string {
+  if (!ts) return '';
+  // `tick` is read so the caller can re-render via state without us ignoring it.
+  void tick;
+  const diffMs = Date.now() - ts;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return t('updatedJustNow');
+  if (minutes < 60) return t('updatedMinutesAgo').replace('{n}', String(minutes));
+  const hours = Math.floor(minutes / 60);
+  return t('updatedHoursAgo').replace('{n}', String(hours));
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -41,27 +66,61 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   selectedCampaignId,
   setSelectedCampaignId,
   campaigns,
+  onRefresh,
+  lastUpdated,
 }) => {
-  const [date, setDate] = useState(new Date());
-
+  // Day rollover only matters once per day — schedule the next update to fire
+  // at the next local-midnight rather than polling every minute.
+  const [today, setToday] = useState(() => new Date());
   useEffect(() => {
-    const timer = setInterval(() => setDate(new Date()), 60 * 1000);
-    return () => clearInterval(timer);
+    const now = new Date();
+    const nextMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0, 0, 5,
+    );
+    const ms = Math.max(60_000, nextMidnight.getTime() - now.getTime());
+    const t = setTimeout(() => setToday(new Date()), ms);
+    return () => clearTimeout(t);
+  }, [today]);
+
+  // Tick the "updated Xmin ago" label every 30s without re-rendering anything
+  // expensive (the whole header is light).
+  const [updatedTick, setUpdatedTick] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => setUpdatedTick((n) => n + 1), 30_000);
+    return () => clearInterval(i);
   }, []);
 
-  const dateString = date.toLocaleDateString('fr-FR', {
+  const dateString = today.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
 
-  const weeks = Array.from({ length: 52 }, (_, i) => i + 1);
+  const weeks = useMemo(
+    () => Array.from({ length: weeksInIsoYear(year) }, (_, i) => i + 1),
+    [year],
+  );
   const currentYear = new Date().getFullYear();
-  const years = [currentYear - 2, currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
+  // Cap the upper bound at the current calendar year — selecting a future year
+  // produces no data and an empty UI with no explanation. Keep the two prior
+  // years for historical lookback.
+  const years = [currentYear - 2, currentYear - 1, currentYear];
+
+  // If the selected week falls outside the new year's max (e.g. picking a
+  // 52-week year while week=53 is selected), clamp it.
+  useEffect(() => {
+    const max = weeksInIsoYear(year);
+    if (week > max) setWeek(max);
+  }, [year, week, setWeek]);
 
   const selectClasses =
     'bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-bold text-sm px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors';
+
+  const updatedLabel = formatLastUpdated(lastUpdated, t, updatedTick);
 
   return (
     <header className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 h-12 md:h-16 flex-wrap">
@@ -116,7 +175,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       <div className="flex-grow" />
 
-      <div className="hidden md:flex flex-col items-end justify-center px-3 border-r border-gray-200/50 dark:border-[var(--border-subtle)]">
+      {updatedLabel && (
+        <span
+          className="hidden md:inline text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+          aria-live="polite"
+        >
+          {updatedLabel}
+        </span>
+      )}
+
+      <div className="hidden lg:flex flex-col items-end justify-center px-3 border-r border-gray-200/50 dark:border-[var(--border-subtle)]">
         <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide first-letter:uppercase">
           {dateString}
         </div>
@@ -124,19 +192,22 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
         <button
-          onClick={onLangChange}
-          aria-label={`Changer la langue (actuel : ${lang.toUpperCase()})`}
-          className="hidden sm:flex items-center gap-2 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+          type="button"
+          onClick={onRefresh}
+          aria-label={t('refresh')}
+          title={t('refresh')}
+          className="flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-2 md:px-3 md:py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
         >
-          {lang.toUpperCase()} <ChevronDown size={16} />
+          <RefreshCw size={16} />
+          <span className="hidden md:inline text-xs">{t('refresh')}</span>
         </button>
         <button
           type="button"
-          aria-label="Notifications"
-          className="relative p-2 md:p-2.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-[var(--text-secondary)]"
+          onClick={onLangChange}
+          aria-label={`Changer la langue (actuel : ${lang.toUpperCase()})`}
+          className="flex items-center gap-2 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
         >
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 md:top-2 md:right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[var(--bg-card-solid)]"></span>
+          {lang.toUpperCase()} <ChevronDown size={16} />
         </button>
       </div>
     </header>
