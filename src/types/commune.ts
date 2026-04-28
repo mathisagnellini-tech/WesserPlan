@@ -1,4 +1,4 @@
-export type Organization = 'msf' | 'unicef' | 'wwf' | 'mdm';
+export type Organization = 'msf' | 'unicef' | 'wwf' | 'mdm' | 'aides' | 'armeedusalut';
 
 export type CommuneStatus = 'pas_demande' | 'informe' | 'refuse' | 'telescope' | 'fait';
 

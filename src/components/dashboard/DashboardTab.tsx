@@ -131,7 +131,6 @@ function mapTeamsResponseToTeamData(rows: unknown): TeamData[] {
 
 const DashboardTab: React.FC = () => {
   const lang = usePreferencesStore((s) => s.language);
-  const setLanguage = usePreferencesStore((s) => s.setLanguage);
   const t = (key: keyof typeof translations.en) => translations[lang][key];
 
   const now = useMemo(() => new Date(), []);
@@ -172,7 +171,7 @@ const DashboardTab: React.FC = () => {
     const ctrl = new AbortController();
     weeklyPerfCtrl.current = ctrl;
     setKpisError(null);
-    dashboardService
+    return dashboardService
       .getWeeklyPerformance(12, selectedCampaignId ?? undefined, year)
       .then((res) => {
         if (ctrl.signal.aborted) return;
@@ -206,7 +205,7 @@ const DashboardTab: React.FC = () => {
     if (!hasLoadedTeamsOnce.current) setTeamsLoading(true);
     setTeamsError(null);
 
-    dashboardService
+    return dashboardService
       .getTeamsForWeek(week, year, selectedCampaignId ?? undefined)
       .then((data) => {
         if (ctrl.signal.aborted) return;
@@ -270,16 +269,18 @@ const DashboardTab: React.FC = () => {
     [weeklyPerf, clusterAnalytics, week, year],
   );
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const refreshAll = useCallback(() => {
-    fetchWeeklyPerf();
-    fetchTeams();
+    setIsRefreshing(true);
+    Promise.allSettled([fetchWeeklyPerf(), fetchTeams()]).finally(() => {
+      setIsRefreshing(false);
+    });
   }, [fetchWeeklyPerf, fetchTeams]);
 
   return (
     <section className="animate-fade-in h-auto lg:h-[calc(100vh-100px)] flex flex-col">
       <DashboardHeader
         lang={lang}
-        onLangChange={() => setLanguage(lang === 'en' ? 'fr' : 'en')}
         t={t}
         week={week}
         year={year}
@@ -289,6 +290,7 @@ const DashboardTab: React.FC = () => {
         setSelectedCampaignId={setSelectedCampaignId}
         campaigns={campaigns}
         onRefresh={refreshAll}
+        isRefreshing={isRefreshing}
         lastUpdated={lastUpdated}
       />
 

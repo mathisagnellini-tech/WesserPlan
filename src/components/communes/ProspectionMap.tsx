@@ -1,10 +1,19 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Organization } from '@/types';
-import { Filter, Loader2, Eraser, Brush, ArrowRight, Check, Layers, Move } from 'lucide-react';
+import { Filter, Loader2, Eraser, Brush, ArrowRight, Check, Layers, Move, AlertTriangle } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet-providers';
 import { MapCommuneFeature } from '@/components/communes/types';
 import { communesService } from '@/services/communesService';
+import { useThemeStore } from '@/stores/themeStore';
+import { reporter } from '@/lib/observability';
+import { escapeHtml } from '@/lib/htmlEscape';
+import { firstVertex } from '@/lib/communeGeo';
+import { ORG_LIST } from '@/constants/organizations';
+
+// Tile providers keyed off theme — must re-key the layer when isDark flips.
+const TILE_LIGHT = 'CartoDB.Positron';
+const TILE_DARK = 'CartoDB.DarkMatter';
 
 export const ProspectionMap: React.FC<{
     department: string | null;
@@ -12,107 +21,121 @@ export const ProspectionMap: React.FC<{
 }> = ({ department, onValidationRequest }) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<L.Map | null>(null);
+    const tileLayerRef = useRef<L.TileLayer | null>(null);
     const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
     const hasCenteredRef = useRef<boolean>(false);
     const deptCodeMapRef = useRef<Record<string, string> | null>(null);
 
+    const isDark = useThemeStore((s) => s.isDark);
+
     const [isLoading, setIsLoading] = useState(false);
+    const [loadError, setLoadError] = useState<Error | null>(null);
     const [features, setFeatures] = useState<MapCommuneFeature[]>([]);
     const [filteredFeatures, setFilteredFeatures] = useState<MapCommuneFeature[]>([]);
 
-    // Selection State
     const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
     const [tool, setTool] = useState<'move' | 'brush' | 'eraser'>('move');
     const [isMouseDown, setIsMouseDown] = useState(false);
 
-    // Refs for stable closure access in Leaflet event handlers
+    // Refs for stable closure access in Leaflet event handlers.
     const toolRef = useRef(tool);
     toolRef.current = tool;
     const isMouseDownRef = useRef(isMouseDown);
     isMouseDownRef.current = isMouseDown;
 
-    // Filters
     const [minPop, setMinPop] = useState(0);
     const [minRevenue, setMinRevenue] = useState(0);
 
-    // History Layer State
     const [saturationOrg, setSaturationOrg] = useState<Organization | 'none'>('none');
 
-    // Fetch Geometry based on selected department
+    // Fetch geometry whenever the department changes. AbortController so a
+    // rapid switch can't race a stale response into setFeatures.
     useEffect(() => {
-        const loadGeometry = async () => {
-            if (!department) { setFeatures([]); setSelectedCodes(new Set()); return; }
-            setIsLoading(true);
+        if (!department) {
             setFeatures([]);
             setSelectedCodes(new Set());
-            hasCenteredRef.current = false;
+            setLoadError(null);
+            return;
+        }
 
+        const ctrl = new AbortController();
+        setIsLoading(true);
+        setLoadError(null);
+        setFeatures([]);
+        setSelectedCodes(new Set());
+        hasCenteredRef.current = false;
+
+        const load = async () => {
             try {
-                // Get dept name → code mapping (cached)
                 if (!deptCodeMapRef.current) {
                     deptCodeMapRef.current = await communesService.getDeptCodeMap();
                 }
                 const deptCode = deptCodeMapRef.current[department] ?? department;
 
-                // Fetch geometry from GeoAPI
-                const res = await fetch(`https://geo.api.gouv.fr/departements/${deptCode}/communes?geometry=contour&format=geojson&type=commune-actuelle`);
-                if (!res.ok) { setFeatures([]); return; }
+                const res = await fetch(
+                    `https://geo.api.gouv.fr/departements/${encodeURIComponent(deptCode)}/communes?geometry=contour&format=geojson&type=commune-actuelle`,
+                    { signal: ctrl.signal },
+                );
+                if (!res.ok) {
+                    throw new Error(`GeoAPI ${res.status}`);
+                }
                 const data = await res.json();
 
-                // Fetch real commune data from Supabase
                 const realCommunes = await communesService.getCommunesByDeptCode(deptCode);
+                if (ctrl.signal.aborted) return;
+
                 const communeByInsee: Record<string, typeof realCommunes[0]> = {};
                 for (const c of realCommunes) {
                     if (c.inseeCode) communeByInsee[c.inseeCode] = c;
                 }
 
-                // Enrich GeoJSON with real data
-                const enriched = data.features.map((f: any) => {
+                const enriched: MapCommuneFeature[] = (data.features ?? []).map((f: MapCommuneFeature) => {
                     const inseeCode = f.properties.code;
                     const real = communeByInsee[inseeCode];
-
-                    const coords = f.geometry.coordinates[0][0];
-                    const lng = Array.isArray(coords) ? coords[0] : 0;
-                    const lat = Array.isArray(coords) ? coords[1] : 0;
-
+                    const centroid = firstVertex(f.geometry);
                     return {
                         ...f,
                         properties: {
                             ...f.properties,
                             revenue: real?.medianIncome ?? 0,
                             population: f.properties.population ?? real?.population ?? 0,
-                            lat: real?.lat ?? lat,
-                            lng: real?.lng ?? lng,
-                            history: {}
-                        }
+                            lat: real?.lat ?? centroid?.lat ?? 0,
+                            lng: real?.lng ?? centroid?.lng ?? 0,
+                            history: {},
+                        },
                     };
                 });
+                if (ctrl.signal.aborted) return;
                 setFeatures(enriched);
             } catch (e) {
-                console.error("Failed to load map data", e);
+                if (ctrl.signal.aborted) return;
+                if (e instanceof DOMException && e.name === 'AbortError') return;
+                reporter.error('ProspectionMap.loadGeometry failed', e, {
+                    source: 'ProspectionMap',
+                    tags: { department },
+                });
+                setLoadError(e instanceof Error ? e : new Error(String(e)));
             } finally {
-                setIsLoading(false);
+                if (!ctrl.signal.aborted) setIsLoading(false);
             }
         };
 
-        loadGeometry();
+        load();
+        return () => ctrl.abort();
     }, [department]);
 
-    // Apply demographic filters
     useEffect(() => {
-        const filtered = features.filter(f =>
-            f.properties.population >= minPop &&
-            f.properties.revenue >= minRevenue
+        const filtered = features.filter(
+            (f) => f.properties.population >= minPop && f.properties.revenue >= minRevenue,
         );
         setFilteredFeatures(filtered);
     }, [features, minPop, minRevenue]);
 
-    // Handle Map Interactions (Painting)
     const handleInteraction = (code: string) => {
         if (!isMouseDownRef.current) return;
         if (toolRef.current === 'move') return;
 
-        setSelectedCodes(prev => {
+        setSelectedCodes((prev) => {
             const next = new Set(prev);
             if (toolRef.current === 'brush') next.add(code);
             else next.delete(code);
@@ -120,39 +143,68 @@ export const ProspectionMap: React.FC<{
         });
     };
 
-    // Initialize Map (once only)
+    // Init map (once). Track all DOM listeners so they're cleanly removed on
+    // unmount — previously document-level mouseup + container dragstart leaked.
     useEffect(() => {
         if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-        const map = L.map(mapContainerRef.current, { zoomControl: false, boxZoom: false, doubleClickZoom: false }).setView([46.6, 1.8], 6);
-        const isDark = document.documentElement.classList.contains('dark');
-        (L.tileLayer as any).provider(isDark ? 'CartoDB.DarkMatter' : 'CartoDB.Positron').addTo(map);
+        const map = L.map(mapContainerRef.current, {
+            zoomControl: false,
+            boxZoom: false,
+            doubleClickZoom: false,
+        }).setView([46.6, 1.8], 6);
+
+        const tile = (L.tileLayer as unknown as { provider: (name: string) => L.TileLayer }).provider(
+            isDark ? TILE_DARK : TILE_LIGHT,
+        );
+        tile.addTo(map);
+        tileLayerRef.current = tile;
         L.control.zoom({ position: 'topright' }).addTo(map);
         mapInstanceRef.current = map;
 
-        // Global mouse listeners for brushing
         map.on('mousedown', () => setIsMouseDown(true));
         map.on('mouseup', () => setIsMouseDown(false));
-        document.addEventListener('mouseup', () => setIsMouseDown(false));
 
-        // Prevent native drag selection box on the map container
+        const onDocMouseUp = () => setIsMouseDown(false);
+        document.addEventListener('mouseup', onDocMouseUp);
+
         const container = map.getContainer();
-        container.addEventListener('dragstart', (e) => e.preventDefault());
+        const onDragStart = (e: Event) => e.preventDefault();
+        const onContainerMouseDown = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'IMG') e.preventDefault();
+        };
+        container.addEventListener('dragstart', onDragStart);
+        container.addEventListener('mousedown', onContainerMouseDown);
         container.style.userSelect = 'none';
-
-        // Force remove boxZoom handler
         if (map.boxZoom) map.boxZoom.disable();
 
-        // Prevent any native image drag on map tiles
-        container.addEventListener('mousedown', (e) => {
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'IMG') {
-                e.preventDefault();
-            }
-        });
+        return () => {
+            document.removeEventListener('mouseup', onDocMouseUp);
+            container.removeEventListener('dragstart', onDragStart);
+            container.removeEventListener('mousedown', onContainerMouseDown);
+            map.remove();
+            mapInstanceRef.current = null;
+            tileLayerRef.current = null;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Toggle map dragging based on tool
+    // Swap tile layer when theme toggles.
+    useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+        if (tileLayerRef.current) {
+            map.removeLayer(tileLayerRef.current);
+            tileLayerRef.current = null;
+        }
+        const tile = (L.tileLayer as unknown as { provider: (name: string) => L.TileLayer }).provider(
+            isDark ? TILE_DARK : TILE_LIGHT,
+        );
+        tile.addTo(map);
+        tileLayerRef.current = tile;
+    }, [isDark]);
+
     useEffect(() => {
         const map = mapInstanceRef.current;
         if (!map) return;
@@ -163,106 +215,108 @@ export const ProspectionMap: React.FC<{
         }
     }, [tool]);
 
-    // Render GeoJSON Layer
     useEffect(() => {
         const map = mapInstanceRef.current;
         if (!map) return;
 
-        // Cleanup: remove previous layer
         if (geoJsonLayerRef.current) {
             map.removeLayer(geoJsonLayerRef.current);
             geoJsonLayerRef.current = null;
         }
 
         if (filteredFeatures.length > 0) {
-            const layer = L.geoJSON({ type: "FeatureCollection", features: filteredFeatures } as any, {
-                style: (feature: any) => {
-                    const isSelected = selectedCodes.has(feature.properties.code);
+            const layer = L.geoJSON({ type: 'FeatureCollection', features: filteredFeatures } as unknown as GeoJSON.FeatureCollection, {
+                style: (feature) => {
+                    if (!feature) return {};
+                    const props = feature.properties as MapCommuneFeature['properties'];
+                    const isSelected = selectedCodes.has(props.code);
 
-                    // Base style
-                    let fillColor = '#94a3b8'; // Grey (default)
+                    let fillColor = '#94a3b8';
                     let fillOpacity = 0.3;
 
-                    // History/Saturation Coloring Logic
                     if (saturationOrg !== 'none') {
-                        const lastVisit = feature.properties.history?.[saturationOrg];
+                        const lastVisit = props.history?.[saturationOrg];
                         if (lastVisit) {
                             const date = new Date(lastVisit);
                             const now = new Date();
-                            const diffMonths = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
-
+                            const diffMonths =
+                                (now.getFullYear() - date.getFullYear()) * 12 +
+                                (now.getMonth() - date.getMonth());
                             if (diffMonths < 6) {
-                                fillColor = '#ef4444'; // Red (Saturated / Recent)
+                                fillColor = '#ef4444';
                                 fillOpacity = 0.6;
                             } else if (diffMonths < 12) {
-                                fillColor = '#f97316'; // Orange (Warning)
+                                fillColor = '#f97316';
                                 fillOpacity = 0.5;
                             } else {
-                                fillColor = '#22c55e'; // Green (Safe / Old)
+                                fillColor = '#22c55e';
                                 fillOpacity = 0.4;
                             }
                         } else {
-                            fillColor = '#22c55e'; // Green (Never visited)
+                            fillColor = '#22c55e';
                             fillOpacity = 0.4;
                         }
                     }
 
-                    // Selection override (Blue)
                     if (isSelected) {
                         fillColor = '#3b82f6';
                         fillOpacity = 0.8;
                     }
 
                     return {
-                        fillColor: fillColor,
+                        fillColor,
                         color: 'white',
                         weight: 0.5,
                         opacity: 1,
-                        fillOpacity: fillOpacity
+                        fillOpacity,
                     };
                 },
-                onEachFeature: (feature: any, layer: any) => {
-                    const lastVisit = saturationOrg !== 'none' ? feature.properties.history?.[saturationOrg] : null;
-                    const dateStr = lastVisit ? new Date(lastVisit).toLocaleDateString() : 'Jamais';
+                onEachFeature: (feature, layer) => {
+                    const props = feature.properties as MapCommuneFeature['properties'];
+                    // Tooltip HTML: every interpolated value MUST be escaped.
+                    const lastVisit = saturationOrg !== 'none' ? props.history?.[saturationOrg] : null;
+                    const dateStr = lastVisit
+                        ? new Date(lastVisit).toLocaleDateString()
+                        : 'Jamais';
+                    const pop = typeof props.population === 'number' ? props.population : 0;
+                    const rev = typeof props.revenue === 'number' ? props.revenue : 0;
+                    const orgUpper = saturationOrg !== 'none' ? saturationOrg.toUpperCase() : '';
 
-                    layer.bindTooltip(`
-                        <div class="text-center font-sans">
-                            <b>${feature.properties.nom}</b><br/>
-                            ${feature.properties.population.toLocaleString()} hab.<br/>
-                            <span class="text-xs text-emerald-600 font-bold">${feature.properties.revenue.toLocaleString()} €</span><br/>
-                            ${saturationOrg !== 'none' ? `<span class="text-xs ${lastVisit ? 'text-[var(--text-secondary)]' : 'text-green-600'}">Dernier passage (${saturationOrg.toUpperCase()}): <b>${dateStr}</b></span>` : ''}
-                        </div>
-                    `, { sticky: true, direction: 'top' });
+                    const html =
+                        `<div class="text-center font-sans">` +
+                        `<b>${escapeHtml(props.nom)}</b><br/>` +
+                        `${escapeHtml(pop.toLocaleString())} hab.<br/>` +
+                        `<span class="text-xs text-emerald-600 font-bold">${escapeHtml(rev.toLocaleString())} €</span><br/>` +
+                        (saturationOrg !== 'none'
+                            ? `<span class="text-xs ${lastVisit ? 'text-[var(--text-secondary)]' : 'text-green-600'}">Dernier passage (${escapeHtml(orgUpper)}): <b>${escapeHtml(dateStr)}</b></span>`
+                            : '') +
+                        `</div>`;
 
-                    layer.on('mouseover', () => {
-                        handleInteraction(feature.properties.code);
-                    });
+                    layer.bindTooltip(html, { sticky: true, direction: 'top' });
+
+                    layer.on('mouseover', () => handleInteraction(props.code));
                     layer.on('mousedown', () => {
                         setIsMouseDown(true);
-                        // Immediate click/interaction
                         if (toolRef.current !== 'move') {
-                            setSelectedCodes(prev => {
+                            setSelectedCodes((prev) => {
                                 const next = new Set(prev);
-                                const code = feature.properties.code;
-                                if (toolRef.current === 'eraser') next.delete(code);
-                                else next.add(code);
+                                if (toolRef.current === 'eraser') next.delete(props.code);
+                                else next.add(props.code);
                                 return next;
                             });
                         }
                     });
-                }
+                },
             }).addTo(map);
 
             geoJsonLayerRef.current = layer;
 
-            // Fit bounds when department changes (hasCenteredRef reset in data loading effect)
             if (!hasCenteredRef.current) {
-                 map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-                 hasCenteredRef.current = true;
+                map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+                hasCenteredRef.current = true;
             }
         }
 
-        // Cleanup function for React StrictMode and rapid re-renders
         return () => {
             if (geoJsonLayerRef.current && map) {
                 map.removeLayer(geoJsonLayerRef.current);
@@ -271,12 +325,10 @@ export const ProspectionMap: React.FC<{
         };
     }, [filteredFeatures, selectedCodes, saturationOrg]);
 
-
-    // Stats for Selection
     const selectedStats = useMemo(() => {
         let pop = 0;
         const selectedList: MapCommuneFeature[] = [];
-        filteredFeatures.forEach(f => {
+        filteredFeatures.forEach((f) => {
             if (selectedCodes.has(f.properties.code)) {
                 pop += f.properties.population;
                 selectedList.push(f);
@@ -285,13 +337,11 @@ export const ProspectionMap: React.FC<{
         return { count: selectedList.length, pop, list: selectedList };
     }, [selectedCodes, filteredFeatures]);
 
-    const zonesCount = (selectedStats.pop / 8000).toFixed(1);
-
     if (!department) {
         return (
             <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-[var(--border-subtle)]">
                 <div className="text-center text-[var(--text-muted)]">
-                    <Filter size={48} className="mx-auto mb-4 opacity-50"/>
+                    <Filter size={48} className="mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-bold">Sélectionnez un ou plusieurs départements</p>
                     <p className="text-sm">Utilisez les filtres à gauche pour charger la carte.</p>
                 </div>
@@ -302,16 +352,29 @@ export const ProspectionMap: React.FC<{
     return (
         <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)]">
             {isLoading && (
-                 <div className="absolute inset-0 z-[50] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center flex-col">
-                     <Loader2 size={48} className="text-orange-600 animate-spin mb-4"/>
-                     <p className="font-bold text-[var(--text-primary)]">Chargement de la topographie...</p>
-                 </div>
+                <div className="absolute inset-0 z-[50] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center flex-col">
+                    <Loader2 size={48} className="text-orange-600 animate-spin mb-4" />
+                    <p className="font-bold text-[var(--text-primary)]">Chargement de la topographie...</p>
+                </div>
             )}
 
-            {/* Toolbar - Top Left (Brush Tools) */}
+            {loadError && !isLoading && (
+                <div className="absolute inset-x-4 top-4 z-[60] bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/20 rounded-xl p-4 flex items-start gap-3" role="alert">
+                    <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
+                    <div className="flex-1">
+                        <h4 className="font-bold text-red-800 dark:text-red-300 text-sm uppercase mb-1">
+                            Carte indisponible
+                        </h4>
+                        <p className="text-sm text-red-800 dark:text-red-300">
+                            {loadError.message || 'Impossible de charger la topographie de ce département.'}
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <div className="absolute top-4 left-4 z-[40] bg-white dark:bg-[var(--bg-card-solid)] p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] flex flex-col gap-4 w-52 md:w-64">
                 <h4 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
-                    <Filter size={14}/> Critères de Cinglage
+                    <Filter size={14} /> Critères de Cinglage
                 </h4>
 
                 <div>
@@ -323,10 +386,10 @@ export const ProspectionMap: React.FC<{
                         type="range" min="0" max="5000" step="100"
                         value={minPop} onChange={(e) => setMinPop(Number(e.target.value))}
                         className="w-full accent-orange-600 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                        aria-label="Population minimale"
                     />
                 </div>
 
-                {/* Revenu Filter Restored */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
                         <span className="text-[var(--text-secondary)] font-bold">Rev. Min</span>
@@ -336,28 +399,35 @@ export const ProspectionMap: React.FC<{
                         type="range" min="15000" max="45000" step="1000"
                         value={minRevenue} onChange={(e) => setMinRevenue(Number(e.target.value))}
                         className="w-full accent-emerald-600 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                        aria-label="Revenu médian minimal"
                     />
                 </div>
 
                 <div className="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
 
-                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-                     <button
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg" role="group" aria-label="Outil de sélection">
+                    <button
+                        type="button"
                         onClick={() => setTool('move')}
+                        aria-pressed={tool === 'move'}
                         className={`flex-1 flex items-center justify-center py-2 rounded-md transition-all ${tool === 'move' ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                         title="Naviguer"
                     >
                         <Move size={16} />
                     </button>
                     <button
+                        type="button"
                         onClick={() => setTool('brush')}
+                        aria-pressed={tool === 'brush'}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${tool === 'brush' ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow text-orange-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                         title="Sélectionner"
                     >
                         <Brush size={16} />
                     </button>
                     <button
+                        type="button"
                         onClick={() => setTool('eraser')}
+                        aria-pressed={tool === 'eraser'}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${tool === 'eraser' ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow text-red-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                         title="Effacer"
                     >
@@ -367,33 +437,35 @@ export const ProspectionMap: React.FC<{
                 {tool !== 'move' && <p className="text-[10px] text-center text-[var(--text-muted)]">Le déplacement carte est désactivé en mode Pinceau</p>}
             </div>
 
-            {/* Toolbar - Top Right (History/Layer) */}
             <div className="absolute top-4 right-4 z-[40] bg-white dark:bg-[var(--bg-card-solid)] p-2 rounded-xl shadow-lg border border-[var(--border-subtle)]">
                 <div className="flex items-center gap-2 px-2 pb-2 mb-2 border-b border-[var(--border-subtle)]">
-                    <Layers size={14} className="text-[var(--text-muted)]"/>
+                    <Layers size={14} className="text-[var(--text-muted)]" />
                     <span className="text-xs font-bold text-[var(--text-primary)] uppercase">Calque de Saturation</span>
                 </div>
                 <div className="flex flex-col gap-1">
                     <button
+                        type="button"
                         onClick={() => setSaturationOrg('none')}
+                        aria-pressed={saturationOrg === 'none'}
                         className={`px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors ${saturationOrg === 'none' ? 'bg-slate-100 dark:bg-slate-800 text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
                     >
                         Aucun (Neutre)
                     </button>
-                    {['msf', 'unicef', 'wwf', 'mdm'].map(org => (
+                    {ORG_LIST.map((org) => (
                         <button
+                            type="button"
                             key={org}
-                            onClick={() => setSaturationOrg(org as Organization)}
+                            onClick={() => setSaturationOrg(org)}
+                            aria-pressed={saturationOrg === org}
                             className={`px-3 py-2 text-xs font-bold rounded-lg text-left uppercase transition-colors flex justify-between items-center ${saturationOrg === org ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-100 dark:border-orange-500/20' : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
                         >
                             <span>Historique {org}</span>
-                            {saturationOrg === org && <Check size={12}/>}
+                            {saturationOrg === org && <Check size={12} />}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Legend - Bottom Left */}
             {saturationOrg !== 'none' && (
                 <div className="absolute bottom-6 left-6 z-[40] bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur p-3 rounded-xl shadow-lg border border-[var(--border-subtle)] animate-fade-in">
                     <h5 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Légende Historique</h5>
@@ -420,7 +492,6 @@ export const ProspectionMap: React.FC<{
 
             <div ref={mapContainerRef} className="h-full w-full z-0 bg-slate-100 dark:bg-slate-800 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', outline: 'none' }}></div>
 
-            {/* Validation Bar - Bottom Center */}
             {selectedStats.count > 0 && (
                 <div className="absolute bottom-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[40] bg-slate-900/95 backdrop-blur text-white p-3 md:p-4 rounded-2xl shadow-2xl flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-8 animate-fade-in">
                     <div>
@@ -434,10 +505,11 @@ export const ProspectionMap: React.FC<{
                     </div>
 
                     <button
+                        type="button"
                         onClick={() => onValidationRequest(selectedStats.list)}
                         className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-orange-900/50 transition-all flex items-center gap-2 w-full md:w-auto md:ml-4 justify-center"
                     >
-                        Valider <ArrowRight size={18}/>
+                        Valider <ArrowRight size={18} />
                     </button>
                 </div>
             )}

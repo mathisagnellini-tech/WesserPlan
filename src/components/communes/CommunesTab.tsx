@@ -26,6 +26,7 @@ const CommunesTab: React.FC = () => {
         handleMapValidationRequest, handleConfirmValidation,
         validationError, setValidationError,
         validationSuccess, setValidationSuccess,
+        updateError, setUpdateError,
         error, geoError,
     } = useCommunesData();
 
@@ -37,7 +38,6 @@ const CommunesTab: React.FC = () => {
 
     return (
         <section className="min-h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in">
-            {/* VALIDATION MODAL */}
             <ProspectValidationModal
                 isOpen={!!validationData || !!validationSuccess}
                 onClose={() => {
@@ -47,7 +47,7 @@ const CommunesTab: React.FC = () => {
                 }}
                 onConfirm={handleConfirmValidation}
                 communes={validationData?.communes || []}
-                stats={validationData?.stats || {count:0, pop:0, zones:"0"}}
+                stats={validationData?.stats || { count: 0, pop: 0, zones: '0' }}
                 isSubmitting={isSubmitting}
                 submitError={validationError}
                 submitSuccess={validationSuccess}
@@ -55,7 +55,6 @@ const CommunesTab: React.FC = () => {
                 onDismissSuccess={() => setValidationSuccess(null)}
             />
 
-            {/* Left List Panel */}
             <CommuneListPanel
                 mode={mode}
                 setMode={setMode}
@@ -85,13 +84,14 @@ const CommunesTab: React.FC = () => {
                 pastRequests={pastRequests}
             />
 
-            {/* Right Details & Map Panel */}
             <div className="flex-1 flex flex-col gap-6 min-h-[400px] md:min-h-0">
                 {mode === 'list' ? (
                     <>
                         <CommuneDetailPanel
                             commune={selectedCommune}
                             onUpdateCommune={handleUpdateCommune}
+                            updateError={updateError}
+                            onDismissUpdateError={() => setUpdateError(null)}
                         />
                         <div className="flex-grow min-h-[300px] rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)] relative">
                             <div ref={mapContainerRef} className="absolute inset-0 z-0"></div>

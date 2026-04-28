@@ -1,7 +1,7 @@
 
 import { Commune, Organization } from '@/types';
 
-export const communesData: Record<Organization, Commune[]> = {
+export const communesData: Partial<Record<Organization, Commune[]>> = {
   msf: [
     {
         id: 1, nom: 'Paris 11e', departement: '75', population: 149102, passage: '2024-01-15', statut: 'fait', maire: 'Anne Hidalgo', revenue: '38 540 \u20ac', lat: 48.8566, lng: 2.3522,

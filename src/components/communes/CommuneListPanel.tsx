@@ -1,6 +1,7 @@
 import React from 'react';
 import { Commune, Organization, CommuneStatus } from '@/types';
 import { statusMap } from '@/constants';
+import { ORG_LIST, ORGANIZATIONS } from '@/constants/organizations';
 import { Search, MapPin, Users, Euro, Check, List as ListIcon, Map as MapIcon, MousePointer2, History } from 'lucide-react';
 import { QuickStatusDropdown } from '@/components/communes/QuickStatusDropdown';
 import { MiniZoneVisualizer } from '@/components/communes/MiniZoneVisualizer';
@@ -82,23 +83,36 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                     </div>
                 </div>
 
-                {/* Org Switcher */}
-                <div className="flex gap-2">
-                     <button
+                {/* Org Switcher — driven by canonical ORG_LIST. Logos sit on top
+                    of the abbreviated label (back-office org assets). */}
+                <div className="flex gap-1.5 flex-wrap" role="radiogroup" aria-label="Organisation">
+                    <button
+                        type="button"
+                        role="radio"
+                        aria-checked={selectedOrg === 'all'}
                         onClick={() => setSelectedOrg('all')}
-                        className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === 'all' ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-                     >
-                         Tous
-                     </button>
-                     {(['msf', 'unicef', 'wwf', 'mdm'] as Organization[]).map(org => (
-                         <button
-                            key={org}
-                            onClick={() => setSelectedOrg(org)}
-                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === org ? 'bg-slate-800 text-white border-slate-800' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-                         >
-                             {org}
-                         </button>
-                     ))}
+                        className={`flex-1 min-w-[60px] py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === 'all' ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                    >
+                        Tous
+                    </button>
+                    {ORG_LIST.map((org) => {
+                        const info = ORGANIZATIONS[org];
+                        const isActive = selectedOrg === org;
+                        return (
+                            <button
+                                type="button"
+                                key={org}
+                                role="radio"
+                                aria-checked={isActive}
+                                onClick={() => setSelectedOrg(org)}
+                                title={info.name}
+                                className={`flex-1 min-w-[60px] py-1 px-1.5 rounded-lg text-xs font-bold uppercase transition-all border flex items-center justify-center gap-1.5 ${isActive ? 'bg-slate-800 text-white border-slate-800' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                            >
+                                <img src={info.logo} alt="" aria-hidden="true" className="h-4 w-auto rounded-sm bg-white p-px" />
+                                <span>{info.shortName}</span>
+                            </button>
+                        );
+                    })}
                 </div>
 
 
@@ -248,6 +262,12 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                      <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2 mb-2">
                         <History size={16}/> Mes dernières demandes
                      </h3>
+                     {pastRequests.length === 0 && (
+                        <EmptyState
+                            title="Aucune demande envoyée"
+                            message="Validez une sélection pour la voir apparaître ici."
+                        />
+                     )}
                      {pastRequests.map(req => (
                          <div key={req.id} className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
                              <div className="flex justify-between items-start mb-2">

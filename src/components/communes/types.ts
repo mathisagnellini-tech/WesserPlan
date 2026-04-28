@@ -1,3 +1,5 @@
+import type { Feature, MultiPolygon, Point, Polygon } from 'geojson';
+
 export interface ProspectHistoryItem {
     id: string;
     date: Date;
@@ -7,16 +9,17 @@ export interface ProspectHistoryItem {
     communesList: { nom: string; lat: number; lng: number }[];
 }
 
-export interface MapCommuneFeature {
-    type: "Feature";
-    geometry: any;
-    properties: {
-        nom: string;
-        code: string;
-        population: number;
-        revenue: number;
-        lat?: number;
-        lng?: number;
-        history?: Record<string, string>;
-    };
+export interface CommuneFeatureProperties {
+    nom: string;
+    code: string;
+    population: number;
+    revenue: number;
+    lat?: number;
+    lng?: number;
+    history?: Record<string, string>;
 }
+
+export type MapCommuneFeature = Feature<
+    Polygon | MultiPolygon | Point,
+    CommuneFeatureProperties
+>;

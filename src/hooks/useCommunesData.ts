@@ -5,6 +5,10 @@ import { useCommunesStore } from '@/stores/communesStore';
 import { communesService } from '@/services/communesService';
 import { supabasePlan } from '@/lib/supabase';
 import { withAudit } from '@/lib/audit';
+import { reporter } from '@/lib/observability';
+import { computeIsoWeek } from '@/lib/isoWeek';
+import { uiStatusToDb } from '@/lib/communeStatus';
+import { ORGANIZATIONS } from '@/constants/organizations';
 
 export function useCommunesData() {
     // Read from Zustand store instead of local state
@@ -15,7 +19,6 @@ export function useCommunesData() {
     const mode = useCommunesStore((s) => s.mode);
     const setMode = useCommunesStore((s) => s.setMode);
 
-    // Filters from store
     const selectedRegions = useCommunesStore((s) => s.selectedRegions);
     const setSelectedRegions = useCommunesStore((s) => s.setSelectedRegions);
     const selectedDepts = useCommunesStore((s) => s.selectedDepts);
@@ -24,49 +27,34 @@ export function useCommunesData() {
     const toggleStatus = useCommunesStore((s) => s.toggleStatus);
     const resetStatuses = useCommunesStore((s) => s.resetStatuses);
 
-    // Region filter
     const activeRegion = useCommunesStore((s) => s.activeRegion);
     const setActiveRegion = useCommunesStore((s) => s.setActiveRegion);
 
-    // Selected commune from store
     const selectedCommuneId = useCommunesStore((s) => s.selectedCommuneId);
     const setSelectedCommuneId = useCommunesStore((s) => s.setSelectedCommuneId);
 
-    // Data
     const [localCommunes, setLocalCommunes] = useState<Commune[]>([]);
     const [totalCommunes, setTotalCommunes] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
-    // Local-only: no Supabase table for prospect history yet — keep sample seed.
-    const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([
-        {
-            id: 'req-1',
-            date: new Date(Date.now() - 86400000 * 2),
-            communeCount: 12,
-            totalPop: 45000,
-            zoneCount: "5.6",
-            communesList: [
-                { nom: 'Saverne', lat: 48.74, lng: 7.36 },
-                { nom: 'Marmoutier', lat: 48.69, lng: 7.38 },
-                { nom: 'Wasselonne', lat: 48.63, lng: 7.44 }
-            ]
-        }
-    ]);
-    const [validationData, setValidationData] = useState<{ communes: MapCommuneFeature[], stats: any } | null>(null);
+    const [updateError, setUpdateError] = useState<Error | null>(null);
+
+    // Past prospect requests are stored client-only for now — the previous
+    // hardcoded sample seed has been removed (it shipped to every user as if
+    // they had a real history). Once a `plan.prospect_requests` table exists,
+    // load it via service here.
+    const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([]);
+
+    const [validationData, setValidationData] = useState<{ communes: MapCommuneFeature[]; stats: { count: number; pop: number; zones: string } } | null>(null);
     const [validationError, setValidationError] = useState<Error | null>(null);
     const [validationSuccess, setValidationSuccess] = useState<{ zoneName: string; count: number } | null>(null);
 
-    // Derive effective filters from Sets (single-select)
-    const effectiveRegion = selectedRegions.size > 0
-        ? Array.from(selectedRegions)[0]
-        : activeRegion;
-    const effectiveDept = selectedDepts.size > 0
-        ? Array.from(selectedDepts)[0]
-        : null;
+    const effectiveRegion = selectedRegions.size > 0 ? Array.from(selectedRegions)[0] : activeRegion;
+    const effectiveDept = selectedDepts.size > 0 ? Array.from(selectedDepts)[0] : null;
 
     // Debounce search
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     useEffect(() => {
         searchTimerRef.current = setTimeout(() => setDebouncedSearch(search), 300);
         return () => clearTimeout(searchTimerRef.current);
@@ -74,13 +62,11 @@ export function useCommunesData() {
 
     const hasFilters = selectedOrg !== 'all' || effectiveRegion || effectiveDept || debouncedSearch.length >= 2;
 
-    // Load from Supabase (plan.town_halls)
     useEffect(() => {
-        let cancelled = false;
+        const ctrl = new AbortController();
         setIsLoading(true);
         setError(null);
 
-        // When 'all' with no filters/search, show nothing
         if (!hasFilters) {
             setLocalCommunes([]);
             setTotalCommunes(0);
@@ -93,33 +79,33 @@ export function useCommunesData() {
                 region: effectiveRegion ?? undefined,
                 departments: effectiveDept ? [effectiveDept] : undefined,
                 search: debouncedSearch.length >= 2 ? debouncedSearch : undefined,
-              }).then(r => ({ communes: r.data, total: r.total }))
-            : communesService.getByOrganization(selectedOrg).then(c => ({ communes: c, total: c.length }));
+            }).then((r) => ({ communes: r.data, total: r.total }))
+            : communesService.getByOrganization(selectedOrg).then((c) => ({ communes: c, total: c.length }));
 
         loadData
             .then(({ communes, total }) => {
-                if (cancelled) return;
+                if (ctrl.signal.aborted) return;
                 setLocalCommunes(communes);
                 setTotalCommunes(total);
             })
             .catch((err: Error) => {
-                if (cancelled) return;
+                if (ctrl.signal.aborted) return;
                 setLocalCommunes([]);
                 setTotalCommunes(0);
                 setError(err);
+                reporter.error('communes load failed', err, { source: 'useCommunesData' });
             })
             .finally(() => {
-                if (!cancelled) setIsLoading(false);
+                if (!ctrl.signal.aborted) setIsLoading(false);
             });
 
-        return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        return () => ctrl.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedOrg, effectiveRegion, effectiveDept, debouncedSearch]);
 
-    // Derive selectedCommune from store's selectedCommuneId
     const selectedCommune = useMemo(() => {
         if (selectedCommuneId === null) return null;
-        return localCommunes.find(c => c.id === selectedCommuneId) || null;
+        return localCommunes.find((c) => c.id === selectedCommuneId) || null;
     }, [localCommunes, selectedCommuneId]);
 
     const setSelectedCommune = (commune: Commune | null) => {
@@ -128,37 +114,30 @@ export function useCommunesData() {
 
     const handleUpdateCommune = async (id: number, updates: Partial<Commune>) => {
         // Optimistic local update
-        setLocalCommunes(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+        setLocalCommunes((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+        setUpdateError(null);
 
-        // Map Commune fields → DB columns understood by communesService.update
         const dbUpdates: Parameters<typeof communesService.update>[1] = {};
         if (updates.email !== undefined) dbUpdates.email = updates.email ?? '';
         if (updates.phone !== undefined) dbUpdates.phone = updates.phone ?? '';
         if (updates.maire !== undefined) dbUpdates.mayor = updates.maire;
         if (updates.statut !== undefined) {
-            const reverseMap: Record<string, string> = {
-                'pas_demande': 'pending',
-                'informe': 'in_progress',
-                'refuse': 'refused',
-                'telescope': 'action_required',
-                'fait': 'accepted',
-            };
-            dbUpdates.status = reverseMap[updates.statut] ?? 'pending';
+            dbUpdates.status = uiStatusToDb(updates.statut);
         }
 
-        // Nothing to persist (e.g. only client-only fields touched) → bail
         if (Object.keys(dbUpdates).length === 0) return;
 
         try {
             await communesService.update(id, dbUpdates);
         } catch (err) {
-            console.error('Commune update failed', err);
+            const error = err instanceof Error ? err : new Error('Commune update failed');
+            reporter.error('Commune update failed', err, { source: 'useCommunesData', tags: { id } });
             // Revert optimistic update by refetching the row
             const fresh = await communesService.getById(id).catch(() => null);
             if (fresh) {
-                setLocalCommunes(prev => prev.map(c => c.id === id ? fresh : c));
+                setLocalCommunes((prev) => prev.map((c) => (c.id === id ? fresh : c)));
             }
-            setError(err instanceof Error ? err : new Error('Commune update failed'));
+            setUpdateError(error);
         }
     };
 
@@ -168,9 +147,9 @@ export function useCommunesData() {
             communes: selectedFeatures,
             stats: {
                 count: selectedFeatures.length,
-                pop: pop,
-                zones: (pop / 8000).toFixed(1)
-            }
+                pop,
+                zones: (pop / 8000).toFixed(1),
+            },
         });
     };
 
@@ -185,124 +164,148 @@ export function useCommunesData() {
         const { communes, stats } = validationData;
 
         try {
-            // 1. Get town_hall IDs matching the selected INSEE codes
-            const inseeCodes = communes.map(c => c.properties.code);
-            const { data: matchedTownHalls } = await supabasePlan
+            const inseeCodes = communes.map((c) => c.properties.code);
+            const { data: matchedTownHalls, error: lookupError } = await supabasePlan
                 .from('town_halls')
                 .select('id')
                 .in('insee_code', inseeCodes);
+            if (lookupError) throw lookupError;
 
             const townHallIds = (matchedTownHalls ?? []).map((t: { id: number }) => t.id);
 
-            // 2. Create zone in plan.zones
-            const currentWeek = new Date().toISOString().slice(0, 4) + '-W' + String(Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0');
+            const now = new Date();
+            // ISO 8601 week label (`2026-W18`) — uses the shared computeIsoWeek
+            // helper so years rolling over (week 53) and Jan 1 edge cases stay
+            // correct. The previous inline math was naive day-count.
+            const isoWeek = computeIsoWeek(now);
+            const currentWeek = `${now.getFullYear()}-W${String(isoWeek).padStart(2, '0')}`;
+
             const { error: zoneError } = await supabasePlan
                 .from('zones')
-                .insert(withAudit({
-                    zone_name: zoneName,
-                    organization: org,
-                    deployment_weeks: [currentWeek],
-                    color: org === 'msf' ? '#dc2626' : org === 'unicef' ? '#38bdf8' : org === 'wwf' ? '#16a34a' : '#1e3a8a',
-                    town_hall_ids: townHallIds,
-                }, 'insert'));
-
+                .insert(
+                    withAudit(
+                        {
+                            zone_name: zoneName,
+                            organization: org,
+                            deployment_weeks: [currentWeek],
+                            color: ORGANIZATIONS[org]?.color ?? '#FF5B2B',
+                            town_hall_ids: townHallIds,
+                        },
+                        'insert',
+                    ),
+                );
             if (zoneError) throw zoneError;
 
-            // 3. Update town_halls: assign org + set status to in_progress
             if (townHallIds.length > 0) {
                 const { error: updateError } = await supabasePlan
                     .from('town_halls')
-                    .update(withAudit({
-                        organization: org,
-                        status: 'in_progress',
-                    }, 'update'))
+                    .update(
+                        withAudit(
+                            {
+                                organization: org,
+                                status: 'in_progress',
+                            },
+                            'update',
+                        ),
+                    )
                     .in('id', townHallIds);
-
                 if (updateError) throw updateError;
             }
 
-            // 4. Add to local history
             const newHistoryItem: ProspectHistoryItem = {
                 id: `req-${Date.now()}`,
                 date: new Date(),
                 communeCount: stats.count,
                 totalPop: stats.pop,
                 zoneCount: stats.zones,
-                communesList: communes.map(c => ({
+                communesList: communes.map((c) => ({
                     nom: c.properties.nom,
                     lat: c.properties.lat || 0,
-                    lng: c.properties.lng || 0
-                }))
+                    lng: c.properties.lng || 0,
+                })),
             };
-            setPastRequests(prev => [newHistoryItem, ...prev]);
+            setPastRequests((prev) => [newHistoryItem, ...prev]);
 
-            // 5. Close & confirm
+            // Refresh visible communes so the new org assignment / status is
+            // reflected in the list without a manual reload.
+            try {
+                if (selectedOrg === 'all') {
+                    const refreshed = await communesService.getAll(500, {
+                        region: effectiveRegion ?? undefined,
+                        departments: effectiveDept ? [effectiveDept] : undefined,
+                        search: debouncedSearch.length >= 2 ? debouncedSearch : undefined,
+                    });
+                    setLocalCommunes(refreshed.data);
+                    setTotalCommunes(refreshed.total);
+                }
+            } catch (refreshErr) {
+                reporter.warn('post-validation refresh failed', refreshErr, { source: 'useCommunesData' });
+            }
+
             setValidationData(null);
             setValidationSuccess({ zoneName, count: townHallIds.length });
-
         } catch (err) {
-            console.error('Validation failed:', err);
+            reporter.error('Validation failed', err, { source: 'useCommunesData' });
             setValidationError(err instanceof Error ? err : new Error('Erreur lors de la création de la zone.'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Fetch regions + departments from Supabase
     const [availableRegionsOptions, setAvailableRegionsOptions] = useState<{ value: string; label: string }[]>([]);
     const [allDepts, setAllDepts] = useState<{ value: string; label: string; region: string }[]>([]);
     const [geoError, setGeoError] = useState<Error | null>(null);
 
     useEffect(() => {
-        communesService.getRegionsAndDepartments()
+        const ctrl = new AbortController();
+        communesService
+            .getRegionsAndDepartments()
             .then(({ regions, departments }) => {
+                if (ctrl.signal.aborted) return;
                 setAvailableRegionsOptions(regions);
                 setAllDepts(departments);
             })
-            .catch((err: Error) => setGeoError(err));
+            .catch((err: Error) => {
+                if (ctrl.signal.aborted) return;
+                setGeoError(err);
+                reporter.error('getRegionsAndDepartments failed', err, { source: 'useCommunesData' });
+            });
+        return () => ctrl.abort();
     }, []);
 
-    // Filter departments by selected region (activeRegion is a plain string, reliable)
     const availableDeptsOptions = useMemo(() => {
         if (activeRegion) {
-            return allDepts.filter(d => d.region === activeRegion);
+            return allDepts.filter((d) => d.region === activeRegion);
         }
         return allDepts;
     }, [allDepts, activeRegion]);
 
-    // Client-side filtering: only status (search + geo are server-side)
     const filteredCommunes = useMemo(() => {
         if (selectedStatuses.size === 0) return localCommunes;
-        return localCommunes.filter(c => selectedStatuses.has(c.statut));
+        return localCommunes.filter((c) => selectedStatuses.has(c.statut));
     }, [localCommunes, selectedStatuses]);
 
     return {
-        // Mode
         mode, setMode,
-        // Org
         selectedOrg, setSelectedOrg,
-        // Region
         activeRegion, setActiveRegion,
-        // Search
         search, setSearch,
-        // Filters
         selectedRegions, setSelectedRegions,
         selectedDepts, setSelectedDepts,
         selectedStatuses, toggleStatus, resetStatuses,
         availableRegionsOptions, availableDeptsOptions,
-        // Data
         localCommunes, filteredCommunes, totalCommunes,
         selectedCommune, setSelectedCommune,
         handleUpdateCommune,
         isLoading, isSubmitting, effectiveDept,
-        // Errors / surfacing
         error,
         geoError,
+        updateError,
+        setUpdateError,
         validationError,
         validationSuccess,
         setValidationError,
         setValidationSuccess,
-        // Map/Prospection
         pastRequests,
         validationData, setValidationData,
         handleMapValidationRequest, handleConfirmValidation,

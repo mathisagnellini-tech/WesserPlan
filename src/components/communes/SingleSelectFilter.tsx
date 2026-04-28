@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 
 export const SingleSelectFilter: React.FC<{
@@ -10,6 +10,7 @@ export const SingleSelectFilter: React.FC<{
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const listboxId = useId();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -17,80 +18,101 @@ export const SingleSelectFilter: React.FC<{
                 setIsOpen(false);
             }
         };
-        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsOpen(false);
+        };
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleKey);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKey);
+        };
     }, [isOpen]);
 
     const selectedValue = selected.size > 0 ? Array.from(selected)[0] : null;
 
     const handleSelect = (val: string) => {
         if (selectedValue === val) {
-            // Unselect
             onChange(new Set());
         } else {
-            // Replace selection
             onChange(new Set([val]));
         }
         setIsOpen(false);
     };
 
-    const filteredOptions = options.filter(o =>
-        o.label.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOptions = options.filter((o) =>
+        o.label.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     const selectedLabel = selectedValue
-        ? options.find(o => o.value === selectedValue)?.label ?? selectedValue
+        ? options.find((o) => o.value === selectedValue)?.label ?? selectedValue
         : null;
 
     return (
         <div className="relative min-w-[140px]" ref={containerRef}>
             <button
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
+                aria-controls={listboxId}
                 className={`w-full flex items-center justify-between px-3 py-2 text-sm border rounded-xl bg-white dark:bg-[var(--bg-card-solid)] transition-all
                 ${selectedValue ? 'border-orange-300 ring-1 ring-orange-100 text-orange-700' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-orange-300'}`}
             >
-                <span className="font-bold truncate">
-                    {selectedLabel ?? label}
-                </span>
+                <span className="font-bold truncate">{selectedLabel ?? label}</span>
                 <ChevronDown size={14} className={`text-[var(--text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 max-h-64 flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-[var(--border-subtle)] z-50 overflow-hidden">
+                <div
+                    id={listboxId}
+                    role="listbox"
+                    aria-label={label}
+                    className="absolute top-full left-0 mt-2 w-56 max-h-64 flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-[var(--border-subtle)] z-50 overflow-hidden"
+                >
                     <div className="p-2 border-b border-[var(--border-subtle)] sticky top-0 bg-white dark:bg-[var(--bg-card-solid)] z-10">
                         <input
                             type="text"
                             placeholder={`Chercher ${label}...`}
+                            aria-label={`Chercher ${label}`}
                             className="w-full bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-orange-400"
                             value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             autoFocus
                         />
                     </div>
                     <div className="overflow-y-auto p-1 custom-scrollbar">
-                        {filteredOptions.length > 0 ? filteredOptions.map(opt => {
-                            const isSelected = opt.value === selectedValue;
-                            return (
-                                <div
-                                    key={opt.value}
-                                    onClick={() => handleSelect(opt.value)}
-                                    className={`flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-xs font-medium mb-0.5
-                                    ${isSelected ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-[var(--text-primary)]'}`}
-                                >
-                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors
-                                        ${isSelected ? 'bg-orange-600 border-orange-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[var(--bg-card-solid)]'}`}>
-                                        {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
-                                    </div>
-                                    <span className="truncate">{opt.label}</span>
-                                </div>
-                            );
-                        }) : (
+                        {filteredOptions.length > 0 ? (
+                            filteredOptions.map((opt) => {
+                                const isSelected = opt.value === selectedValue;
+                                return (
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={isSelected}
+                                        onClick={() => handleSelect(opt.value)}
+                                        className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-xs font-medium mb-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40
+                                        ${isSelected ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-[var(--text-primary)]'}`}
+                                    >
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors
+                                            ${isSelected ? 'bg-orange-600 border-orange-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[var(--bg-card-solid)]'}`}>
+                                            {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
+                                        </div>
+                                        <span className="truncate">{opt.label}</span>
+                                    </button>
+                                );
+                            })
+                        ) : (
                             <div className="p-4 text-center text-xs text-[var(--text-muted)]">Aucun résultat</div>
                         )}
                     </div>
                     {selectedValue && (
                         <div className="p-2 border-t border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50">
                             <button
+                                type="button"
                                 onClick={() => { onChange(new Set()); setIsOpen(false); }}
                                 className="w-full py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                             >

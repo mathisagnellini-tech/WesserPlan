@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, CalendarDays, RefreshCw } from 'lucide-react';
+import { CalendarDays, RefreshCw } from 'lucide-react';
 import { weeksInIsoYear } from '@/lib/isoWeek';
 import type { CampaignMetricsDto } from '@/types/api';
 
@@ -28,7 +28,6 @@ const translations = {
 
 export interface DashboardHeaderProps {
   lang: 'en' | 'fr';
-  onLangChange: () => void;
   t: (key: keyof typeof translations.en) => string;
   week: number;
   year: number;
@@ -38,6 +37,7 @@ export interface DashboardHeaderProps {
   setSelectedCampaignId: (id: string | null) => void;
   campaigns: CampaignMetricsDto[];
   onRefresh: () => void;
+  isRefreshing?: boolean;
   lastUpdated: number | null;
 }
 
@@ -57,7 +57,6 @@ function formatLastUpdated(ts: number | null, t: DashboardHeaderProps['t'], tick
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   lang,
-  onLangChange,
   t,
   week,
   year,
@@ -67,6 +66,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   setSelectedCampaignId,
   campaigns,
   onRefresh,
+  isRefreshing = false,
   lastUpdated,
 }) => {
   // Day rollover only matters once per day — schedule the next update to fire
@@ -117,14 +117,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     if (week > max) setWeek(max);
   }, [year, week, setWeek]);
 
-  const selectClasses =
-    'bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-bold text-sm px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors';
-
   const updatedLabel = formatLastUpdated(lastUpdated, t, updatedTick);
+
+  const innerSelectClasses =
+    'bg-transparent text-[var(--text-primary)] font-bold text-sm py-1 px-2 rounded-lg focus:outline-none cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700';
 
   return (
     <header className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 h-12 md:h-16 flex-wrap">
-      {/* Week selector */}
+      {/* Combined Week / Year / Campaign filter pill */}
       <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1.5 shadow-sm">
         <CalendarDays size={16} className="text-orange-600 ml-1" />
         <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
@@ -133,7 +133,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <select
           value={week}
           onChange={(e) => setWeek(Number(e.target.value))}
-          className="bg-transparent text-[var(--text-primary)] font-bold text-sm py-1 px-2 rounded-lg focus:outline-none cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
+          className={innerSelectClasses}
         >
           {weeks.map((w) => (
             <option key={w} value={w}>
@@ -148,7 +148,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <select
           value={year}
           onChange={(e) => setYear(Number(e.target.value))}
-          className="bg-transparent text-[var(--text-primary)] font-bold text-sm py-1 px-2 rounded-lg focus:outline-none cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
+          className={innerSelectClasses}
         >
           {years.map((y) => (
             <option key={y} value={y}>
@@ -156,22 +156,24 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </option>
           ))}
         </select>
+        <div className="w-px h-5 bg-slate-200 dark:bg-slate-700" />
+        <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          {t('campaign')}
+        </label>
+        <select
+          value={selectedCampaignId ?? ''}
+          onChange={(e) => setSelectedCampaignId(e.target.value === '' ? null : e.target.value)}
+          className={innerSelectClasses}
+          aria-label={t('campaign')}
+        >
+          <option value="">{t('allCampaigns')}</option>
+          {campaigns.map((c) => (
+            <option key={c.campaignId} value={c.campaignId}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
-
-      {/* Campaign filter */}
-      <select
-        value={selectedCampaignId ?? ''}
-        onChange={(e) => setSelectedCampaignId(e.target.value === '' ? null : e.target.value)}
-        className={selectClasses}
-        aria-label={t('campaign')}
-      >
-        <option value="">{t('allCampaigns')}</option>
-        {campaigns.map((c) => (
-          <option key={c.campaignId} value={c.campaignId}>
-            {c.name}
-          </option>
-        ))}
-      </select>
 
       <div className="flex-grow" />
 
@@ -194,20 +196,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <button
           type="button"
           onClick={onRefresh}
+          disabled={isRefreshing}
           aria-label={t('refresh')}
+          aria-busy={isRefreshing}
           title={t('refresh')}
-          className="flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-2 md:px-3 md:py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+          className="flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-2 md:px-3 md:py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-[var(--bg-card-solid)]"
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : undefined} />
           <span className="hidden md:inline text-xs">{t('refresh')}</span>
-        </button>
-        <button
-          type="button"
-          onClick={onLangChange}
-          aria-label={`Changer la langue (actuel : ${lang.toUpperCase()})`}
-          className="flex items-center gap-2 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-        >
-          {lang.toUpperCase()} <ChevronDown size={16} />
         </button>
       </div>
     </header>
