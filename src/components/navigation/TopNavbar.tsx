@@ -1,42 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Settings, ChevronDown, Moon, Sun, User } from 'lucide-react';
+import { Settings, Moon, Sun, User } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuth } from '@/hooks/useAuth';
-import { tabConfig, secondaryTabs } from './navConfig';
+import { tabConfig } from './navConfig';
 
 const TopNavbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggle } = useThemeStore();
   const { userName } = useAuth();
-  const [showMore, setShowMore] = useState(false);
-  const moreRef = useRef<HTMLDivElement>(null);
 
   const userInitials = userName
     ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '';
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setShowMore(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (!showMore) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowMore(false);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showMore]);
 
   const isActivePath = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -80,49 +57,23 @@ const TopNavbar: React.FC = () => {
             })}
           </nav>
 
-          {/* Right Section: Secondary tabs, theme toggle, user */}
+          {/* Right Section: Settings, theme toggle, user */}
           <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
-            {/* Secondary tabs dropdown */}
-            <div className="relative" ref={moreRef}>
-              <button
-                onClick={() => setShowMore(!showMore)}
-                aria-label="Plus d'options"
-                aria-haspopup="menu"
-                aria-expanded={showMore}
-                className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200
-                  ${secondaryTabs.some(t => isActivePath(t.path))
-                    ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)]'
-                  }
-                `}
-              >
-                <Settings size={16} />
-                <ChevronDown size={14} className={`transition-transform duration-200 ${showMore ? 'rotate-180' : ''}`} />
-              </button>
-
-              {showMore && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-2xl shadow-xl overflow-hidden z-50">
-                  {secondaryTabs.map((tab) => {
-                    const isActive = isActivePath(tab.path);
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => { navigate(tab.path); setShowMore(false); }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-colors
-                          ${isActive
-                            ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
-                            : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)]/60 hover:text-[var(--text-primary)]'
-                          }
-                        `}
-                      >
-                        <tab.icon size={16} />
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {/* Settings */}
+            <button
+              type="button"
+              onClick={() => navigate('/settings')}
+              aria-label="Paramètres"
+              title="Paramètres"
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200
+                ${isActivePath('/settings')
+                  ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-solid)]'
+                }
+              `}
+            >
+              <Settings size={16} />
+            </button>
 
             {/* Theme Toggle */}
             <button

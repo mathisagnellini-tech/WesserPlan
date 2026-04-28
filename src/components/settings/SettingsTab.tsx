@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   User,
   Palette,
   Bell,
   Database,
   Trash2,
-  KeyRound,
   Sun,
   Moon,
   LogOut,
   Info,
-  Copy,
   Check,
   Clock,
+  Upload,
 } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -88,6 +88,7 @@ const clearLocalCache = (): number => {
 };
 
 const SettingsTab: React.FC = () => {
+    const navigate = useNavigate();
     const { isDark, setTheme } = useThemeStore();
     const { userName, userEmail, logout, isAuthenticated } = useAuth();
 
@@ -277,46 +278,19 @@ const SettingsTab: React.FC = () => {
                         />
                     </SettingsCard>
 
-                    <SettingsCard title="API & Intégrations" icon={KeyRound}>
-                        {/* TODO: Real API key management (display, regenerate, revoke) requires
-                            backend support. The previous "Copier" button wrote the bullet
-                            placeholder to the clipboard — a footgun if pasted into a config.
-                            We render a discoverable placeholder instead. */}
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <label className="block text-sm font-medium text-[var(--text-secondary)]" htmlFor="api-key-display">Clé API Wesser</label>
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                    <Clock size={10} /> Bientôt
-                                </span>
-                            </div>
-                            <div className="flex gap-2">
-                                <input
-                                    id="api-key-display"
-                                    type="password"
-                                    value="••••••••••••••••••••"
-                                    readOnly
-                                    disabled
-                                    aria-disabled="true"
-                                    className="flex-1 bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-60"
-                                />
-                                <button
-                                    type="button"
-                                    disabled
-                                    aria-disabled="true"
-                                    title="Bientôt disponible"
-                                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg cursor-not-allowed opacity-60"
-                                >
-                                    <Copy size={16} />
-                                    Copier
-                                </button>
-                            </div>
-                            <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-sm text-blue-900 dark:text-blue-300">
-                                <Info size={16} className="mt-0.5 shrink-0" />
-                                <span>
-                                    <strong>Bientôt disponible.</strong> La gestion des clés API arrivera prochainement.
-                                    Pour l'instant, contactez votre administrateur.
-                                </span>
-                            </div>
+                    <SettingsCard title="Import de données" icon={Upload}>
+                        <p className="text-sm text-[var(--text-secondary)]">
+                            Importez vos fichiers CSV ou Excel pour mettre à jour les communes, équipes
+                            et autres données.
+                        </p>
+                        <div className="flex justify-start">
+                            <button
+                                type="button"
+                                onClick={() => navigate('/upload')}
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[var(--accent-primary)] rounded-lg hover:bg-[var(--accent-primary)]/90 transition shadow-sm"
+                            >
+                                <Upload size={16} /> Ouvrir l'import
+                            </button>
                         </div>
                     </SettingsCard>
                 </div>

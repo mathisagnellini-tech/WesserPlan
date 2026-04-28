@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
+import RouteErrorElement from '@/components/ui/RouteErrorElement';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const CommunesPage = lazy(() => import('@/pages/CommunesPage'));
@@ -17,6 +18,7 @@ export const routes: RouteObject[] = [
   {
     path: '/',
     element: <MainLayout />,
+    errorElement: <RouteErrorElement />,
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'communes', element: <CommunesPage /> },
@@ -29,5 +31,5 @@ export const routes: RouteObject[] = [
       { path: '*', element: <NotFoundPage /> },
     ],
   },
-  { path: '/team-planner', element: <TeamPlannerPage /> },
+  { path: '/team-planner', element: <TeamPlannerPage />, errorElement: <RouteErrorElement /> },
 ];

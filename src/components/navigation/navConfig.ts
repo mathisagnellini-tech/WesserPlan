@@ -1,4 +1,4 @@
-import { Home, Building, Mail, Database, Truck, Settings, Upload, Users, Compass, Menu } from 'lucide-react';
+import { Home, Building, Mail, Database, Truck, Settings, Users, Compass, Menu } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface TabConfig {
@@ -19,7 +19,6 @@ export const tabConfig: TabConfig[] = [
 ];
 
 export const secondaryTabs: TabConfig[] = [
-  { id: 'upload', label: 'Upload', icon: Upload, path: '/upload' },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
 
