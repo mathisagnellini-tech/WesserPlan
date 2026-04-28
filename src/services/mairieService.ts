@@ -1,4 +1,5 @@
 import { supabasePlan as supabase } from '@/lib/supabase';
+import { withAudit } from '@/lib/audit';
 import type { Mairie, Zone, Commentaire } from '@/components/mairie/types';
 import type { Organization } from '@/types/commune';
 import { standardHoraires } from '@/components/mairie/helpers';
@@ -133,6 +134,7 @@ function rowToZone(row: TownHallZoneRow): Zone {
     organization: (row.organization as Organization | 'all') || 'all',
     defaultDuration: row.deployment_weeks.length || 1,
     startWeek,
+    townHallIds: row.town_hall_ids ?? [],
   };
 }
 
@@ -211,7 +213,7 @@ export const mairieService = {
   }>): Promise<void> {
     const { error } = await supabase
       .from('town_halls')
-      .update(updates)
+      .update(withAudit(updates, 'update'))
       .eq('id', id);
     if (error) throw new Error(`Mairie update failed: ${error.message}`);
   },
@@ -219,7 +221,7 @@ export const mairieService = {
   async createZone(zone: { zone_name: string; organization: string; deployment_weeks: string[]; color: string; town_hall_ids: number[] }): Promise<Zone> {
     const { data, error } = await supabase
       .from('zones')
-      .insert(zone)
+      .insert(withAudit(zone, 'insert'))
       .select()
       .single();
     if (error) throw new Error(`Zone create failed: ${error.message}`);
@@ -235,7 +237,7 @@ export const mairieService = {
   }>): Promise<void> {
     const { error } = await supabase
       .from('zones')
-      .update(updates)
+      .update(withAudit(updates, 'update'))
       .eq('id', id);
     if (error) throw new Error(`Zone update failed: ${error.message}`);
   },
@@ -251,12 +253,20 @@ export const mairieService = {
   async addComment(townHallId: number, content: string): Promise<void> {
     const { error } = await supabase
       .from('comments')
-      .insert({
+      .insert(withAudit({
         town_hall_entry_id: townHallId,
         scope: 'back_office',
         content,
-      });
+      }, 'insert'));
     if (error) throw new Error(`Comment create failed: ${error.message}`);
+  },
+
+  async updateComment(commentId: number, content: string): Promise<void> {
+    const { error } = await supabase
+      .from('comments')
+      .update(withAudit({ content }, 'update'))
+      .eq('id', commentId);
+    if (error) throw new Error(`Comment update failed: ${error.message}`);
   },
 
   async deleteComment(commentId: number): Promise<void> {

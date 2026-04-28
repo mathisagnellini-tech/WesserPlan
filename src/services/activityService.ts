@@ -1,4 +1,5 @@
 import { supabasePlan as supabase } from '@/lib/supabase';
+import { withAudit } from '@/lib/audit';
 
 export interface ActivityItem {
   id: number;
@@ -41,13 +42,13 @@ export const activityService = {
   async create(activity: Omit<ActivityItem, 'id'>): Promise<ActivityItem> {
     const { data, error } = await supabase
       .from('activities')
-      .insert({
+      .insert(withAudit({
         type: activity.type,
         text: activity.text,
         author: activity.author,
         time: activity.time,
         date: activity.date,
-      })
+      }, 'insert'))
       .select()
       .single();
 

@@ -1,4 +1,5 @@
 import { supabasePlan as supabase } from '@/lib/supabase';
+import { withAudit } from '@/lib/audit';
 import type { Commune } from '@/types';
 import type { Organization, CommuneStatus } from '@/types/commune';
 
@@ -184,7 +185,7 @@ export const communesService = {
   }>): Promise<Commune | null> {
     const { data, error } = await supabase
       .from('town_halls')
-      .update(updates)
+      .update(withAudit(updates, 'update'))
       .eq('id', id)
       .select(SELECT_COLS)
       .single();

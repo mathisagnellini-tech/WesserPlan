@@ -1,4 +1,5 @@
 import { supabasePlan as supabase } from '@/lib/supabase';
+import { withAudit } from '@/lib/audit';
 import type { Housing } from '@/components/operations/types';
 
 // Supabase row type matches schema.sql
@@ -93,7 +94,7 @@ export const housingsService = {
   async create(housing: Partial<HousingRow>): Promise<Housing> {
     const { data, error } = await supabase
       .from('housings')
-      .insert(housing)
+      .insert(withAudit(housing as Record<string, unknown>, 'insert'))
       .select()
       .single();
 
@@ -104,7 +105,7 @@ export const housingsService = {
   async update(id: number, updates: Partial<HousingRow>): Promise<Housing | null> {
     const { data, error } = await supabase
       .from('housings')
-      .update(updates)
+      .update(withAudit(updates as Record<string, unknown>, 'update'))
       .eq('id', id)
       .select()
       .single();
