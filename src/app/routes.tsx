@@ -11,6 +11,7 @@ const TeamPlannerPage = lazy(() => import('@/pages/TeamPlannerPage'));
 const OperationsPage = lazy(() => import('@/pages/OperationsPage'));
 const UploadPage = lazy(() => import('@/pages/UploadPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 export const routes: RouteObject[] = [
   {
@@ -25,6 +26,7 @@ export const routes: RouteObject[] = [
       { path: 'operations', element: <OperationsPage /> },
       { path: 'upload', element: <UploadPage /> },
       { path: 'settings', element: <SettingsPage /> },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
   { path: '/team-planner', element: <TeamPlannerPage /> },
