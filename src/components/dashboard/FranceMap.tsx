@@ -38,9 +38,6 @@ function buildPopupContent(team: TeamData): string {
         .dark .wp-popup-value { color: var(--text-primary) !important; }
         .dark .wp-popup-icon-bg { background: #1e293b !important; color: var(--text-secondary) !important; }
         .dark .wp-popup-car-badge { background: #334155 !important; color: var(--text-primary) !important; }
-        .dark .wp-popup-weather-box { background: #1e293b !important; border-color: #334155 !important; }
-        .dark .wp-popup-weather-label { color: var(--text-secondary) !important; }
-        .dark .wp-popup-weather-temp { color: var(--text-primary) !important; }
       </style>
       <div style="font-family: 'Inter', sans-serif; min-width: 240px; padding: 4px;">
         <div class="wp-popup-border" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #f1f5f9;">
@@ -71,13 +68,6 @@ function buildPopupContent(team: TeamData): string {
                 <div style="flex:1;">
                     <p class="wp-popup-label" style="margin:0; font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Vehicule</p>
                     <p class="wp-popup-car-badge" style="margin:2px 0 0 0; font-size:12px; font-weight:600; color:#334155; font-family:monospace; background:#e2e8f0; display:inline-block; padding:2px 6px; border-radius:4px;">${team.car}</p>
-                </div>
-            </div>
-
-            <div class="wp-popup-weather-box" style="background-color:#f8fafc; padding:10px; border-radius:10px; display:flex; align-items:center; justify-content:space-between; margin-top:4px; border:1px solid #e2e8f0;">
-                <span class="wp-popup-weather-label" style="font-size:11px; font-weight:600; color:#475569;">Meteo locale</span>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="wp-popup-weather-temp" style="font-size:14px; font-weight:800; color:#1e293b;">${team.weather.t}°C</span>
                 </div>
             </div>
         </div>

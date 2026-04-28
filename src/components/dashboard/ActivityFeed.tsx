@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Home, Ban, CheckCircle2, CalendarDays, Flag, Clock, Plus, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Activity, Home, Ban, CheckCircle2, Plus, X } from 'lucide-react';
 import { activityService, type ActivityItem } from '@/services/activityService';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // Add Event Modal
-const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e: ActivityItem) => void }> = ({ isOpen, onClose, onAdd }) => {
+const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e: ActivityItem) => void | Promise<void> }> = ({ isOpen, onClose, onAdd }) => {
     const [type, setType] = useState('housing');
     const [text, setText] = useState('');
     const [time, setTime] = useState('09:00');
     const [dateMode, setDateMode] = useState('today');
     const [specificDate, setSpecificDate] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
-    if(!isOpen) return null;
+    if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         let finalDateStr = "Auj.";
         if (dateMode === 'yesterday') finalDateStr = "Hier";
@@ -21,15 +26,23 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
             finalDateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
         }
 
-        onAdd({
-            id: Date.now(),
-            type,
-            text,
-            author: "Moi",
-            time,
-            date: finalDateStr
-        });
-        onClose();
+        setSubmitting(true);
+        setSubmitError(null);
+        try {
+            await onAdd({
+                id: Date.now(),
+                type,
+                text,
+                author: "Moi",
+                time,
+                date: finalDateStr,
+            });
+            onClose();
+        } catch (err) {
+            setSubmitError(err instanceof Error ? err.message : 'Erreur inconnue');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -71,34 +84,57 @@ const AddEventModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (e:
                              <input type="date" value={specificDate} onChange={e => setSpecificDate(e.target.value)} className="w-full border border-[var(--input-border)] rounded-lg p-2 text-sm bg-[var(--input-bg)] dark:text-[var(--text-primary)]" required/>
                          </div>
                      )}
-                     <button type="submit" className="w-full bg-orange-600 text-white font-bold py-2 rounded-lg hover:bg-orange-700 transition-colors">Ajouter</button>
+                     {submitError && (
+                         <p className="text-xs text-red-600 dark:text-red-400 font-medium">{submitError}</p>
+                     )}
+                     <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-full bg-orange-600 text-white font-bold py-2 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        {submitting ? 'En cours…' : 'Ajouter'}
+                    </button>
                  </form>
              </div>
         </div>
     );
 };
 
-const FALLBACK_ACTIVITIES: ActivityItem[] = [
-    { id: 1, type: 'housing', text: "Logement ajoute (Lyon)", author: "Sarah L.", time: "10:45", date: "Auj." },
-    { id: 2, type: 'refusal', text: "Refus Mairie Colmar", author: "Thomas R.", time: "09:30", date: "Auj." },
-    { id: 3, type: 'done', text: "Zone B terminee", author: "Equipe 4", time: "16:00", date: "Hier" },
-];
-
 export const ActivityFeed: React.FC = () => {
-    const [activities, setActivities] = useState<ActivityItem[]>(FALLBACK_ACTIVITIES);
+    const [activities, setActivities] = useState<ActivityItem[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
-    // Try loading from Supabase
-    useEffect(() => {
+    const load = useCallback(() => {
+        let cancelled = false;
+        setIsLoading(true);
+        setError(null);
         activityService.getRecent(20)
-            .then(data => { if (data.length > 0) setActivities(data); })
-            .catch(() => { /* keep fallback */ });
+            .then(data => { if (!cancelled) setActivities(data); })
+            .catch(err => {
+                if (cancelled) return;
+                setError(err instanceof Error ? err : new Error(String(err)));
+            })
+            .finally(() => { if (!cancelled) setIsLoading(false); });
+        return () => { cancelled = true; };
     }, []);
 
-    const handleAddEvent = (newEvent: ActivityItem) => {
-        setActivities([newEvent, ...activities]);
-        // Persist to Supabase (fire-and-forget)
-        activityService.create(newEvent).catch(() => {});
+    useEffect(() => {
+        const cleanup = load();
+        return cleanup;
+    }, [load]);
+
+    const handleAddEvent = async (newEvent: ActivityItem) => {
+        // Persist first; surface errors instead of fire-and-forget.
+        const created = await activityService.create({
+            type: newEvent.type,
+            text: newEvent.text,
+            author: newEvent.author,
+            time: newEvent.time,
+            date: newEvent.date,
+        });
+        setActivities(prev => [created, ...prev]);
     };
 
     const getIcon = (type: string) => {
@@ -127,7 +163,22 @@ export const ActivityFeed: React.FC = () => {
             </div>
 
             <div className="flex-grow overflow-y-auto p-4 space-y-3">
-                {activities.map((act) => (
+                {isLoading && <LoadingState fullHeight />}
+                {!isLoading && error && (
+                    <ErrorState
+                        title="Impossible de charger l'activité"
+                        error={error}
+                        onRetry={load}
+                        fullHeight
+                    />
+                )}
+                {!isLoading && !error && activities.length === 0 && (
+                    <EmptyState
+                        title="Aucune activité récente"
+                        message="Les nouveaux évenements apparaitront ici."
+                    />
+                )}
+                {!isLoading && !error && activities.map((act) => (
                     <div key={act.id} className="flex gap-3 items-start group animate-fade-in">
                         <div className="flex flex-col items-center gap-1 min-w-[35px]">
                             <span className="text-[10px] font-bold text-[var(--text-secondary)]">{act.time}</span>
@@ -147,23 +198,11 @@ export const ActivityFeed: React.FC = () => {
                 ))}
             </div>
 
-            {/* Main Event Highlight */}
-            <div className="p-4 bg-gradient-to-br from-orange-600 to-orange-700 text-white m-4 rounded-xl shadow-lg shadow-orange-500/30 relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                     <Flag size={60} />
-                 </div>
-                 <div className="relative z-10">
-                     <div className="flex items-center gap-2 mb-1 opacity-90">
-                         <CalendarDays size={14} />
-                         <span className="text-xs font-bold uppercase tracking-wider">Main Event</span>
-                     </div>
-                     <h4 className="font-black text-lg leading-tight mb-2">Debut Campagne Handicap International</h4>
-                     <div className="flex items-center gap-2 text-xs font-medium bg-white/20 w-fit px-2 py-1 rounded-lg backdrop-blur-sm">
-                         <Clock size={12} />
-                         1er Mars 2025
-                     </div>
-                 </div>
-            </div>
+            {/* TODO: Re-introduce a "Main Event" highlight once the backend exposes a flagged
+                top-priority activity (e.g. activity.type === 'main_event' or a dedicated
+                campaign milestone endpoint). The previous hardcoded "Début Campagne Handicap
+                International / 1er Mars 2025" banner has been removed because it cannot be
+                kept truthful without a real data source. */}
         </div>
     );
 };

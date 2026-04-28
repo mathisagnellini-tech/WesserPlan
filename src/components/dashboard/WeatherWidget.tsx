@@ -13,7 +13,18 @@ import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip);
 
-export const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walkingScore: 'Excellente' | 'Bonne' | 'Difficile' | 'Extreme', hourlyTemperatures?: number[], hourlyTimes?: string[] }> = ({ avgTemp, condition, walkingScore, hourlyTemperatures, hourlyTimes }) => {
+export const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string, walkingScore: 'Excellente' | 'Bonne' | 'Difficile' | 'Extreme', hourlyTemperatures?: number[], hourlyTimes?: string[], dailyTempMax?: number[] }> = ({ avgTemp, condition, walkingScore, hourlyTemperatures, hourlyTimes, dailyTempMax }) => {
+    // Compute the temperature delta vs the previous reference day from real
+    // daily data. We hide the delta entirely when daily data is missing.
+    const tempDelta = useMemo<number | null>(() => {
+        if (!dailyTempMax || dailyTempMax.length < 2) return null;
+        const today = dailyTempMax[0];
+        const previous = dailyTempMax[1];
+        if (typeof today !== 'number' || typeof previous !== 'number') return null;
+        if (Number.isNaN(today) || Number.isNaN(previous)) return null;
+        return Math.round(today - previous);
+    }, [dailyTempMax]);
+
     const chartData = useMemo(() => {
         let labels: string[];
         let dataPoints: number[];
@@ -85,9 +96,11 @@ export const CompactWeatherWidget: React.FC<{ avgTemp: number, condition: string
                          <span className="text-4xl font-black text-[var(--text-primary)] leading-none">{avgTemp}°</span>
                          <div className="flex flex-col">
                              <span className="text-xs font-bold text-[var(--text-secondary)]">{condition}</span>
-                             <span className="text-[10px] text-[var(--text-muted)] font-medium flex items-center gap-1">
-                                <TrendingUp size={10} /> +2° vs Hier
-                             </span>
+                             {tempDelta !== null && (
+                                 <span className="text-[10px] text-[var(--text-muted)] font-medium flex items-center gap-1">
+                                    <TrendingUp size={10} /> {tempDelta >= 0 ? '+' : ''}{tempDelta}° vs Hier
+                                 </span>
+                             )}
                          </div>
                      </div>
                 </div>

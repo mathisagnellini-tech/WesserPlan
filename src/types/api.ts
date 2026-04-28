@@ -144,6 +144,20 @@ export interface CampaignTotalsYtdDto {
   avgDonorAge: number;
 }
 
+// ── Cluster analytics (used for tenure-bucketed active fundraisers) ──
+// Loose typing: backend shape may evolve; we only consume `fundraiserSplit`.
+export interface ClusterAnalyticsResponseDto {
+  data: ClusterAnalyticsWeekDto[];
+}
+
+export interface ClusterAnalyticsWeekDto {
+  week?: string;
+  weekNumber?: number;
+  year?: number;
+  fundraiserSplit?: { w1?: number; w2To4?: number; w5Plus?: number };
+  [key: string]: unknown;
+}
+
 // ── Users ──
 
 export interface MyFundraiserUserDto {
