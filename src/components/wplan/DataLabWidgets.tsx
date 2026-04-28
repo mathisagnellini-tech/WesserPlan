@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, CloudRain, Fingerprint, Activity, UserPlus, Loader2 } from 'lucide-react';
 import { useDepartmentWeather } from '@/hooks/useWeather';
+import EmptyState from '@/components/ui/EmptyState';
 
 export const GoldenHourWidget: React.FC = () => {
     return (
@@ -23,8 +24,30 @@ export const GoldenHourWidget: React.FC = () => {
     );
 };
 
-export const WeatherCorrelatorWidget: React.FC = () => {
-    const { data: weatherData, isLoading, error } = useDepartmentWeather('75');
+interface WeatherCorrelatorWidgetProps {
+    /** Department code to fetch weather for. Required — no silent fallback. */
+    deptCode?: string;
+}
+
+export const WeatherCorrelatorWidget: React.FC<WeatherCorrelatorWidgetProps> = ({ deptCode }) => {
+    if (!deptCode) {
+        return (
+            <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700/50 flex flex-col relative overflow-hidden group hover:border-orange-500/30 transition-all">
+                <div className="absolute top-0 right-0 p-3 opacity-50">
+                    <CloudRain size={20} className="text-orange-400" />
+                </div>
+                <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">
+                    Weather-Correlator
+                </h4>
+                <EmptyState
+                    title="Sélectionnez un département"
+                    message="Cliquez sur un département de la carte pour voir la corrélation météo locale."
+                />
+            </div>
+        );
+    }
+    const effectiveDept = deptCode;
+    const { data: weatherData, isLoading, error } = useDepartmentWeather(effectiveDept);
 
     // Use real daily precipitation data if available, otherwise fall back to mock
     const barHeights = React.useMemo(() => {
@@ -60,7 +83,10 @@ export const WeatherCorrelatorWidget: React.FC = () => {
             <div className="absolute top-0 right-0 p-3 opacity-50 group-hover:opacity-100 transition-opacity">
                 {isLoading ? <Loader2 size={20} className="text-orange-400 animate-spin" /> : <CloudRain size={20} className="text-orange-400" />}
             </div>
-            <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Weather-Correlator</h4>
+            <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">
+                Weather-Correlator
+                <span className="ml-2 text-orange-400 normal-case">Dépt {effectiveDept}</span>
+            </h4>
             <div className="flex-grow flex items-end gap-1 h-32 mt-2">
                 {barHeights.map((h, i) => (
                     <div key={i} className="flex-1 flex flex-col justify-end gap-1 h-full group/bar">

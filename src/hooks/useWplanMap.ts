@@ -42,12 +42,18 @@ export function useWplanMap({
     const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
     const eventMarkersRef = useRef<L.Marker[]>([]);
 
-    const getMetricColor = useCallback((code: string, metric: MapMetric) => {
+    const getMetricValue = useCallback((code: string, metric: MapMetric) => {
+        // Deterministic per-(code, metric) value 0–99. Mix the metric name into the
+        // hash so each metric paints a different pattern instead of all sharing one.
+        const seed = `${metric}:${code}`;
         let hash = 0;
-        for (let i = 0; i < code.length; i++) hash = code.charCodeAt(i) + ((hash << 5) - hash);
-        const val = Math.abs(hash) % 100;
-        return METRICS_CONFIG[metric].getValueColor(val);
+        for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+        return Math.abs(hash) % 100;
     }, []);
+
+    const getMetricColor = useCallback((code: string, metric: MapMetric) => {
+        return METRICS_CONFIG[metric].getValueColor(getMetricValue(code, metric));
+    }, [getMetricValue]);
 
     // Initialize map
     useEffect(() => {
@@ -144,14 +150,16 @@ export function useWplanMap({
         };
 
         const onEachFeature = (feature: any, layer: L.Layer) => {
+            const code = feature.properties.code || '';
+            const metricVal = getMetricValue(code, activeMetric);
             (layer as any).bindPopup(
                 `<div class="text-sm font-sans">
                     <b class="text-base">${feature.properties.nom}</b><br>
-                    <span class="text-gray-500">${feature.properties.code || ''}</span>
+                    <span class="text-gray-500">${code}</span>
                     <hr class="my-1 border-gray-200"/>
                     <div class="flex justify-between items-center">
                         <span>${METRICS_CONFIG[activeMetric].label}</span>
-                        <b class="text-orange-600">${Math.floor(Math.random() * 100)}</b>
+                        <b class="text-orange-600">${metricVal}</b>
                     </div>
                 </div>`
             );
@@ -172,7 +180,7 @@ export function useWplanMap({
 
         geoJsonLayerRef.current = L.geoJSON(geoJsonData as any, { style, onEachFeature }).addTo(map);
 
-    }, [mapLevel, viewingRegion, selectedItem, comparisonItem, isComparing, showEvents, filters, regionGeoJSON, departmentGeoJSON, activeMetric, getMetricColor, setSelectedItem, setComparisonItem]);
+    }, [mapLevel, viewingRegion, selectedItem, comparisonItem, isComparing, showEvents, filters, regionGeoJSON, departmentGeoJSON, activeMetric, getMetricColor, getMetricValue, setSelectedItem, setComparisonItem]);
 
     // Invalidate map size on mount
     useEffect(() => {

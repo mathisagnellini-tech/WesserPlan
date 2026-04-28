@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Target } from 'lucide-react';
 import { useWplanData } from '@/hooks/useWplanData';
 import { useWplanMap } from '@/hooks/useWplanMap';
+import { useDepartmentWeather } from '@/hooks/useWeather';
 import DataLibraryModal from '@/components/wplan/DataLibraryModal';
 import WplanHeader from '@/components/wplan/WplanHeader';
 import MultiSelectDropdown from '@/components/wplan/MultiSelectDropdown';
@@ -25,8 +26,13 @@ const WplanTab: React.FC = () => {
         chartTitle,
         chartConfig,
         selectedRegionName,
+        selectedDeptCode,
         regionOptions,
         departmentOptions,
+        nationalKpis,
+        kpisLoading,
+        kpisError,
+        refetchKpis,
         setSelectedItem,
         setComparisonItem,
         setShowEvents,
@@ -54,9 +60,19 @@ const WplanTab: React.FC = () => {
         setComparisonItem,
     });
 
+    // Weather feed for the currently-selected department (drives correlation chart
+    // and the Data Lab weather widget). Falls back to undefined when no dept selected.
+    const { data: weatherData, isLoading: weatherLoading, error: weatherError } =
+        useDepartmentWeather(selectedDeptCode || undefined);
+
     return (
         <section>
-            {isDataLibraryOpen && <DataLibraryModal onClose={() => setIsDataLibraryOpen(false)} />}
+            {isDataLibraryOpen && (
+                <DataLibraryModal
+                    onClose={() => setIsDataLibraryOpen(false)}
+                    selectedDeptCode={selectedDeptCode}
+                />
+            )}
 
             <WplanHeader
                 mapLevel={mapLevel}
@@ -110,10 +126,18 @@ const WplanTab: React.FC = () => {
                     chartTitle={chartTitle}
                     chartConfig={chartConfig}
                     isComparing={isComparing}
+                    nationalKpis={nationalKpis}
+                    kpisLoading={kpisLoading}
+                    kpisError={kpisError}
+                    onRetryKpis={refetchKpis}
+                    weatherData={weatherData}
+                    weatherLoading={weatherLoading}
+                    weatherError={weatherError}
+                    selectedDeptCode={selectedDeptCode}
                 />
             </div>
 
-            <SwotMatrix regionName={selectedRegionName} />
+            <SwotMatrix regionName={selectedRegionName} nationalKpis={nationalKpis} />
         </section>
     );
 };

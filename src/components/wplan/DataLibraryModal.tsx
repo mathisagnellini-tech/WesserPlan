@@ -5,9 +5,11 @@ import { GoldenHourWidget, WeatherCorrelatorWidget, GenomeWidget, SeismographWid
 
 interface DataLibraryModalProps {
     onClose: () => void;
+    /** Currently-selected department code (drives weather widget). */
+    selectedDeptCode?: string | null;
 }
 
-const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose }) => {
+const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose, selectedDeptCode }) => {
     return (
         <div className="fixed inset-0 z-[200] animate-fade-in flex items-center justify-center p-4" onClick={onClose}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
@@ -36,7 +38,7 @@ const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ onClose }) => {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <GoldenHourWidget />
-                            <WeatherCorrelatorWidget />
+                            <WeatherCorrelatorWidget deptCode={selectedDeptCode || undefined} />
                             <GenomeWidget />
                             <SeismographWidget />
                         </div>
