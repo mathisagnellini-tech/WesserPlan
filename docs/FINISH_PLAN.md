@@ -123,6 +123,7 @@ Optional cleanup:
 - F3: Realtime sync for team-planner multi-user collab
 - F4: Backend ownership of zone clusters (if salary calc needs them server-side)
 - F5: Real i18n wiring (preferences store now persists language; UI strings still 100% French)
+- F6: Booking.com + Airbnb housing ingestion via email parser → `plan.housings` (mirror the existing Sixt rental pipeline). Neither platform exposes a guest-side API, so the only realistic path is parsing confirmation emails on a dedicated mailbox and routing by sender domain. `plan.housings` already has the right shape (`channel`, `address`, `cost_total`, `nights`, `date_start/date_end`, `owner_name`, `owner_phone`, `lat`/`lng`); set `channel` to `'booking'` / `'airbnb'`. Cheapest version: extend the Sixt mailbox + parser rather than spinning up a new pipeline.
 
 ---
 

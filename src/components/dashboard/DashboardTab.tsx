@@ -42,6 +42,19 @@ interface BackendTeamRow extends TeamListItemDto {
   housingAddress?: string;
   car?: string;
   licensePlate?: string;
+  // Backend `GetTeamsForWeek` accepts a campaignId query param but the
+  // typed DTO doesn't expose the row-level campaign. Read whichever shape
+  // the backend actually returns so we can client-side filter as a safety
+  // net when the backend ignores the param.
+  campaignId?: string | number;
+  campaign_id?: string | number;
+  CampaignId?: string | number;
+}
+
+function rowCampaignId(row: BackendTeamRow): string | undefined {
+  const raw = row.campaignId ?? row.campaign_id ?? row.CampaignId;
+  if (raw === undefined || raw === null) return undefined;
+  return String(raw);
 }
 
 function pickFirstNumber(...vals: Array<number | undefined>): number | undefined {
@@ -68,12 +81,24 @@ function deriveCoordsForOrg(orgKey: string, index: number): [number, number] {
   return [cap.lat, cap.lng];
 }
 
-function mapTeamsResponseToTeamData(rows: unknown): TeamData[] {
+function mapTeamsResponseToTeamData(
+  rows: unknown,
+  selectedCampaignId: string | null,
+): TeamData[] {
   if (!Array.isArray(rows)) return [];
   const result: TeamData[] = [];
   rows.forEach((raw, idx) => {
     if (!raw || typeof raw !== 'object') return;
     const row = raw as BackendTeamRow;
+
+    // Defence in depth: backend should already filter by campaignId, but
+    // if a row exposes its own campaign and it doesn't match, drop it.
+    // Rows without any campaign field are passed through (we trust the
+    // backend filter in that case).
+    if (selectedCampaignId) {
+      const rowCampaign = rowCampaignId(row);
+      if (rowCampaign !== undefined && rowCampaign !== selectedCampaignId) return;
+    }
 
     const rawName = pickFirstString(row.teamName) ?? '';
     const parsed = parseTeamName(rawName);
@@ -208,7 +233,7 @@ const DashboardTab: React.FC = () => {
       .then((data) => {
         if (ctrl.signal.aborted) return;
         try {
-          setTeams(mapTeamsResponseToTeamData(data));
+          setTeams(mapTeamsResponseToTeamData(data, selectedCampaignId));
           setLastUpdated(Date.now());
         } catch (err) {
           reporter.warn('mapTeamsResponseToTeamData failed', err, { source: 'DashboardTab' });
