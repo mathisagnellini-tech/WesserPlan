@@ -6,6 +6,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#E31E24">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
+    <link rel="manifest" href="/site.webmanifest">
     <title>Wesser Plan</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,14 +17,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js"></script>
     <!-- Leaflet Draw -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
       :root {
@@ -30,13 +28,13 @@
         --bg-card-solid: #ffffff;
         --text-primary: #1a1a1a;
         --text-secondary: #5a5a5a;
-        --text-muted: #94a3b8;
+        --text-muted: #64748B;
         --accent-primary: #FF5B2B;
         --accent-secondary: #E04A1F;
         --highlight-bg: #FFF0EB;
-        --highlight-text: #FF5B2B;
+        --highlight-text: #C2410C;
         --highlight-bg-hover: #FFE0D4;
-        --border-color: rgba(255, 255, 255, 0.6);
+        --border-color: rgba(15, 23, 42, 0.08);
         --border-subtle: #e2e8f0;
         --shadow-soft: 0 10px 40px rgba(0,0,0,.04);
         --radius-lg: 24px;
@@ -54,8 +52,8 @@
         --bg-card-solid: #1e2130;
         --text-primary: #e8eaed;
         --text-secondary: #9aa0b0;
-        --text-muted: #5a6178;
-        --accent-primary: #FF7A50;
+        --text-muted: #94A3B8;
+        --accent-primary: #FF5B2B;
         --accent-secondary: #FF5B2B;
         --highlight-bg: #2a1510;
         --highlight-text: #FF9A75;
@@ -216,11 +214,14 @@
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
       }
 
-      /* TeamPlanner dark scrollbar (scoped) */
+      /* TeamPlanner scrollbar (light default, dark override) */
       .team-planner-board::-webkit-scrollbar { width: 8px; height: 8px; }
-      .team-planner-board::-webkit-scrollbar-track { background: #2d2d2d; }
-      .team-planner-board::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-      .team-planner-board::-webkit-scrollbar-thumb:hover { background: #666; }
+      .team-planner-board::-webkit-scrollbar-track { background: #e2e8f0; }
+      .team-planner-board::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      .team-planner-board::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      .dark .team-planner-board::-webkit-scrollbar-track { background: #2d2d2d; }
+      .dark .team-planner-board::-webkit-scrollbar-thumb { background: #555; }
+      .dark .team-planner-board::-webkit-scrollbar-thumb:hover { background: #666; }
 
       .custom-scrollbar-light::-webkit-scrollbar { width: 6px; height: 6px; }
       .custom-scrollbar-light::-webkit-scrollbar-track { background: transparent; }
@@ -230,6 +231,13 @@
       /* Zone Maker map styles */
       .leaflet-container {
         font-family: 'Inter', sans-serif;
+      }
+      .leaflet-interactive {
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .leaflet-container svg {
+        outline: none;
       }
 
       /* Mobile safe areas for notched phones */
@@ -397,6 +405,10 @@
       @supports (-webkit-touch-callout: none) {
         .overflow-y-auto { -webkit-overflow-scrolling: touch; }
       }
+
+      /* Global focus-visible ring for keyboard accessibility */
+      :focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+      button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -430,6 +442,6 @@
         }
       }, 10000);
     </script>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

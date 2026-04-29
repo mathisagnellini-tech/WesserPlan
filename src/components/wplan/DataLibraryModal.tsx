@@ -1,0 +1,101 @@
+import React, { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Library } from 'lucide-react';
+import { dataLibraryData } from '@/constants';
+import { GoldenHourWidget, WeatherCorrelatorWidget, GenomeWidget, SeismographWidget } from '@/components/wplan/DataLabWidgets';
+import { useDialogA11y } from '@/hooks/useDialogA11y';
+
+interface DataLibraryModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    /** Currently-selected department code (drives weather widget). */
+    selectedDeptCode?: string | null;
+}
+
+const DataLibraryModal: React.FC<DataLibraryModalProps> = ({ isOpen, onClose, selectedDeptCode }) => {
+    const titleId = useId();
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const { dialogRef } = useDialogA11y({ isOpen, onClose, initialFocusRef: closeRef });
+
+    if (!isOpen) return null;
+
+    return createPortal(
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="fixed inset-0 z-[200] animate-fade-in flex items-center justify-center p-4"
+        >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
+            <div
+                ref={dialogRef}
+                className="relative bg-white dark:bg-slate-900 w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700/50"
+            >
+                <header className="flex justify-between items-center p-8 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-orange-600 rounded-2xl shadow-[0_0_20px_rgba(255,91,43,0.4)]">
+                            <Library className="text-white w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 id={titleId} className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                Data Lab <span className="text-orange-500">.</span>
+                            </h3>
+                            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">Observatoire de la donnée terrain & Intelligence Artificielle</p>
+                        </div>
+                    </div>
+                    <button
+                        ref={closeRef}
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Fermer"
+                        className="p-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+                </header>
+
+                <div className="overflow-y-auto custom-scrollbar p-8">
+                    <div className="mb-12">
+                        <h4 className="text-slate-900 dark:text-white font-bold text-lg mb-6 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            Insights Temps Réel
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <GoldenHourWidget />
+                            <WeatherCorrelatorWidget deptCode={selectedDeptCode || undefined} />
+                            <GenomeWidget />
+                            <SeismographWidget />
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <h4 className="text-slate-900 dark:text-white font-bold text-lg mb-6 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                            Catalogue de Données
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {dataLibraryData.categories.map((category) => (
+                                <div key={category.nom} className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 hover:border-orange-500/30 transition-colors group">
+                                    <h5 className="font-bold text-orange-600 dark:text-orange-400 mb-4 text-sm uppercase tracking-wider flex items-center justify-between">
+                                        {category.nom}
+                                        <span className="text-slate-500 dark:text-slate-600 text-[10px] bg-white dark:bg-slate-800 px-2 py-1 rounded-full group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{category.items.length}</span>
+                                    </h5>
+                                    <div className="flex flex-wrap gap-2">
+                                        {category.items.map((item) => (
+                                            <span key={item} className="bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-colors cursor-default">
+                                                {item}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body,
+    );
+};
+
+export default DataLibraryModal;
