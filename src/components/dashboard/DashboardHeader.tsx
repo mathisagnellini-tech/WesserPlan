@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, RefreshCw } from 'lucide-react';
 import { weeksInIsoYear } from '@/lib/isoWeek';
-import type { CampaignMetricsDto } from '@/types/api';
+import type { DashboardCampaignDto } from '@/types/plan';
 
 const translations = {
   en: {
@@ -35,7 +35,7 @@ export interface DashboardHeaderProps {
   setYear: (y: number) => void;
   selectedCampaignId: string | null;
   setSelectedCampaignId: (id: string | null) => void;
-  campaigns: CampaignMetricsDto[];
+  campaigns: DashboardCampaignDto[];
   onRefresh: () => void;
   isRefreshing?: boolean;
   lastUpdated: number | null;
@@ -120,16 +120,17 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const updatedLabel = formatLastUpdated(lastUpdated, t, updatedTick);
 
   const innerSelectClasses =
-    'bg-transparent text-[var(--text-primary)] font-bold text-sm py-1 px-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700';
+    'num bg-transparent text-[var(--text-primary)] font-medium text-sm py-1 px-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors';
+
+  const labelClasses =
+    'text-[11px] font-medium tracking-tight text-[var(--text-muted)]';
 
   return (
     <header className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 h-12 md:h-16 flex-wrap">
       {/* Combined Week / Year / Campaign filter pill */}
-      <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1.5 shadow-sm">
-        <CalendarDays size={16} className="text-orange-600 ml-1" />
-        <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-          {t('week')}
-        </label>
+      <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-2xl p-1.5 pl-2.5 shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.08)]">
+        <CalendarDays size={15} className="text-orange-600" strokeWidth={2.2} />
+        <label className={labelClasses}>{t('week')}</label>
         <select
           value={week}
           onChange={(e) => setWeek(Number(e.target.value))}
@@ -141,10 +142,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </option>
           ))}
         </select>
-        <div className="w-px h-5 bg-slate-200 dark:bg-slate-700" />
-        <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-          {t('year')}
-        </label>
+        <div className="w-px h-4 bg-slate-200/70 dark:bg-slate-700/70" />
+        <label className={labelClasses}>{t('year')}</label>
         <select
           value={year}
           onChange={(e) => setYear(Number(e.target.value))}
@@ -156,10 +155,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </option>
           ))}
         </select>
-        <div className="w-px h-5 bg-slate-200 dark:bg-slate-700" />
-        <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-          {t('campaign')}
-        </label>
+        <div className="w-px h-4 bg-slate-200/70 dark:bg-slate-700/70" />
+        <label className={labelClasses}>{t('campaign')}</label>
         <select
           value={selectedCampaignId ?? ''}
           onChange={(e) => setSelectedCampaignId(e.target.value === '' ? null : e.target.value)}
@@ -179,15 +176,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       {updatedLabel && (
         <span
-          className="hidden md:inline text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+          className="hidden md:inline-flex items-center gap-2 text-[11px] font-medium text-[var(--text-muted)] tracking-tight"
           aria-live="polite"
         >
+          <span className="live-dot" aria-hidden="true" />
           {updatedLabel}
         </span>
       )}
 
-      <div className="hidden lg:flex flex-col items-end justify-center px-3 border-r border-gray-200/50 dark:border-[var(--border-subtle)]">
-        <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide first-letter:uppercase">
+      <div className="hidden lg:flex flex-col items-end justify-center px-3 border-r border-[var(--border-subtle)]">
+        <div className="text-xs font-medium text-[var(--text-secondary)] tracking-tight first-letter:uppercase">
           {dateString}
         </div>
       </div>
@@ -200,10 +198,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           aria-label={t('refresh')}
           aria-busy={isRefreshing}
           title={t('refresh')}
-          className="flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-secondary)] font-bold bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-2 md:px-3 md:py-2 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-[var(--bg-card-solid)] focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+          className="flex items-center gap-1.5 text-[var(--text-secondary)] font-medium bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] px-2.5 py-2 md:px-3.5 md:py-2 rounded-xl shadow-sm hover:border-orange-200 hover:text-orange-700 dark:hover:border-orange-500/40 dark:hover:text-orange-300 active:translate-y-[1px] transition disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
         >
-          <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : undefined} />
-          <span className="hidden md:inline text-xs">{t('refresh')}</span>
+          <RefreshCw size={15} strokeWidth={2.2} className={isRefreshing ? 'animate-spin' : undefined} />
+          <span className="hidden md:inline text-xs tracking-tight">{t('refresh')}</span>
         </button>
       </div>
     </header>

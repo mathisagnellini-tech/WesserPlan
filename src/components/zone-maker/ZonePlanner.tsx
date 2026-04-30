@@ -16,7 +16,7 @@ const ZonePlanner: React.FC = () => {
   const zp = useZonePlanner();
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC] dark:bg-slate-950 font-sans overflow-hidden"
+    <div className="app-surface fixed top-14 left-0 right-0 bottom-20 md:top-16 md:bottom-0 flex flex-col md:flex-row bg-[#F8FAFC] dark:bg-slate-950 overflow-hidden"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -98,7 +98,7 @@ const ZonePlanner: React.FC = () => {
       </div>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 h-screen relative bg-[#F1F5F9] dark:bg-slate-950 overflow-hidden">
+      <main className="flex-1 h-full relative bg-[#F1F5F9] dark:bg-slate-950 overflow-hidden">
         {/* CNFF OVERLAY */}
         {zp.showCNFF && (
           <CnffReport
@@ -131,37 +131,42 @@ const ZonePlanner: React.FC = () => {
             value isn't yet wired into any filter pipeline. The input stays
             visible to preview the eventual UX. */}
         {!zp.isBrushMode && (
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 z-[400] w-full max-w-xl px-12 pointer-events-none">
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[400] w-full max-w-xl px-8 pointer-events-none">
             <Tooltip
               comingSoon
               content="La recherche en direct connectera bientôt l'INSEE/code/nom au filtre carte. Pour l'instant, la valeur n'est pas encore appliquée."
             >
-              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-4 flex items-center gap-4 pointer-events-auto ring-1 ring-black/5 hover:bg-white dark:hover:bg-slate-900 hover:shadow-2xl transition-all duration-500">
-                <Search className="ml-6 text-slate-300 dark:text-slate-500" size={22} strokeWidth={2.5} />
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-[0_24px_60px_-24px_rgba(15,23,42,0.25),0_8px_24px_-16px_rgba(255,91,43,0.15)] border border-[var(--border-subtle)] rounded-2xl pl-3 pr-4 py-2 flex items-center gap-3 pointer-events-auto hover:border-orange-200 dark:hover:border-orange-500/30 transition-colors duration-300">
+                <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25 shrink-0">
+                  <Search size={16} strokeWidth={2.2} />
+                </div>
                 <input
                   type="text"
-                  placeholder="Rechercher une commune..."
+                  placeholder="Rechercher une commune…"
                   aria-label="Rechercher une commune"
                   value={zp.searchQuery}
                   onChange={(e) => zp.setSearchQuery(e.target.value)}
-                  className="flex-1 px-5 py-4 bg-transparent text-[15px] font-black tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-400"
+                  className="cmd-input flex-1 py-2 text-[14px] font-medium tracking-tight focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
             </Tooltip>
           </div>
         )}
 
-        {/* GeoJSON load error — surface a retry button instead of a silent failure. */}
+        {/* GeoJSON load error */}
         {zp.geoLoadError && !zp.isLoading && (
-          <div role="alert" className="absolute top-32 left-1/2 -translate-x-1/2 z-[700] w-full max-w-md px-6">
-            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/20 rounded-2xl p-4 flex items-start gap-3 shadow-xl">
-              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
+          <div role="alert" className="absolute top-28 left-1/2 -translate-x-1/2 z-[700] w-full max-w-md px-6">
+            <div className="bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/25 rounded-2xl p-4 flex items-start gap-3 shadow-xl">
+              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={18} strokeWidth={2.2} />
               <div className="flex-1">
-                <p className="text-sm text-red-800 dark:text-red-300 font-bold mb-2">Carte indisponible — chargement de la topographie impossible.</p>
+                <p className="text-[13px] text-red-700 dark:text-red-300 font-medium tracking-tight mb-2">
+                  Carte indisponible — chargement de la topographie impossible.
+                </p>
                 <button
                   type="button"
                   onClick={zp.retryGeoLoad}
-                  className="text-xs font-bold px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  className="btn-primary !text-[12px] !px-3 !py-1.5"
+                  style={{ background: '#dc2626' }}
                 >
                   Réessayer
                 </button>
@@ -173,8 +178,8 @@ const ZonePlanner: React.FC = () => {
         {/* Loading */}
         {zp.isLoading && (
           <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 z-[700] flex flex-col items-center justify-center backdrop-blur-3xl">
-            <div className="w-20 h-20 border-6 border-orange-600/10 border-t-orange-600 rounded-full animate-spin mb-8 shadow-2xl shadow-orange-100 dark:shadow-orange-900/30"></div>
-            <p className="text-slate-900 dark:text-white font-black text-3xl tracking-tight uppercase">Chargement...</p>
+            <div className="w-14 h-14 border-[3px] border-orange-600/15 border-t-orange-600 rounded-full animate-spin mb-5"></div>
+            <p className="display text-slate-900 dark:text-white text-2xl tracking-tight">Chargement…</p>
           </div>
         )}
 

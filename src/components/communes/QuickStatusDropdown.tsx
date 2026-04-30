@@ -95,7 +95,7 @@ export const QuickStatusDropdown: React.FC<{
                     ref={dropdownRef}
                     id={menuId}
                     role="menu"
-                    className="fixed z-[9999] bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-2xl border border-[var(--border-subtle)] overflow-hidden min-w-[160px] animate-fade-in"
+                    className="modal-shell fixed z-[9999] overflow-hidden min-w-[180px] animate-fade-in"
                     style={{ top: coords.top, left: coords.left }}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -121,11 +121,11 @@ export const QuickStatusDropdown: React.FC<{
                                     focusSibling(e.currentTarget, -1);
                                 }
                             }}
-                            className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 focus:outline-none focus:bg-slate-50 dark:focus:bg-slate-700/50 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-700 last:border-0
-                            ${key === currentStatus ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600' : 'text-[var(--text-secondary)]'}`}
+                            className={`w-full text-left px-3.5 py-2.5 text-[13px] font-medium tracking-tight hover:bg-slate-50 dark:hover:bg-slate-700/50 focus:outline-none focus:bg-slate-50 dark:focus:bg-slate-700/50 flex items-center justify-between transition border-b border-[var(--border-subtle)] last:border-0 active:translate-y-[1px]
+                            ${key === currentStatus ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-200' : 'text-[var(--text-secondary)]'}`}
                         >
                             <span>{conf.text}</span>
-                            {key === currentStatus && <Check size={12} />}
+                            {key === currentStatus && <Check size={12} strokeWidth={2.6} />}
                         </button>
                     ))}
                 </div>,

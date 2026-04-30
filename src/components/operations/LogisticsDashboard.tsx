@@ -25,60 +25,78 @@ export const LogisticsDashboard: React.FC<{ housings: Housing[], cars: CarType[]
         })
     ).length;
 
+    const cornerIcon = (Icon: typeof Euro, tint = 'orange') => (
+        <div
+            className={`absolute top-3 right-3 h-8 w-8 rounded-xl flex items-center justify-center
+                ${tint === 'orange'
+                    ? 'bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25'
+                    : tint === 'amber'
+                    ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-100 dark:bg-amber-500/15 dark:ring-amber-500/25'
+                    : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-300 dark:ring-slate-600/40'}`}
+        >
+            <Icon size={15} strokeWidth={2.2} />
+        </div>
+    );
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-4 border border-[var(--border-subtle)] shadow-sm flex flex-col justify-between relative overflow-hidden group">
-                <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Euro size={48} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-3 mb-8">
+            {/* Hero: Coût moyen / nuit — operational lever */}
+            <div className="kpi-card kpi-card--hero relative">
+                {cornerIcon(Euro)}
+                <div className="relative z-10 flex flex-col h-full justify-between gap-2 pr-10">
+                    <p className="eyebrow">Coût moyen par nuit</p>
+                    <div className="flex items-end justify-between gap-3">
+                        <p className="num display text-[var(--text-primary)] leading-none text-[44px] md:text-[56px]">
+                            {avgCostPerNight}<span className="text-[28px] md:text-[34px] align-top ml-0.5">€</span>
+                        </p>
+                        <p className="eyebrow text-right text-[10px] leading-tight max-w-[10ch] -mb-0.5">
+                            coût total / nuits cumulées
+                        </p>
+                    </div>
                 </div>
-                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Coût Moyen / Nuit</h4>
-                <div className="flex items-end gap-2 mt-2">
-                    <span className="text-3xl font-black text-[var(--text-primary)]">{avgCostPerNight}€</span>
-                </div>
-                <p className="text-[10px] text-[var(--text-muted)] mt-1">Coût total / nuits cumulées</p>
             </div>
 
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-4 border border-[var(--border-subtle)] shadow-sm flex flex-col justify-between relative overflow-hidden group">
-                <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Users size={48} />
+            <div className="kpi-card relative">
+                {cornerIcon(Users)}
+                <div className="relative z-10 flex flex-col h-full justify-between gap-2 pr-10">
+                    <p className="eyebrow">Personnes hébergées</p>
+                    <p className="num text-[var(--text-primary)] leading-none text-[26px] md:text-[30px] font-semibold tracking-tight">
+                        {peopleHoused}
+                    </p>
+                    <p className="eyebrow text-[10px] -mt-1">
+                        sur <span className="num">{housings.length}</span> logement{housings.length !== 1 ? 's' : ''}
+                    </p>
                 </div>
-                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Personnes Hébergées</h4>
-                <div className="flex items-end gap-2 mt-2">
-                    <span className="text-3xl font-black text-[var(--text-primary)]">{peopleHoused}</span>
-                </div>
-                <p className="text-[10px] text-[var(--text-muted)] mt-1">{housings.length} logement(s)</p>
             </div>
 
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl p-4 border border-[var(--border-subtle)] shadow-sm flex flex-col justify-between relative overflow-hidden group">
-                <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Wallet size={48} />
+            <div className="kpi-card relative">
+                {cornerIcon(Wallet)}
+                <div className="relative z-10 flex flex-col h-full justify-between gap-2 pr-10">
+                    <p className="eyebrow">Coût total</p>
+                    <p className="num text-[var(--text-primary)] leading-none text-[26px] md:text-[30px] font-semibold tracking-tight">
+                        {totalCost.toLocaleString('fr-FR')}<span className="text-[18px] ml-0.5">€</span>
+                    </p>
+                    <p className="eyebrow text-[10px] -mt-1">cumul logements affichés</p>
                 </div>
-                <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Coût Total</h4>
-                <div className="flex items-end gap-2 mt-2">
-                    <span className="text-3xl font-black text-[var(--text-primary)]">{totalCost.toLocaleString('fr-FR')}€</span>
-                </div>
-                <p className="text-[10px] text-[var(--text-muted)] mt-1">Cumul logements affichés</p>
             </div>
 
-            <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between relative overflow-hidden text-slate-900 dark:text-white">
-                <div className="absolute right-0 top-0 p-3 opacity-20">
-                    <AlertTriangle size={48} />
-                </div>
-                <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Alertes Flotte</h4>
-                <div className="mt-2 space-y-2">
+            <div className="kpi-card relative">
+                {cornerIcon(carsWithRecentDamage === 0 ? ShieldCheck : AlertTriangle, carsWithRecentDamage === 0 ? 'slate' : 'amber')}
+                <div className="relative z-10 flex flex-col h-full justify-between gap-2 pr-10">
+                    <p className="eyebrow">Alertes flotte</p>
                     {carsWithRecentDamage === 0 ? (
-                        <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-300">
-                            <ShieldCheck size={14}/>
-                            <span>Aucune alerte</span>
-                        </div>
+                        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400 tracking-tight">
+                            Aucune alerte
+                        </p>
                     ) : (
-                        <div className="flex items-center gap-2 text-sm font-medium text-red-700 dark:text-red-300">
-                            <AlertTriangle size={14}/>
-                            <span>{carsWithRecentDamage} choc{carsWithRecentDamage > 1 ? 's' : ''} récent{carsWithRecentDamage > 1 ? 's' : ''} (&lt; 30j)</span>
-                        </div>
+                        <p className="text-sm font-medium text-red-700 dark:text-red-400 tracking-tight">
+                            <span className="num">{carsWithRecentDamage}</span> choc{carsWithRecentDamage > 1 ? 's' : ''} récent{carsWithRecentDamage > 1 ? 's' : ''} <span className="text-[var(--text-muted)]">· &lt; 30 j</span>
+                        </p>
                     )}
+                    <p className="eyebrow text-[10px] -mt-1">
+                        <span className="num">{cars.length}</span> véhicule{cars.length !== 1 ? 's' : ''} suivi{cars.length !== 1 ? 's' : ''}
+                    </p>
                 </div>
-                <p className="text-[10px] text-[var(--text-muted)] mt-2">{cars.length} véhicule(s) suivi(s)</p>
             </div>
         </div>
     );

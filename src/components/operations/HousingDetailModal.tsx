@@ -10,6 +10,19 @@ interface HousingDetailModalProps {
     onClose: () => void;
 }
 
+// Desaturated org tone classes — replaces the old saturated red/orange/green
+// 600 fills which violated the audit's "keep saturation < 80%" rule.
+const orgTone = (org: string) => {
+    switch (org) {
+        case 'MSF':
+            return 'bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/25';
+        case 'UNICEF':
+            return 'bg-sky-50 text-sky-700 ring-1 ring-sky-100 dark:bg-sky-500/15 dark:text-sky-300 dark:ring-sky-500/25';
+        default:
+            return 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/25';
+    }
+};
+
 export const HousingDetailModal: React.FC<HousingDetailModalProps> = ({ housing, onClose }) => {
     const titleId = useId();
     const closeRef = useRef<HTMLButtonElement>(null);
@@ -18,15 +31,12 @@ export const HousingDetailModal: React.FC<HousingDetailModalProps> = ({ housing,
 
     if (!housing) return null;
 
-    const orgBadgeColor =
-        housing.org === 'MSF' ? 'bg-red-600'
-        : housing.org === 'UNICEF' ? 'bg-orange-600'
-        : 'bg-green-600';
+    const nightlyRate = housing.nights > 0 ? (housing.cost / housing.nights).toFixed(0) : null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+        <div className="app-surface fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
             <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
                 aria-hidden="true"
             />
@@ -36,102 +46,152 @@ export const HousingDetailModal: React.FC<HousingDetailModalProps> = ({ housing,
                 aria-modal="true"
                 aria-labelledby={titleId}
                 tabIndex={-1}
-                className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] outline-none"
+                className="modal-shell relative w-full max-w-2xl flex flex-col max-h-[90vh] outline-none"
             >
-                <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-[var(--text-muted)]">
-                        <MapPin size={48} opacity={0.2} />
-                        <span className="ml-2 text-sm font-medium">Aperçu carte indisponible</span>
+                {/* Header — accent strip with intentional placeholder, org chip, week badge */}
+                <div className="modal-accent-strip h-32 relative border-b border-[var(--border-subtle)]">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="inline-flex items-center gap-2 text-[var(--text-muted)]">
+                            <MapPin size={16} strokeWidth={2.2} className="text-orange-600/70" />
+                            <span className="text-[12px] font-medium tracking-tight">
+                                <span className="num">{housing.region}</span> · département <span className="num">{housing.dept}</span>
+                            </span>
+                        </div>
                     </div>
                     <button
                         ref={closeRef}
                         type="button"
                         onClick={onClose}
                         aria-label="Fermer"
-                        className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-[var(--bg-card-solid)]/80 hover:bg-white rounded-full text-[var(--text-secondary)] transition-colors shadow-sm"
+                        className="btn-ghost !absolute top-3 right-3 !p-2 bg-white/85 dark:bg-[var(--bg-card-solid)]/85 backdrop-blur-sm border border-[var(--border-subtle)]"
                     >
-                        <X size={20} />
+                        <X size={16} strokeWidth={2.2} />
                     </button>
-                    <div className="absolute bottom-4 left-6">
-                        <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${orgBadgeColor}`}>
+                    <div className="absolute bottom-3 left-5 flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-lg text-[11px] font-medium tracking-tight ${orgTone(housing.org)}`}>
                             Utilisé par {housing.org}
+                        </span>
+                        <span className="num px-2.5 py-1 rounded-lg text-[11px] font-medium tracking-tight bg-orange-50 text-orange-700 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-300 dark:ring-orange-500/25">
+                            {getWeekNumberLabel(housing.date)}
                         </span>
                     </div>
                 </div>
-                <div className="p-8 overflow-y-auto">
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <h2 id={titleId} className="text-2xl font-bold text-[var(--text-primary)] leading-tight mb-1">{housing.name}</h2>
-                            <p className="text-[var(--text-secondary)] text-sm">{housing.address}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs font-bold bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded">{getWeekNumberLabel(housing.date)}</span>
-                                <span className="text-xs text-[var(--text-secondary)]">{housing.region} ({housing.dept})</span>
-                            </div>
+
+                <div className="p-7 overflow-y-auto">
+                    {/* Title row */}
+                    <div className="flex justify-between items-start gap-6 mb-6">
+                        <div className="min-w-0">
+                            <h2
+                                id={titleId}
+                                className="display text-[28px] text-[var(--text-primary)] leading-tight mb-1"
+                            >
+                                {housing.name}
+                            </h2>
+                            <p className="text-[13px] text-[var(--text-secondary)] tracking-tight">{housing.address}</p>
                         </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-extrabold text-[var(--text-primary)]">{housing.cost.toLocaleString('fr-FR')} €</div>
-                            <div className="text-xs text-[var(--text-muted)] uppercase font-bold tracking-wider">Coût total</div>
-                            {housing.nights > 0 && <div className="text-sm text-[var(--text-secondary)] mt-1">{(housing.cost / housing.nights).toFixed(0)} € / nuit</div>}
+                        <div className="text-right shrink-0">
+                            <div className="num display text-[28px] text-[var(--text-primary)] leading-none tracking-tight">
+                                {housing.cost.toLocaleString('fr-FR')}<span className="text-[18px] ml-0.5">€</span>
+                            </div>
+                            <div className="eyebrow mt-1">coût total</div>
+                            {nightlyRate && (
+                                <div className="num text-[12px] text-[var(--text-secondary)] tracking-tight mt-1.5">
+                                    {nightlyRate} € / nuit
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 mb-8">
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center">
-                            <User className="text-orange-500 mb-2" size={24} />
-                            <span className="font-bold text-[var(--text-primary)] text-lg">{housing.people}</span>
-                            <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Personnes</span>
-                        </div>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center">
-                            <Bed className="text-orange-500 mb-2" size={24} />
-                            <span className="font-bold text-[var(--text-primary)] text-lg">{housing.nights}</span>
-                            <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Nuits min.</span>
-                        </div>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-[var(--border-subtle)] flex flex-col items-center justify-center text-center">
-                            <Star className="text-yellow-500 mb-2" size={24} fill="currentColor" />
-                            <span className="font-bold text-[var(--text-primary)] text-lg">{housing.rating}/5</span>
-                            <span className="text-xs text-[var(--text-secondary)] uppercase font-bold">Avis Équipe</span>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <h3 className="font-bold text-[var(--text-primary)] mb-3">Commentaire Chef d'Équipe</h3>
-                            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl text-sm text-[var(--text-primary)] italic border border-yellow-100 dark:border-yellow-800/40 relative">
-                                <span className="absolute top-2 left-2 text-4xl text-yellow-200 dark:text-yellow-700/50 font-serif leading-none">"</span>
-                                <p className="relative z-10">{housing.comment || "Aucun commentaire spécifique."}</p>
-                                <p className="text-right mt-2 text-xs font-bold not-italic text-[var(--text-muted)]">- {housing.lead}</p>
+
+                    {/* Stat tiles — kpi-card primitive, compact */}
+                    <div className="grid grid-cols-3 gap-3 mb-7">
+                        <div className="kpi-card !p-4 relative">
+                            <div className="relative z-10 flex flex-col items-start gap-2">
+                                <User size={15} strokeWidth={2.2} className="text-orange-600" />
+                                <p className="num text-[var(--text-primary)] text-[20px] font-semibold leading-none tracking-tight">
+                                    {housing.people}
+                                </p>
+                                <p className="eyebrow leading-none">personnes</p>
                             </div>
                         </div>
-                        <div>
-                            <h3 className="font-bold text-[var(--text-primary)] mb-3">Commodités</h3>
-                            <div className="space-y-2">
-                                {housing.amenities.map(am => (
-                                    <div key={am} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
-                                        <CheckCircle2 size={16} className="text-green-500" />
-                                        {am}
-                                    </div>
-                                ))}
+                        <div className="kpi-card !p-4 relative">
+                            <div className="relative z-10 flex flex-col items-start gap-2">
+                                <Bed size={15} strokeWidth={2.2} className="text-orange-600" />
+                                <p className="num text-[var(--text-primary)] text-[20px] font-semibold leading-none tracking-tight">
+                                    {housing.nights}
+                                </p>
+                                <p className="eyebrow leading-none">nuits min.</p>
+                            </div>
+                        </div>
+                        <div className="kpi-card !p-4 relative">
+                            <div className="relative z-10 flex flex-col items-start gap-2">
+                                <Star size={15} strokeWidth={2.2} className="text-amber-500" fill="currentColor" />
+                                <p className="num text-[var(--text-primary)] text-[20px] font-semibold leading-none tracking-tight">
+                                    {housing.rating}<span className="text-[var(--text-muted)] text-[14px] font-medium">/5</span>
+                                </p>
+                                <p className="eyebrow leading-none">avis équipe</p>
                             </div>
                         </div>
                     </div>
-                    <div className="border-t border-[var(--border-subtle)] pt-6 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center text-[var(--text-secondary)]">
-                                <User size={20} />
+
+                    {/* Comment + amenities */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-7">
+                        <div>
+                            <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-2.5 tracking-tight">
+                                Commentaire chef d’équipe
+                            </h3>
+                            {housing.comment ? (
+                                <blockquote className="relative pl-3 border-l-2 border-orange-300 dark:border-orange-500/40 text-[13px] text-[var(--text-secondary)] italic leading-relaxed">
+                                    {housing.comment}
+                                    <footer className="not-italic mt-2 text-[11px] font-medium text-[var(--text-muted)]">
+                                        — {housing.lead}
+                                    </footer>
+                                </blockquote>
+                            ) : (
+                                <p className="text-[13px] text-[var(--text-muted)] italic">Aucun commentaire spécifique.</p>
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-2.5 tracking-tight">
+                                Commodités
+                            </h3>
+                            {housing.amenities.length > 0 ? (
+                                <ul className="space-y-1.5">
+                                    {housing.amenities.map(am => (
+                                        <li key={am} className="flex items-center gap-2 text-[13px] text-[var(--text-secondary)]">
+                                            <CheckCircle2 size={13} strokeWidth={2.4} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                            {am}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-[13px] text-[var(--text-muted)]">Aucune commodité renseignée.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Owner footer */}
+                    <div className="border-t border-[var(--border-subtle)] pt-5 flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-700/40 ring-1 ring-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                                <User size={17} strokeWidth={2.2} />
                             </div>
-                            <div>
-                                <p className="text-sm font-bold text-[var(--text-primary)]">{housing.ownerName}</p>
-                                <p className="text-xs text-[var(--text-secondary)]">{housing.channel}</p>
+                            <div className="min-w-0">
+                                <p className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight truncate">
+                                    {housing.ownerName}
+                                </p>
+                                <p className="eyebrow leading-tight">{housing.channel}</p>
                             </div>
                         </div>
                         {housing.owner ? (
                             <a
                                 href={`tel:${housing.owner.replace(/\s+/g, '')}`}
-                                className="px-6 py-3 bg-slate-900 text-white dark:bg-orange-600 dark:hover:bg-orange-700 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 dark:shadow-slate-900 flex items-center gap-2"
+                                className="btn-primary num"
                             >
-                                <Phone size={18} /> {housing.owner}
+                                <Phone size={14} strokeWidth={2.2} /> {housing.owner}
                             </a>
                         ) : (
-                            <span className="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-[var(--text-muted)] rounded-xl font-bold flex items-center gap-2 cursor-not-allowed">
-                                <Phone size={18} /> N/A
+                            <span className="btn-secondary cursor-not-allowed opacity-60">
+                                <Phone size={14} strokeWidth={2.2} /> Téléphone indisponible
                             </span>
                         )}
                     </div>

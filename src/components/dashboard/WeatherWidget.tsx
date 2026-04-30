@@ -103,23 +103,31 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
       {/* Left: Stats */}
       <div className="flex flex-col justify-between z-10 flex-shrink-0">
         <div>
-          <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">
-            Meteo Moyenne
+          <h4 className="text-[11px] font-medium text-[var(--text-muted)] tracking-tight mb-1.5">
+            Météo moyenne
           </h4>
           <div className="flex items-end gap-2">
-            <span className="text-4xl font-black text-[var(--text-primary)] leading-none">{avgTemp}°</span>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-[var(--text-secondary)]">{condition}</span>
+            <span
+              className="text-[40px] font-semibold text-[var(--text-primary)] leading-none tracking-tight"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {avgTemp}°
+            </span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">{condition}</span>
               {tempDelta !== null && (
-                <span className="text-[10px] text-[var(--text-secondary)] font-medium flex items-center gap-1">
-                  <TrendingUp size={10} /> {tempDelta >= 0 ? '+' : ''}{tempDelta}° vs Hier
+                <span
+                  className="text-[10px] text-[var(--text-muted)] font-medium flex items-center gap-1"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                >
+                  <TrendingUp size={10} strokeWidth={2.4} /> {tempDelta >= 0 ? '+' : ''}{tempDelta}° vs hier
                 </span>
               )}
             </div>
           </div>
         </div>
         <div
-          className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 shadow-sm w-fit
+          className={`px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 shadow-sm w-fit
             ${
               walkingScore === 'Excellente'
                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
@@ -130,8 +138,8 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
                 : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400'
             }`}
         >
-          {walkingScore === 'Excellente' ? <Sun size={12} /> : <Cloud size={12} />}
-          Marche : {walkingScore}
+          {walkingScore === 'Excellente' ? <Sun size={12} strokeWidth={2.4} /> : <Cloud size={12} strokeWidth={2.4} />}
+          Marche · {walkingScore}
         </div>
       </div>
 
@@ -139,7 +147,7 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
       <div className="flex-grow relative min-w-[80px] h-full">
         {chartData ? (
           <>
-            <div className="absolute top-0 right-0 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
+            <div className="absolute top-0 right-0 text-[10px] font-medium text-[var(--text-muted)] tracking-tight">
               24h
             </div>
             <div className="h-full w-full pt-2">
@@ -148,7 +156,7 @@ export const CompactWeatherWidget: React.FC<CompactWeatherWidgetProps> = ({
           </>
         ) : (
           <div className="h-full w-full flex items-center justify-center">
-            <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-center">
+            <span className="text-[10px] font-medium text-[var(--text-muted)] tracking-tight text-center">
               Données indisponibles
             </span>
           </div>

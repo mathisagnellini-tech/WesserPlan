@@ -3,6 +3,7 @@ import { Commune, Organization } from '@/types';
 import { MapCommuneFeature, ProspectHistoryItem } from '@/components/communes/types';
 import { useCommunesStore } from '@/stores/communesStore';
 import { communesService } from '@/services/communesService';
+import { prospectRequestsService } from '@/services/prospectRequestsService';
 import { supabasePlan } from '@/lib/supabase';
 import { withAudit } from '@/lib/audit';
 import { reporter } from '@/lib/observability';
@@ -39,11 +40,21 @@ export function useCommunesData() {
     const [error, setError] = useState<Error | null>(null);
     const [updateError, setUpdateError] = useState<Error | null>(null);
 
-    // Past prospect requests are stored client-only for now — the previous
-    // hardcoded sample seed has been removed (it shipped to every user as if
-    // they had a real history). Once a `plan.prospect_requests` table exists,
-    // load it via service here.
     const [pastRequests, setPastRequests] = useState<ProspectHistoryItem[]>([]);
+
+    useEffect(() => {
+        const ctrl = new AbortController();
+        prospectRequestsService.list()
+            .then((items) => {
+                if (ctrl.signal.aborted) return;
+                setPastRequests(items);
+            })
+            .catch((err: Error) => {
+                if (ctrl.signal.aborted) return;
+                reporter.warn('prospect requests load failed', err, { source: 'useCommunesData' });
+            });
+        return () => ctrl.abort();
+    }, []);
 
     const [validationData, setValidationData] = useState<{ communes: MapCommuneFeature[]; stats: { count: number; pop: number; zones: string } } | null>(null);
     const [validationError, setValidationError] = useState<Error | null>(null);
@@ -161,7 +172,7 @@ export function useCommunesData() {
         setValidationError(null);
         setValidationSuccess(null);
 
-        const { communes, stats } = validationData;
+        const { communes } = validationData;
 
         try {
             const inseeCodes = communes.map((c) => c.properties.code);
@@ -212,19 +223,17 @@ export function useCommunesData() {
                 if (updateError) throw updateError;
             }
 
-            const newHistoryItem: ProspectHistoryItem = {
-                id: `req-${Date.now()}`,
-                date: new Date(),
-                communeCount: stats.count,
-                totalPop: stats.pop,
-                zoneCount: stats.zones,
-                communesList: communes.map((c) => ({
-                    nom: c.properties.nom,
-                    lat: c.properties.lat || 0,
-                    lng: c.properties.lng || 0,
-                })),
-            };
-            setPastRequests((prev) => [newHistoryItem, ...prev]);
+            // Persist the request log row(s), then re-pull the canonical list
+            // so we surface DB-shaped data (groups, IDs, dates) — not a hand-
+            // rolled record. A failure here shouldn't block the zone creation
+            // success path, so it's best-effort.
+            try {
+                await prospectRequestsService.create({ townHallIds, organization: org });
+                const refreshedRequests = await prospectRequestsService.list();
+                setPastRequests(refreshedRequests);
+            } catch (logErr) {
+                reporter.warn('prospect request log failed', logErr, { source: 'useCommunesData' });
+            }
 
             // Refresh visible communes so the new org assignment / status is
             // reflected in the list without a manual reload.

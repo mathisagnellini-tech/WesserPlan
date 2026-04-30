@@ -93,44 +93,8 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [initError, setInitError] = useState<string | null>(null);
-
-  useEffect(() => {
-    msalInstance
-      .initialize()
-      .then(() => {
-        // Handle redirect promise (returning from login)
-        return msalInstance.handleRedirectPromise();
-      })
-      .then(() => setIsInitialized(true))
-      .catch((err) => {
-        console.error('MSAL initialization failed:', err);
-        setInitError(err.message || "Le service d'authentification n'a pas pu démarrer.");
-      });
-  }, []);
-
-  if (initError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)]">
-        <div className="text-center max-w-md">
-          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">Erreur d'authentification</h2>
-          <p className="text-sm text-[var(--text-secondary)] mb-4">{initError}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-[#FF5B2B] text-white font-medium rounded-lg hover:bg-[#e5512a] transition-colors"
-          >
-            Réessayer
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isInitialized) {
-    return null;
-  }
-
+  // MSAL is initialized (and any redirect response handled) in main.tsx
+  // before React mounts, so we just wrap the tree in MsalProvider here.
   return (
     <MsalProvider instance={msalInstance}>
       <AuthGate>{children}</AuthGate>

@@ -35,17 +35,18 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   return (
     <div className="flex-grow overflow-y-auto px-8 pt-10 space-y-4 bg-transparent pb-48">
       {/* Header */}
-      <div className={`grid sticky top-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl z-20 -mx-8 px-8 py-5 border-b border-slate-200/40 dark:border-slate-700/40 ${isCompact ? 'gap-3' : 'gap-6'}`} style={{ gridTemplateColumns: `60px repeat(${maxCapacity}, 1fr)` }}>
-        <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center flex flex-col justify-center">Week</div>
+      <div className={`grid sticky top-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl z-20 -mx-8 px-8 py-4 border-b border-slate-200/40 dark:border-slate-700/40 ${isCompact ? 'gap-3' : 'gap-5'}`} style={{ gridTemplateColumns: `60px repeat(${maxCapacity}, 1fr)` }}>
+        <div className="eyebrow leading-none text-center flex flex-col justify-center">Sem.</div>
         {Array.from({ length: maxCapacity }).map((_, i) => (
-          <div key={i} className="text-[10px] font-black text-slate-900 dark:text-white text-center uppercase tracking-[0.15em] flex items-center justify-center gap-2">
-            <Users size={12} className="text-slate-300" strokeWidth={2.2} /> Eq. {i + 1}
+          <div key={i} className="num text-[12px] font-medium text-slate-700 dark:text-slate-200 text-center tracking-tight flex items-center justify-center gap-1.5">
+            <Users size={11} className="text-slate-300 dark:text-slate-600" strokeWidth={2.2} /> Éq. {i + 1}
             <button
               onClick={() => onToggleTeamPath(i + 1)}
-              className={`ml-1 p-1.5 rounded-lg transition-all ${visibleTeamPath === i + 1 ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-300 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30'}`}
+              className={`ml-0.5 p-1 rounded-md transition active:translate-y-[1px] ${visibleTeamPath === i + 1 ? 'bg-orange-600 text-white shadow-md' : 'text-slate-300 dark:text-slate-600 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/15'}`}
               title="Afficher le trajet sur la carte"
+              aria-label={`Trajet équipe ${i + 1}`}
             >
-              <Route size={10} strokeWidth={2.5} />
+              <Route size={10} strokeWidth={2.4} />
             </button>
           </div>
         ))}
@@ -72,12 +73,12 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             <div key={slot.week}
               className={`grid p-3 items-stretch transition-all duration-500 rounded-[2.5rem] border border-transparent ${bgThemeClass} ${isCompact ? 'gap-3' : 'gap-6'}`}
               style={{ gridTemplateColumns: `60px repeat(${maxCapacity}, 1fr)` }}>
-              <div className="flex flex-col items-center gap-4 py-2">
-                <div className={`font-black text-[11px] px-3 py-2 rounded-2xl border transition-all ${weekLabelTheme}`}>S{slot.week}</div>
-                <div className="flex flex-col items-center gap-1.5 bg-white/60 dark:bg-slate-800/60 p-1.5 rounded-2xl shadow-inner border border-slate-100/50 dark:border-slate-700/50">
-                  <button onClick={() => onModifyWeekTeamCount(slot.week, 1)} className="p-1.5 text-slate-300 dark:text-slate-500 hover:text-orange-600 transition-colors"><UserPlus size={11} strokeWidth={2.5} /></button>
-                  <div className="text-[10px] font-black text-slate-500 dark:text-slate-400">{slot.capacity}</div>
-                  <button onClick={() => onModifyWeekTeamCount(slot.week, -1)} className="p-1.5 text-slate-300 dark:text-slate-500 hover:text-red-500 transition-colors"><UserMinus size={11} strokeWidth={2.5} /></button>
+              <div className="flex flex-col items-center gap-3 py-2">
+                <div className={`num font-medium text-[12px] px-2.5 py-1.5 rounded-xl border tracking-tight transition-all ${weekLabelTheme}`}>S{slot.week}</div>
+                <div className="flex flex-col items-center gap-1 bg-white/60 dark:bg-slate-800/60 p-1 rounded-xl shadow-inner border border-[var(--border-subtle)]">
+                  <button onClick={() => onModifyWeekTeamCount(slot.week, 1)} className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-orange-600 transition active:translate-y-[1px]" aria-label="Ajouter une équipe"><UserPlus size={11} strokeWidth={2.4} /></button>
+                  <div className="num text-[11px] font-medium text-slate-600 dark:text-slate-300 tracking-tight">{slot.capacity}</div>
+                  <button onClick={() => onModifyWeekTeamCount(slot.week, -1)} className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-500 transition active:translate-y-[1px]" aria-label="Retirer une équipe"><UserMinus size={11} strokeWidth={2.4} /></button>
                 </div>
               </div>
               {Array.from({ length: maxCapacity }).map((_, idx) => {
@@ -93,35 +94,39 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                   return (
                     <div key={idx} onDragOver={(e) => { if (isEditMode) e.preventDefault(); setDragOverCell({ week: slot.week, team: idx + 1 }); }} onDrop={(e) => { e.preventDefault(); e.stopPropagation(); const cid = e.dataTransfer.getData('clusterId'); if (cid) onManualMoveRequest(cid, idx + 1, slot.week); }} className={`rounded-[2rem] transition-all duration-500 ${isTarget && isEditMode ? 'scale-[1.05] z-40' : ''}`}>
                       <div onClick={() => { if (!isBonusMode) onSelectCluster(cluster); }} draggable={isEditMode} onDragStart={(e) => e.dataTransfer.setData('clusterId', cluster.id)} className={`h-full rounded-[2rem] border flex flex-col relative overflow-hidden transition-all duration-500 shadow-[0_15px_35px_-12px_rgba(0,0,0,0.06)] ${selectedCluster?.id === cluster.id ? 'ring-[3px] ring-orange-500/15 border-orange-500 shadow-2xl scale-[1.03] z-20' : 'bg-white dark:bg-[var(--bg-card-solid)] border-slate-100/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-xl hover:-translate-y-1'} ${isLow ? 'border-red-200 dark:border-red-800 bg-red-50/10 dark:bg-red-900/10' : ''}`}>
-                        <div className={`${isCompact ? 'p-4' : 'p-6'} pb-3 flex flex-col`}>
+                        <div className={`${isCompact ? 'p-4' : 'p-5'} pb-2 flex flex-col`}>
                           <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                              <span className={`font-black text-slate-900 dark:text-white leading-none tracking-tighter ${isCompact ? 'text-xl' : 'text-2xl'}`}>{cluster.code}</span>
-                              {isLow && <AlertTriangle size={16} className="text-red-600 animate-pulse" strokeWidth={2.5} />}
-                              {cluster.isBonus && <Zap size={15} className="text-emerald-500" strokeWidth={2.5} />}
+                            <div className="flex items-center gap-2">
+                              <span className={`num display text-slate-900 dark:text-white leading-none tracking-tight ${isCompact ? 'text-[20px]' : 'text-[24px]'}`}>{cluster.code}</span>
+                              {isLow && <AlertTriangle size={14} className="text-red-600 animate-pulse" strokeWidth={2.4} />}
+                              {cluster.isBonus && <Zap size={13} className="text-emerald-500" strokeWidth={2.4} />}
                             </div>
                             {isCompact && (
-                              <span className="bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2 py-1 rounded-lg text-[9px] font-black tracking-wider uppercase shadow-sm">{cluster.durationWeeks}s</span>
+                              <span className="num bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-1.5 py-0.5 rounded-md text-[10px] font-medium tracking-tight">{cluster.durationWeeks}s</span>
                             )}
                           </div>
-                          <div className="h-1.5 w-10 rounded-full mt-2" style={{ backgroundColor: cluster.color }}></div>
+                          <div className="h-1 w-8 rounded-full mt-2" style={{ backgroundColor: cluster.color }} />
                         </div>
-                        <div className={`${isCompact ? 'px-4 py-3' : 'px-6 py-4'} flex-grow flex items-center`}>
-                          <div className={`text-[11px] font-black uppercase flex items-center gap-2 ${isLow ? 'text-red-600' : 'text-slate-400'} ${cluster.isBonus ? 'text-emerald-600' : ''}`}>
-                            <Users size={isCompact ? 13 : 15} strokeWidth={2.2} className={isLow ? 'text-red-400' : (cluster.isBonus ? 'text-emerald-400' : 'text-slate-200 dark:text-slate-700')} />
+                        <div className={`${isCompact ? 'px-4 py-2.5' : 'px-5 py-3'} flex-grow flex items-center`}>
+                          <div className={`num text-[12px] font-medium tracking-tight flex items-center gap-1.5 ${isLow ? 'text-red-600 dark:text-red-300' : 'text-slate-500 dark:text-slate-400'} ${cluster.isBonus ? '!text-emerald-600 dark:!text-emerald-300' : ''}`}>
+                            <Users size={isCompact ? 12 : 14} strokeWidth={2.2} className={isLow ? 'text-red-400' : (cluster.isBonus ? 'text-emerald-400' : 'text-slate-300 dark:text-slate-600')} />
                             {(cluster.totalPopulation / 1000).toFixed(1)}k
                           </div>
                         </div>
                         {!isCompact && (
-                          <div className="px-6 py-4 bg-slate-50/30 dark:bg-slate-800/30 border-t border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between">
-                            <span className="bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2.5 py-1 rounded-xl text-[9px] font-black tracking-[0.15em] shadow-sm uppercase">{cluster.durationWeeks} semaines</span>
-                            {cluster.isBonus && <span className="text-emerald-600 text-[10px] font-black uppercase tracking-tighter flex items-center gap-1.5"><Zap size={12} strokeWidth={2.5} /> Zone Bonus</span>}
+                          <div className="px-5 py-3 bg-slate-50/30 dark:bg-slate-800/30 border-t border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between">
+                            <span className="num bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2 py-0.5 rounded-md text-[10px] font-medium tracking-tight">{cluster.durationWeeks} sem.</span>
+                            {cluster.isBonus && (
+                              <span className="text-emerald-600 dark:text-emerald-300 text-[11px] font-medium tracking-tight flex items-center gap-1">
+                                <Zap size={11} strokeWidth={2.4} /> Zone bonus
+                              </span>
+                            )}
                           </div>
                         )}
-                        {/* PROGRESS INDICATOR (X/Y) */}
+                        {/* Progress (X/Y) */}
                         {cluster.durationWeeks > 1 && (
-                          <div className={`absolute bottom-3 right-4 flex items-center ${isCompact ? 'bottom-2 right-3' : 'bottom-3 right-4'}`}>
-                            <span className="text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm tracking-tighter">
+                          <div className={`absolute ${isCompact ? 'bottom-2 right-3' : 'bottom-3 right-4'} flex items-center`}>
+                            <span className="num text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md border border-[var(--border-subtle)] tracking-tight">
                               {weekIndex}/{cluster.durationWeeks}
                             </span>
                           </div>

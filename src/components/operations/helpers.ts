@@ -1,7 +1,5 @@
 import { computeIsoWeek } from '@/lib/isoWeek';
 
-export { MOCK_ZONES } from '@/mocks/operationsMocks';
-
 export const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);

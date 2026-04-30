@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Plus } from 'lucide-react';
-import type { Housing, CarType } from './types';
-import { getDistance, MOCK_ZONES } from './helpers';
+import { Plus, Building2, Truck } from 'lucide-react';
+import type { Housing, CarType, TargetZone } from './types';
+import { getDistance } from './helpers';
 import { LogisticsDashboard } from './LogisticsDashboard';
 import { ReportDamageModal } from './ReportDamageModal';
 import { AddHousingModal } from './AddHousingModal';
@@ -14,6 +14,8 @@ import { VehicleSection } from './VehicleSection';
 import { useOperationsStore } from '@/stores/operationsStore';
 import { housingsService } from '@/services/housingsService';
 import { carsService } from '@/services/carsService';
+import { mairieService } from '@/services/mairieService';
+import { reporter } from '@/lib/observability';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -26,6 +28,7 @@ const OperationsTab: React.FC = () => {
   const [smartZoneId, setSmartZoneId] = useState<string>("");
   const [housingData, setHousingData] = useState<Housing[]>([]);
   const [carsData, setCarsData] = useState<CarType[]>([]);
+  const [zones, setZones] = useState<TargetZone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -36,14 +39,21 @@ const OperationsTab: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
+    // Zone fetch is best-effort — if it fails, the SmartMatcher dropdown is
+    // empty but the rest of the page still works.
     Promise.all([
       housingsService.getAll(),
       carsService.getAll(),
+      mairieService.getZonesGeo().catch((err: Error) => {
+        reporter.warn('zones geo load failed', err, { source: 'OperationsTab' });
+        return [] as TargetZone[];
+      }),
     ])
-      .then(([housings, cars]) => {
+      .then(([housings, cars, zonesGeo]) => {
         if (cancelled) return;
         setHousingData(housings);
         setCarsData(cars);
+        setZones(zonesGeo);
       })
       .catch((err: Error) => {
         if (cancelled) return;
@@ -82,7 +92,7 @@ const OperationsTab: React.FC = () => {
   const filteredHousing = useMemo(() => {
       let data = [...housingData];
       if (smartZoneId) {
-          const zone = MOCK_ZONES.find(z => z.id === smartZoneId);
+          const zone = zones.find(z => z.id === smartZoneId);
           if (zone) {
               data = data.map(h => {
                   const dist = getDistance(h.lat, h.lng, zone.lat, zone.lng);
@@ -104,7 +114,7 @@ const OperationsTab: React.FC = () => {
           }
       }
       return data;
-  }, [housingData, smartZoneId]);
+  }, [housingData, smartZoneId, zones]);
 
   const handleHousingCreated = useCallback(async () => {
     await refresh();
@@ -140,7 +150,7 @@ const OperationsTab: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pb-10 relative">
+    <div className="app-surface min-h-screen pb-10 relative">
         {/* Modals */}
         <HousingDetailModal housing={selectedHousing} onClose={() => setSelectedHousingId(null)} />
         <AddHousingModal isOpen={isAddModalOpen} initialMode={addModalMode} onClose={() => setIsAddModalOpen(false)} onCreated={handleHousingCreated} />
@@ -151,18 +161,31 @@ const OperationsTab: React.FC = () => {
 
         {/* Navigation & Main Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-            <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl w-full sm:w-fit border border-[var(--border-subtle)]">
-                <button onClick={() => setActiveSubTab('housing')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'housing' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 dark:text-orange-400 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-                    🏠 Logements
+            <div className="seg w-full sm:w-fit">
+                <button
+                    type="button"
+                    onClick={() => setActiveSubTab('housing')}
+                    data-active={activeSubTab === 'housing'}
+                    className="flex-1 sm:flex-none justify-center"
+                >
+                    <Building2 size={15} strokeWidth={2.2} /> Logements
                 </button>
-                <button onClick={() => setActiveSubTab('cars')} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeSubTab === 'cars' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 dark:text-orange-400 shadow-sm' : 'text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-                    🚗 Véhicules & Flotte
+                <button
+                    type="button"
+                    onClick={() => setActiveSubTab('cars')}
+                    data-active={activeSubTab === 'cars'}
+                    className="flex-1 sm:flex-none justify-center"
+                >
+                    <Truck size={15} strokeWidth={2.2} /> Véhicules
                 </button>
             </div>
              {activeSubTab === 'housing' && (
                  <div className="flex gap-2">
-                     <button onClick={() => openAddModal('manual')} className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-xl font-bold text-sm shadow-md hover:bg-orange-700 transition-colors">
-                        <Plus size={16} /> Ajouter
+                     <button
+                         onClick={() => openAddModal('manual')}
+                         className="flex items-center gap-1.5 px-3.5 py-2 bg-orange-600 text-white rounded-xl text-sm font-medium tracking-tight shadow-[0_8px_20px_-10px_rgba(255,91,43,0.7)] hover:bg-orange-700 active:translate-y-[1px] transition focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                     >
+                        <Plus size={15} strokeWidth={2.4} /> Ajouter
                     </button>
                  </div>
              )}
@@ -171,7 +194,7 @@ const OperationsTab: React.FC = () => {
         {/* HOUSING TAB */}
         {activeSubTab === 'housing' && (
             <div className="animate-fade-in space-y-6">
-                <SmartMatcher smartZoneId={smartZoneId} viewMode={viewMode} onZoneChange={setSmartZoneId} onViewModeChange={setViewMode} />
+                <SmartMatcher zones={zones} smartZoneId={smartZoneId} viewMode={viewMode} onZoneChange={setSmartZoneId} onViewModeChange={setViewMode} />
                 {housingData.length === 0 ? (
                     <div className="glass-card">
                         <EmptyState
@@ -182,7 +205,7 @@ const OperationsTab: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        {viewMode === 'map' && <HousingMap housings={filteredHousing} smartZoneId={smartZoneId} onSelectHousing={handleSelectHousing} />}
+                        {viewMode === 'map' && <HousingMap housings={filteredHousing} zones={zones} smartZoneId={smartZoneId} onSelectHousing={handleSelectHousing} />}
                         {viewMode === 'list' && <HousingList housings={filteredHousing} copiedId={copiedId} onSelect={handleSelectHousing} onCopy={copyToClipboard} />}
                     </>
                 )}

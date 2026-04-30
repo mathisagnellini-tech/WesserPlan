@@ -88,25 +88,25 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
         <div className={`flex items-center justify-between w-full ${isExpanded ? 'mb-6 px-2' : 'h-full px-4'}`}>
             
             {/* LEFT: ARRIVALS */}
-            <div 
+            <div
                 className={`flex items-center gap-3 group cursor-pointer transition-opacity ${activeSection === 'arrivals' ? 'opacity-100' : 'opacity-50 hover:opacity-100'}`}
                 onClick={(e) => { e.stopPropagation(); setActiveSection('arrivals'); }}
             >
                 <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isExpanded && activeSection === 'arrivals' ? 'bg-orange-500 text-white' : 'bg-white/10 text-orange-400'}`}>
-                    <UserPlus size={14} />
+                    <UserPlus size={14} strokeWidth={2.2} />
                 </div>
-                <div className="flex flex-col justify-center">
-                    <span className="text-[11px] font-bold text-white leading-tight whitespace-nowrap flex items-center gap-2">
+                <div className="flex flex-col justify-center leading-tight">
+                    <span className="text-[12px] font-medium text-white tracking-tight whitespace-nowrap flex items-center gap-2">
                         <span>Arrivées</span>
                         {!isExpanded && (
                             <>
-                                <span className="text-white/20">|</span>
-                                <span className="text-orange-400">{count}</span>
+                                <span className="text-white/20">·</span>
+                                <span className="num text-orange-400">{count}</span>
                             </>
                         )}
                     </span>
                     {isExpanded && (
-                        <span className="text-[9px] font-medium text-slate-400">
+                        <span className="text-[10px] font-medium text-slate-400 tracking-tight">
                             Semaine prochaine
                         </span>
                     )}
@@ -114,23 +114,23 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
             </div>
 
             {/* CENTER: STATS */}
-            <div className={`flex items-center gap-6 px-6 border-x border-white/10 ${isExpanded ? 'mx-auto' : ''}`}>
-                 <div className="flex flex-col items-center">
-                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Effectif</span>
-                     <span className="text-sm font-black text-white">{totalActiveCount}</span>
+            <div className={`flex items-center gap-5 px-6 border-x border-white/10 ${isExpanded ? 'mx-auto' : ''}`}>
+                 <div className="flex flex-col items-center leading-tight">
+                     <span className="text-[10px] font-medium text-slate-400 tracking-tight">Effectif</span>
+                     <span className="num text-[13px] font-semibold text-white tracking-tight">{totalActiveCount}</span>
                  </div>
-                 <div className="flex flex-col items-center">
-                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Flux</span>
-                     <span className={`text-sm font-black ${netChange > 0 ? 'text-emerald-400' : netChange < 0 ? 'text-red-400' : 'text-slate-200'}`}>
+                 <div className="flex flex-col items-center leading-tight">
+                     <span className="text-[10px] font-medium text-slate-400 tracking-tight">Flux</span>
+                     <span className={`num text-[13px] font-semibold tracking-tight ${netChange > 0 ? 'text-emerald-400' : netChange < 0 ? 'text-red-400' : 'text-slate-200'}`}>
                          {netChange > 0 ? '+' : ''}{netChange}
                      </span>
                  </div>
             </div>
 
             {/* RIGHT: DEPARTURES */}
-            <div 
+            <div
                 className={`
-                    flex items-center gap-3 group transition-all duration-300 rounded-xl p-1 cursor-pointer
+                    flex items-center gap-3 group transition rounded-xl p-1 cursor-pointer
                     ${activeSection === 'departures' ? 'opacity-100' : 'opacity-50 hover:opacity-100'}
                     ${isDragOverDeparture ? 'bg-red-500/20 ring-2 ring-red-500 scale-105' : ''}
                 `}
@@ -139,24 +139,24 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
             >
-                <div className="flex flex-col justify-center items-end">
-                    <span className="text-[11px] font-bold text-white leading-tight whitespace-nowrap flex items-center gap-2">
+                <div className="flex flex-col justify-center items-end leading-tight">
+                    <span className="text-[12px] font-medium text-white tracking-tight whitespace-nowrap flex items-center gap-2">
                         {!isExpanded && (
                             <>
-                                <span className="text-red-400">{departureCount}</span>
-                                <span className="text-white/20">|</span>
+                                <span className="num text-red-400">{departureCount}</span>
+                                <span className="text-white/20">·</span>
                             </>
                         )}
                         <span>Départs</span>
                     </span>
                     {isExpanded && (
-                        <span className="text-[9px] font-medium text-slate-400">
+                        <span className="text-[10px] font-medium text-slate-400 tracking-tight">
                             Glisser ici pour retirer
                         </span>
                     )}
                 </div>
                 <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isExpanded && activeSection === 'departures' ? 'bg-red-500 text-white' : 'bg-white/10 text-red-400'}`}>
-                    <UserMinus size={14} />
+                    <UserMinus size={14} strokeWidth={2.2} />
                 </div>
             </div>
 
@@ -188,20 +188,20 @@ export const DynamicIsland: React.FC<DynamicIslandProps> = ({
                 <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300 w-full">
                     {/* Tabs */}
                     <div className="flex justify-center mb-4 flex-shrink-0">
-                        <div className="flex bg-black/40 rounded-full p-1 border border-white/5">
-                            <button 
+                        <div className="flex bg-black/40 rounded-full p-1 border border-white/5 gap-1">
+                            <button
                                 onClick={() => setActiveTab('new')}
-                                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${activeTab === 'new' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                                className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-tight flex items-center gap-1.5 transition active:translate-y-[1px] ${activeTab === 'new' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
                             >
-                                <Sparkles size={10} />
-                                Nouveaux <span className="opacity-60 ml-0.5">{newcomers.length}</span>
+                                <Sparkles size={11} strokeWidth={2.2} />
+                                Nouveaux <span className="num opacity-60 ml-0.5">{newcomers.length}</span>
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setActiveTab('senior')}
-                                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${activeTab === 'senior' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                                className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-tight flex items-center gap-1.5 transition active:translate-y-[1px] ${activeTab === 'senior' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
                             >
-                                <GraduationCap size={10} />
-                                Seniors <span className="opacity-60 ml-0.5">{seniors.length}</span>
+                                <GraduationCap size={11} strokeWidth={2.2} />
+                                Seniors <span className="num opacity-60 ml-0.5">{seniors.length}</span>
                             </button>
                         </div>
                     </div>

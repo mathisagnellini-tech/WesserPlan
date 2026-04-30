@@ -27,123 +27,160 @@ export const RelationsList: React.FC<RelationsListProps> = ({ person, allPeople,
           ).slice(0, 5)
         : [];
 
+    const config = {
+        affinity: {
+            icon: Heart,
+            label: 'Affinité',
+            tone: 'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/25',
+        },
+        synergy: {
+            icon: Zap,
+            label: 'Synergie',
+            tone: 'bg-orange-50 text-orange-700 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-300 dark:ring-orange-500/25',
+        },
+        conflict: {
+            icon: AlertTriangle,
+            label: 'Conflit',
+            tone: 'bg-red-50 text-red-700 ring-red-100 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/25',
+        },
+    } as const;
+
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Add New Relationship */}
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] p-4 rounded-[28px] border border-slate-100 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
-                        <Plus size={14} className="text-orange-500" /> Ajouter une relation
+        <div className="space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Add new relationship */}
+            <div className="bg-white dark:bg-[var(--bg-card-solid)] p-4 rounded-2xl border border-[var(--border-subtle)] shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)]">
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="eyebrow leading-none flex items-center gap-1.5">
+                        <Plus size={11} strokeWidth={2.4} className="text-orange-500" /> Ajouter une relation
                     </h3>
                 </div>
 
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Rechercher un collègue..."
+                        placeholder="Rechercher un collègue…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                        className="field-input"
                     />
                     {searchQuery.length > 1 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden z-20">
+                        <div className="modal-shell absolute top-full left-0 right-0 mt-2 overflow-hidden z-20">
                             {searchResults.map((p: Person) => (
-                                <div key={p.id} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group cursor-pointer border-b border-slate-50 dark:border-slate-800 last:border-0">
-                                    <div className="flex items-center gap-3">
-                                        <img src={p.photoUrl} className="w-8 h-8 rounded-full object-cover" alt={p.name} />
-                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.name}</span>
+                                <div
+                                    key={p.id}
+                                    className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group cursor-pointer border-b border-[var(--border-subtle)] last:border-0"
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <img src={p.photoUrl} className="w-7 h-7 rounded-full object-cover" alt={p.name} />
+                                        <span className="text-[13px] font-medium text-slate-700 dark:text-slate-200 tracking-tight truncate">
+                                            {p.name}
+                                        </span>
                                     </div>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => { onAddRelationship(p.id, 'affinity'); setSearchQuery(''); }} className="p-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/30" title="Affinité"><Heart size={14} /></button>
-                                        <button onClick={() => { onAddRelationship(p.id, 'synergy'); setSearchQuery(''); }} className="p-1.5 bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-500/30" title="Synergie"><Zap size={14} /></button>
-                                        <button onClick={() => { onAddRelationship(p.id, 'conflict'); setSearchQuery(''); }} className="p-1.5 bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/30" title="Conflit"><AlertTriangle size={14} /></button>
+                                        <button
+                                            onClick={() => { onAddRelationship(p.id, 'affinity'); setSearchQuery(''); }}
+                                            className="p-1.5 bg-emerald-50 ring-1 ring-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/25 rounded-md hover:scale-105 active:translate-y-[1px] transition"
+                                            title="Affinité"
+                                        >
+                                            <Heart size={12} strokeWidth={2.2} />
+                                        </button>
+                                        <button
+                                            onClick={() => { onAddRelationship(p.id, 'synergy'); setSearchQuery(''); }}
+                                            className="p-1.5 bg-orange-50 ring-1 ring-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300 dark:ring-orange-500/25 rounded-md hover:scale-105 active:translate-y-[1px] transition"
+                                            title="Synergie"
+                                        >
+                                            <Zap size={12} strokeWidth={2.2} />
+                                        </button>
+                                        <button
+                                            onClick={() => { onAddRelationship(p.id, 'conflict'); setSearchQuery(''); }}
+                                            className="p-1.5 bg-red-50 ring-1 ring-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/25 rounded-md hover:scale-105 active:translate-y-[1px] transition"
+                                            title="Conflit"
+                                        >
+                                            <AlertTriangle size={12} strokeWidth={2.2} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}
                             {searchResults.length === 0 && (
-                                <div className="p-4 text-center text-xs text-slate-400 dark:text-slate-500 italic">Aucun résultat</div>
+                                <div className="p-4 text-center text-[12px] text-slate-400 dark:text-slate-500 italic tracking-tight">
+                                    Aucun résultat
+                                </div>
                             )}
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Active Relationships */}
+            {/* Active relationships */}
             <div>
-                <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-3 flex items-center gap-2 pl-2">
-                    <Users size={14} className="text-slate-400" /> Relations Actives
+                <h3 className="eyebrow leading-none mb-3 flex items-center gap-1.5 pl-1">
+                    <Users size={11} strokeWidth={2.4} className="text-slate-400" /> Relations actives
                 </h3>
                 <div className="space-y-2">
                     {myRelationships.length > 0 ? myRelationships.map(rel => {
                         const otherId = rel.sourceId === person.id ? rel.targetId : rel.sourceId;
                         const other = allPeople[otherId];
                         if (!other) return null;
-
-                        const config = {
-                            affinity: { icon: Heart, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100', label: 'Affinité' },
-                            synergy: { icon: Zap, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-100', label: 'Synergie' },
-                            conflict: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-100', label: 'Conflit' }
-                        }[rel.type];
-
-                        const Icon = config.icon;
+                        const cfg = config[rel.type];
+                        const Icon = cfg.icon;
 
                         return (
-                            <div key={rel.id} className={`flex items-center justify-between p-3 rounded-xl border ${config.border} bg-white dark:bg-[var(--bg-card-solid)] shadow-sm`}>
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full ${config.bg} ${config.color}`}>
-                                        <Icon size={14} />
+                            <div key={rel.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card-solid)] shadow-sm">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className={`p-1.5 rounded-lg ring-1 ${cfg.tone}`}>
+                                        <Icon size={13} strokeWidth={2.2} />
                                     </div>
-                                    <div>
-                                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{other.name}</div>
-                                        <div className={`text-[10px] font-bold uppercase ${config.color}`}>{config.label}</div>
+                                    <div className="min-w-0">
+                                        <div className="text-[13px] font-medium text-slate-800 dark:text-slate-200 tracking-tight truncate">{other.name}</div>
+                                        <div className={`eyebrow leading-none mt-0.5`} style={{ color: 'currentColor' }}>{cfg.label.toLowerCase()}</div>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => onRemoveRelationship(rel.id)}
-                                    className="p-2 text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                                    className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/15 rounded-md transition active:translate-y-[1px]"
+                                    aria-label="Retirer la relation"
                                 >
-                                    <X size={14} />
+                                    <X size={13} strokeWidth={2.2} />
                                 </button>
                             </div>
                         );
                     }) : (
-                        <div className="text-center p-6 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-2xl text-slate-400 dark:text-slate-500 text-sm">
+                        <div className="text-center p-5 border border-dashed border-[var(--border-subtle)] rounded-2xl text-slate-400 dark:text-slate-500 text-[13px] italic tracking-tight">
                             Aucune relation active.
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Past Teammates (History) */}
+            {/* Past teammates */}
             <div>
-                <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-3 flex items-center gap-2 pl-2">
-                    <History size={14} className="text-slate-400" /> Historique (Déjà travaillé ensemble)
+                <h3 className="eyebrow leading-none mb-3 flex items-center gap-1.5 pl-1">
+                    <History size={11} strokeWidth={2.4} className="text-slate-400" /> Historique commun
                 </h3>
                 <div className="space-y-2">
                     {pastTeammates.length > 0 ? pastTeammates.map((teammate: Person) => {
                         const hasRel = myRelationships.some(r => r.sourceId === teammate.id || r.targetId === teammate.id);
 
                         return (
-                            <div key={teammate.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-                                <div className="flex items-center gap-3">
-                                    <img src={teammate.photoUrl} className="w-8 h-8 rounded-full grayscale opacity-70" alt={teammate.name} />
-                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{teammate.name}</span>
+                            <div key={teammate.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--border-subtle)] bg-slate-50/40 dark:bg-slate-800/40">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <img src={teammate.photoUrl} className="w-7 h-7 rounded-full grayscale opacity-70" alt={teammate.name} />
+                                    <span className="text-[13px] font-medium text-slate-600 dark:text-slate-300 tracking-tight truncate">{teammate.name}</span>
                                 </div>
-                                {!hasRel && (
+                                {!hasRel ? (
                                     <button
                                         onClick={() => onAddRelationship(teammate.id, 'synergy')}
-                                        className="px-3 py-1.5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-orange-600 hover:border-orange-200 shadow-sm transition-all flex items-center gap-1"
+                                        className="btn-secondary !px-2.5 !py-1 !text-[11px]"
                                     >
-                                        <Zap size={10} /> Créer Synergie
+                                        <Zap size={10} strokeWidth={2.4} /> Créer une synergie
                                     </button>
-                                )}
-                                {hasRel && (
-                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase px-2">Lié</span>
+                                ) : (
+                                    <span className="eyebrow leading-none px-2">lié</span>
                                 )}
                             </div>
                         );
                     }) : (
-                        <div className="text-center p-4 text-slate-400 dark:text-slate-500 text-xs italic">
+                        <div className="text-center p-4 text-slate-400 dark:text-slate-500 text-[12px] italic tracking-tight">
                             Aucun historique commun trouvé.
                         </div>
                     )}

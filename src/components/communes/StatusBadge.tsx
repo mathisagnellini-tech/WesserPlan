@@ -17,11 +17,11 @@ export const StatusBadge: React.FC<{ status: CommuneStatus; interactive?: boolea
 
     return (
         <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${config.bg} ${config.color} ${interactive ? 'group/badge' : ''}`}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium tracking-tight ${config.bg} ${config.color} ${interactive ? 'group/badge' : ''}`}
         >
-            <Icon size={12} />
+            <Icon size={11} strokeWidth={2.4} />
             {config.text}
-            {interactive && <ChevronDown size={10} className="opacity-0 group-hover/badge:opacity-100 transition-opacity ml-1" />}
+            {interactive && <ChevronDown size={10} strokeWidth={2.4} className="opacity-0 group-hover/badge:opacity-100 transition-opacity ml-0.5" />}
         </span>
     );
 };

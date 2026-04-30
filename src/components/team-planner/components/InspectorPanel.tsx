@@ -57,10 +57,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
       {/* Main Panel */}
       <div
         className={`
-            fixed top-4 bottom-4 right-4 w-[440px] z-[110] rounded-[36px]
-            bg-white dark:bg-slate-900 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] border border-white/40 dark:border-slate-700
+            app-surface fixed top-4 bottom-4 right-4 w-[440px] z-[110] rounded-[28px]
+            bg-white dark:bg-slate-900 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] border border-[var(--border-subtle)]
             flex flex-col overflow-hidden
-            transform transition-all duration-500 cubic-bezier(0.19, 1, 0.22, 1)
+            transform transition-all duration-500
             ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-[40px] opacity-0'}
         `}
       >
@@ -68,37 +68,38 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
         <div className="relative h-72 flex-shrink-0 bg-slate-50 dark:bg-slate-800 overflow-hidden group">
              <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
                 <img src={person.photoUrl} className="w-full h-full object-cover" alt={person.name} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
              </div>
-             <button onClick={handleClose} className="absolute top-5 right-5 p-2.5 rounded-full bg-white/20 hover:bg-white/40 text-white backdrop-blur-md transition-all border border-white/20 z-20">
-                <X size={20} />
+             <button
+                onClick={handleClose}
+                aria-label="Fermer"
+                className="absolute top-4 right-4 p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition active:translate-y-[1px] border border-white/20 z-20"
+             >
+                <X size={16} strokeWidth={2.2} />
             </button>
-            <div className="absolute bottom-0 left-0 right-0 p-8 pt-20 bg-gradient-to-t from-black/80 to-transparent">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20 shadow-sm mb-3">
-                    <MapPin size={12} className="text-white" />
-                    <span className="text-xs font-bold text-white uppercase tracking-wide">{person.origin}</span>
+            <div className="absolute bottom-0 left-0 right-0 p-7 pt-20 bg-gradient-to-t from-black/80 to-transparent">
+                <div className="num inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/15 backdrop-blur-md border border-white/15 mb-3 tracking-tight">
+                    <MapPin size={11} className="text-white" strokeWidth={2.4} />
+                    <span className="text-[11px] font-medium text-white">{person.origin}</span>
                 </div>
-                <h2 className="text-4xl font-black text-white leading-none tracking-tight mb-2 drop-shadow-lg">{person.name}</h2>
-                <div className="text-lg text-white/80 font-medium">{person.role}</div>
+                <h2 className="display text-white text-[36px] leading-none tracking-tight mb-2 drop-shadow-lg">{person.name}</h2>
+                <div className="text-[15px] text-white/80 tracking-tight">{person.role}</div>
             </div>
         </div>
 
         {/* Tabs */}
-        <div className="px-6 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 sticky top-0 overflow-x-auto no-scrollbar py-2">
-            {['info', 'dates', 'docs', 'relations', 'private'].map((tab) => (
-                <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab as any)}
-                    className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all capitalize whitespace-nowrap
-                        ${activeTab === tab
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md shadow-slate-900/20'
-                            : 'bg-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'}
-                    `}
-                >
-                    {tab === 'info' ? 'Profil' : tab === 'dates' ? 'Planning' : tab === 'docs' ? 'Sécurité' : tab === 'relations' ? 'Relations' : 'Privé'}
-                </button>
-            ))}
+        <div className="px-4 py-2.5 border-b border-[var(--border-subtle)] bg-white dark:bg-slate-900 z-10 sticky top-0 overflow-x-auto no-scrollbar">
+            <div className="seg w-fit">
+                {['info', 'dates', 'docs', 'relations', 'private'].map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab as any)}
+                        data-active={activeTab === tab}
+                    >
+                        {tab === 'info' ? 'Profil' : tab === 'dates' ? 'Planning' : tab === 'docs' ? 'Sécurité' : tab === 'relations' ? 'Relations' : 'Privé'}
+                    </button>
+                ))}
+            </div>
         </div>
 
         {/* Scrollable Content */}
@@ -121,23 +122,29 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ person, allPeopl
 
       {/* Secure Content Viewer */}
       {isUnlocked && secureView !== 'none' && secureView !== 'notes' && (
-           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-xl animate-in fade-in">
-               <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden max-w-2xl w-full max-h-[80vh] flex flex-col animate-in zoom-in-95">
-                   <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                       <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 ml-2">Document Sécurisé</h3>
-                       <button onClick={() => setSecureView('none')} className="p-2 bg-white dark:bg-[var(--bg-card-solid)] rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white shadow-sm transition-colors"><X size={20}/></button>
+           <div className="app-surface fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/45 backdrop-blur-xl animate-in fade-in">
+               <div className="modal-shell max-w-2xl w-full max-h-[80vh] flex flex-col animate-in zoom-in-95">
+                   <div className="modal-accent-strip p-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
+                       <h3 className="display text-slate-900 dark:text-white text-lg leading-none ml-2">Document sécurisé</h3>
+                       <button
+                           onClick={() => setSecureView('none')}
+                           aria-label="Fermer"
+                           className="btn-ghost !p-2"
+                       >
+                           <X size={16} strokeWidth={2.2} />
+                       </button>
                    </div>
-                   <div className="p-10 bg-slate-50 dark:bg-slate-800 flex items-center justify-center flex-1 overflow-auto">
+                   <div className="p-10 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-center flex-1 overflow-auto">
                         {secureView === 'score' ? (
-                            <div className="w-full bg-white dark:bg-[var(--bg-card-solid)] p-8 rounded-[24px] shadow-sm text-center border border-slate-100 dark:border-slate-800">
-                                <div className="text-7xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter">A+</div>
-                                <div className="text-slate-400 font-bold uppercase tracking-widest text-sm">Score Global</div>
+                            <div className="w-full bg-white dark:bg-[var(--bg-card-solid)] p-8 rounded-2xl shadow-sm text-center border border-[var(--border-subtle)]">
+                                <div className="num display text-slate-900 dark:text-white text-[80px] leading-none tracking-tight mb-2">A+</div>
+                                <div className="eyebrow leading-none">Score global</div>
                             </div>
                         ) : (
                              person.documents[secureView as keyof typeof person.documents] ? (
                                 <img src={person.documents[secureView as keyof typeof person.documents]} className="max-w-full rounded-2xl shadow-lg border border-white" alt="Document" />
                              ) : (
-                                <div className="text-slate-400 dark:text-slate-500 font-medium italic">Document non disponible</div>
+                                <div className="text-[13px] text-slate-400 dark:text-slate-500 italic tracking-tight">Document non disponible</div>
                              )
                         )}
                    </div>

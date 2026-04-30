@@ -21,42 +21,51 @@ const WplanHeader: React.FC<WplanHeaderProps> = ({
     onToggleCompare,
 }) => {
     return (
-        <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 md:mb-6">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">DataWiz</h2>
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <div className="inline-flex gap-1 p-1 rounded-lg bg-gray-200 dark:bg-slate-800">
+        <header className="flex flex-col sm:flex-row justify-between sm:items-end gap-3 mb-5 md:mb-7">
+            <div>
+                <h2 className="display text-[var(--text-primary)] text-[34px] md:text-[40px] leading-none tracking-tight">
+                    DataWiz
+                </h2>
+                <p className="eyebrow leading-none mt-2">analyse régionale &amp; départementale</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="seg">
                     <button
                         onClick={() => onSetMapLevel('regions')}
-                        className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${mapLevel === 'regions' && !viewingRegion ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow-sm' : 'text-[var(--text-secondary)] hover:bg-gray-300/50 dark:hover:bg-slate-700/50'}`}
+                        data-active={mapLevel === 'regions' && !viewingRegion}
                     >
                         Régions
                     </button>
                     <button
                         onClick={() => onSetMapLevel('departments')}
-                        className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${mapLevel === 'departments' && !viewingRegion ? 'bg-white dark:bg-[var(--bg-card-solid)] shadow-sm' : 'text-[var(--text-secondary)] hover:bg-gray-300/50 dark:hover:bg-slate-700/50'}`}
+                        data-active={mapLevel === 'departments' && !viewingRegion}
                     >
                         Départements
                     </button>
                 </div>
                 <button
                     onClick={onOpenDataLibrary}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-white dark:bg-[var(--bg-card-solid)] rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors shadow-sm border border-[var(--border-subtle)]"
+                    className="btn-secondary !px-3 !py-2 !text-[12px]"
                 >
-                    <Library size={16} /> Bibliothèque
+                    <Library size={14} strokeWidth={2.2} /> Bibliothèque
                 </button>
                 {viewingRegion && (
                     <button
                         onClick={onBackToRegions}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-200 dark:bg-slate-800 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-700 transition-colors"
+                        className="btn-secondary !px-3 !py-2 !text-[12px]"
                     >
-                        <ArrowLeft size={16} /> Retour aux régions
+                        <ArrowLeft size={14} strokeWidth={2.2} /> Retour aux régions
                     </button>
                 )}
                 <button
                     onClick={onToggleCompare}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${isComparing ? 'bg-orange-500 text-white shadow-md' : 'bg-white dark:bg-[var(--bg-card-solid)] hover:bg-gray-50 dark:hover:bg-slate-800/50 border border-[var(--border-subtle)]'}`}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium tracking-tight rounded-xl transition active:translate-y-[1px] border ${
+                        isComparing
+                            ? 'bg-orange-600 text-white border-orange-600 shadow-[0_8px_20px_-10px_rgba(255,91,43,0.7)]'
+                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30 hover:text-orange-700 dark:hover:text-orange-300'
+                    }`}
                 >
-                    <Shuffle size={16} /> {isComparing ? 'Mode Comparaison' : 'Comparer'}
+                    <Shuffle size={14} strokeWidth={2.2} /> {isComparing ? 'Comparaison active' : 'Comparer'}
                 </button>
             </div>
         </header>

@@ -68,25 +68,26 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
         <div className="w-full md:w-[480px] flex flex-col bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-sm border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
             <div className="p-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-slate-800/30 space-y-4">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-                        {mode === 'list' ? <ListIcon className="text-orange-600"/> : <MapIcon className="text-emerald-600"/>}
-                        {mode === 'list' ? 'Liste des Communes' : 'Prospection Carte'}
+                    <h2 className="display text-[var(--text-primary)] text-xl tracking-tight leading-tight flex items-center gap-2">
+                        {mode === 'list' ? <ListIcon size={18} strokeWidth={2.2} className="text-orange-600"/> : <MapIcon size={18} strokeWidth={2.2} className="text-emerald-600"/>}
+                        {mode === 'list' ? 'Liste des communes' : 'Prospection · carte'}
                     </h2>
-                    {/* MODE SWITCHER */}
-                    <div className="flex bg-slate-200 dark:bg-slate-700 p-1 rounded-lg">
+                    <div className="seg shrink-0">
                         <button
                             onClick={() => setMode('list')}
-                            className={`p-2 rounded-md transition-all ${mode === 'list' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-orange-600 shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-                            title="Vue Liste"
+                            data-active={mode === 'list'}
+                            title="Vue liste"
+                            aria-label="Vue liste"
                         >
-                            <ListIcon size={18} />
+                            <ListIcon size={14} strokeWidth={2.2} />
                         </button>
                         <button
                             onClick={() => setMode('map')}
-                            className={`p-2 rounded-md transition-all ${mode === 'map' ? 'bg-white dark:bg-[var(--bg-card-solid)] text-emerald-600 shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-                            title="Vue Prospection"
+                            data-active={mode === 'map'}
+                            title="Vue prospection"
+                            aria-label="Vue prospection"
                         >
-                            <MapIcon size={18} />
+                            <MapIcon size={14} strokeWidth={2.2} />
                         </button>
                     </div>
                 </div>
@@ -99,9 +100,9 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                         role="radio"
                         aria-checked={selectedOrg === 'all'}
                         onClick={() => setSelectedOrg('all')}
-                        className={`flex-1 min-w-[60px] py-1.5 rounded-lg text-xs font-bold uppercase transition-all border ${selectedOrg === 'all' ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                        className={`flex-1 min-w-[60px] py-1.5 rounded-lg text-[12px] font-medium tracking-tight transition active:translate-y-[1px] border ${selectedOrg === 'all' ? 'bg-orange-50 text-orange-700 border-orange-200 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-200 dark:border-orange-500/30 dark:ring-orange-500/25' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30'}`}
                     >
-                        Tous
+                        Toutes
                     </button>
                     {ORG_LIST.map((org) => {
                         const info = ORGANIZATIONS[org];
@@ -114,9 +115,9 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 aria-checked={isActive}
                                 onClick={() => setSelectedOrg(org)}
                                 title={info.name}
-                                className={`flex-1 min-w-[60px] py-1 px-1.5 rounded-lg text-xs font-bold uppercase transition-all border flex items-center justify-center gap-1.5 ${isActive ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                                className={`flex-1 min-w-[60px] py-1 px-1.5 rounded-lg text-[12px] font-medium tracking-tight transition active:translate-y-[1px] border flex items-center justify-center gap-1.5 ${isActive ? 'bg-orange-50 text-orange-700 border-orange-200 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-200 dark:border-orange-500/30 dark:ring-orange-500/25' : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30'}`}
                             >
-                                <img src={info.logo} alt="" aria-hidden="true" className="h-4 w-auto rounded-sm bg-white p-px" />
+                                <img src={info.logo} alt="" aria-hidden="true" className="h-3.5 w-auto rounded-sm bg-white p-px" />
                                 <span>{info.shortName}</span>
                             </button>
                         );
@@ -128,11 +129,11 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                 <div className="space-y-3 pt-2 border-t border-[var(--border-subtle)]/50">
                     {mode === 'list' && (
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16}/>
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" size={14} strokeWidth={2.2}/>
                             <input
                                 type="text"
-                                placeholder="Rechercher une ville..."
-                                className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white dark:bg-[var(--bg-card-solid)]"
+                                placeholder="Rechercher une ville…"
+                                className="field-input !pl-9"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -183,27 +184,33 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                     <button
                                         key={status}
                                         onClick={() => toggleStatus(status)}
-                                        className={`px-2 py-1.5 rounded-md text-[10px] font-bold uppercase border transition-all flex items-center justify-center gap-1
+                                        className={`px-2 py-1.5 rounded-md text-[11px] font-medium tracking-tight border transition active:translate-y-[1px] flex items-center justify-center gap-1
                                         ${isSelected
-                                            ? `${conf.bg} ${conf.color} ${STATUS_BORDER[status]} shadow-sm`
-                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-slate-300 dark:hover:border-slate-500'
+                                            ? `${conf.bg} ${conf.color} ${STATUS_BORDER[status]}`
+                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30'
                                         }`}
                                     >
-                                        {isSelected && <Check size={10} strokeWidth={4}/>}
+                                        {isSelected && <Check size={10} strokeWidth={3}/>}
                                         {conf.text}
                                     </button>
                                 );
                             })}
                             {selectedStatuses.size > 0 && (
-                                <button onClick={resetStatuses} className="text-[10px] text-[var(--text-secondary)] underline px-1">Reset</button>
+                                <button onClick={resetStatuses} className="text-[11px] text-[var(--text-secondary)] hover:text-orange-600 underline px-1 tracking-tight">
+                                    Reset
+                                </button>
                             )}
                         </div>
                     )}
 
                     {mode === 'map' && (
-                        <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg border border-orange-100 dark:border-orange-500/20 text-xs text-orange-800 dark:text-orange-300">
-                            <p className="font-bold flex items-center gap-1"><MousePointer2 size={12}/> Mode Prospection</p>
-                            <p className="opacity-80 mt-1">Sélectionnez les départements ci-dessus pour charger la carte, puis utilisez le pinceau pour sélectionner des communes.</p>
+                        <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-xl border border-orange-100 dark:border-orange-500/25 text-[12px] text-orange-800 dark:text-orange-200 tracking-tight">
+                            <p className="font-medium flex items-center gap-1.5">
+                                <MousePointer2 size={12} strokeWidth={2.2}/> Mode prospection
+                            </p>
+                            <p className="opacity-85 mt-1 leading-relaxed">
+                                Sélectionnez les départements ci-dessus pour charger la carte, puis utilisez le pinceau pour sélectionner des communes.
+                            </p>
                         </div>
                     )}
                 </div>
@@ -235,19 +242,19 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                                 <div
                                     key={c.id}
                                     onClick={() => setSelectedCommune(c)}
-                                    className={`p-3 rounded-xl border transition-all cursor-pointer hover:shadow-md ${selectedCommune?.id === c.id ? 'bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-500/20 ring-1 ring-orange-200 dark:ring-orange-500/20' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] hover:border-orange-100 dark:hover:border-orange-500/30'}`}
+                                    className={`p-3 rounded-xl border transition cursor-pointer active:translate-y-[1px] ${selectedCommune?.id === c.id ? 'bg-orange-50 dark:bg-orange-500/15 border-orange-200 dark:border-orange-500/25 ring-1 ring-orange-100 dark:ring-orange-500/25' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30 hover:shadow-md'}`}
                                 >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-[var(--text-primary)]">{c.nom}</h3>
+                                    <div className="flex justify-between items-start mb-2 gap-2">
+                                        <h3 className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">{c.nom}</h3>
                                         <QuickStatusDropdown
                                             currentStatus={c.statut}
                                             onSelect={(newStatus) => onUpdateCommune(c.id, { statut: newStatus })}
                                         />
                                     </div>
-                                    <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
-                                        <div className="flex items-center gap-1"><MapPin size={12}/> {c.departement}</div>
-                                        <div className="flex items-center gap-1"><Users size={12}/> {c.population.toLocaleString()}</div>
-                                        <div className="flex items-center gap-1"><Euro size={12}/> {c.revenue}</div>
+                                    <div className="num flex items-center gap-3 text-[11px] text-[var(--text-secondary)] tracking-tight">
+                                        <div className="flex items-center gap-1"><MapPin size={11} strokeWidth={2.2}/> {c.departement}</div>
+                                        <div className="flex items-center gap-1"><Users size={11} strokeWidth={2.2}/> {c.population.toLocaleString('fr-FR')}</div>
+                                        <div className="flex items-center gap-1"><Euro size={11} strokeWidth={2.2}/> {c.revenue}</div>
                                     </div>
                                 </div>
                             ))
@@ -258,17 +265,17 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                             />
                         )}
                     </div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] text-center text-xs font-bold text-[var(--text-secondary)]">
-                        {filteredCommunes.length}{totalCommunes > filteredCommunes.length ? ` sur ${totalCommunes.toLocaleString()}` : ''} communes
+                    <div className="num p-3 bg-slate-50/60 dark:bg-slate-800/40 border-t border-[var(--border-subtle)] text-center text-[12px] font-medium text-[var(--text-secondary)] tracking-tight">
+                        {filteredCommunes.length}{totalCommunes > filteredCommunes.length ? ` sur ${totalCommunes.toLocaleString('fr-FR')}` : ''} communes
                     </div>
                 </>
             )}
 
             {/* HISTORY SIDEBAR FOR MAP MODE */}
             {mode === 'map' && (
-                <div className="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-4">
-                     <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2 mb-2">
-                        <History size={16}/> Mes dernières demandes
+                <div className="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-3">
+                     <h3 className="eyebrow leading-none flex items-center gap-1.5 mb-1">
+                        <History size={11} strokeWidth={2.4}/> Mes dernières demandes
                      </h3>
                      {pastRequests.length === 0 && (
                         <EmptyState
@@ -277,25 +284,24 @@ export const CommuneListPanel: React.FC<CommuneListPanelProps> = ({
                         />
                      )}
                      {pastRequests.map(req => (
-                         <div key={req.id} className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                         <div key={req.id} className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-sm hover:shadow-md hover:border-orange-200 dark:hover:border-orange-500/30 transition">
                              <div className="flex justify-between items-start mb-2">
-                                 <div>
-                                     <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">{req.date.toLocaleDateString()}</span>
-                                     <div className="font-bold text-[var(--text-primary)]">{req.communeCount} Communes</div>
+                                 <div className="leading-tight">
+                                     <span className="num eyebrow leading-none">{req.date.toLocaleDateString('fr-FR')}</span>
+                                     <div className="num text-[14px] font-medium text-[var(--text-primary)] tracking-tight mt-1">{req.communeCount} communes</div>
                                  </div>
-                                 <div className="text-right">
-                                     <div className="text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded">{req.zoneCount} Zones</div>
-                                     <div className="text-[10px] text-[var(--text-muted)]">{(req.totalPop/1000).toFixed(1)}k hab.</div>
+                                 <div className="text-right leading-tight">
+                                     <div className="num text-[11px] font-medium text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/15 px-2 py-0.5 rounded-md tracking-tight">{req.zoneCount} zones</div>
+                                     <div className="num text-[11px] text-[var(--text-muted)] mt-1 tracking-tight">{(req.totalPop/1000).toFixed(1)}k hab.</div>
                                  </div>
                              </div>
 
-                             {/* Mini Map Visualizer */}
                              <div className="mb-2">
                                  <MiniZoneVisualizer points={req.communesList} />
                              </div>
 
-                             <div className="text-xs text-[var(--text-secondary)] truncate">
-                                 {req.communesList.slice(0, 3).map(c => c.nom).join(', ')}...
+                             <div className="text-[12px] text-[var(--text-secondary)] tracking-tight truncate">
+                                 {req.communesList.slice(0, 3).map(c => c.nom).join(', ')}…
                              </div>
                          </div>
                      ))}

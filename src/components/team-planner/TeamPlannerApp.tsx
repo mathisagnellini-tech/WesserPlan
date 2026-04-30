@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { alumniData } from './constants';
 import { Person } from './types';
 import { InspectorPanel } from './components/InspectorPanel';
 import { MissionInspector } from './components/MissionInspector';
@@ -18,7 +17,10 @@ import { useTeamBoard } from './hooks/useTeamBoard';
 import { useTeamFilters } from './hooks/useTeamFilters';
 import { useTeamRelationships } from './hooks/useTeamRelationships';
 import { useTeamStore } from '@/stores/teamStore';
-import { LayoutGrid, Rows, GitMerge, Grip, Maximize, Minimize, MapPin } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { LayoutGrid, Rows, GitMerge, Grip, Maximize, Minimize, MapPin, CalendarX, AlertTriangle } from 'lucide-react';
 
 export type ViewMode = 'performance' | 'identity' | 'hr';
 export type ViewDensity = 'standard' | 'compact' | 'tiny';
@@ -123,7 +125,7 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white font-sans overflow-hidden flex flex-col selection:bg-orange-200">
+    <div className="app-surface min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white overflow-hidden flex flex-col selection:bg-orange-200">
       <div className="fixed inset-0 z-0 opacity-[0.4] pointer-events-none" style={{ backgroundImage: `radial-gradient(#94a3b8 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
       <div className="fixed inset-0 bg-gradient-to-t from-orange-50/50 dark:from-slate-900/50 to-transparent pointer-events-none z-0" />
 
@@ -167,9 +169,20 @@ export default function App() {
       )}
 
       {pageMode === 'alumni' ? (
-          <AlumniView alumni={alumniData} onInfoClick={board.setSelectedPerson} onAddToIncoming={handleAddToIncoming} />
+          <>
+              {board.fundraisersError && (
+                  <div role="alert" className="mx-8 mt-4 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 flex items-start gap-2">
+                      <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                      <div className="text-xs text-amber-800 dark:text-amber-300">
+                          <p className="font-semibold">Données alumni indisponibles</p>
+                          <p className="opacity-80">L'endpoint <code className="font-mono">/Plan/Fundraisers/Kanban</code> n'a pas répondu — la liste reste vide.</p>
+                      </div>
+                  </div>
+              )}
+              <AlumniView alumni={board.alumniData} onInfoClick={board.setSelectedPerson} onAddToIncoming={handleAddToIncoming} />
+          </>
       ) : pageMode === 'map' ? (
-          <MapView data={board.currentData} alumni={alumniData} viewMode={viewMode} />
+          <MapView data={board.currentData} alumni={board.alumniData} viewMode={viewMode} />
       ) : (
         <main className={`flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar-light relative p-6 pb-2 transition-all duration-700 z-10 ${isCinemaMode ? 'pt-6' : ''}`} id="board-container" onClick={board.handleBackgroundClick}>
             <div className="min-w-fit h-full flex flex-col relative">
@@ -206,42 +219,64 @@ export default function App() {
                     </button>
                 )}
 
-                <div className={`flex flex-row gap-6 pb-4 items-stretch flex-1 ${isFocusMode ? 'opacity-90' : 'opacity-100'}`}>
-                {board.currentData.columnOrder.map((colId) => {
-                    const column = board.currentData.columns[colId];
-                    if (!filtering.shouldShowColumn(column)) return null;
+                {board.loadError ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <ErrorState
+                            title="Impossible de charger le planning"
+                            error={board.loadError}
+                            onRetry={() => window.location.reload()}
+                        />
+                    </div>
+                ) : board.isLoadingWeek && !board.hasBoardForCurrentWeek ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <LoadingState label="Chargement du planning…" />
+                    </div>
+                ) : !board.hasBoardForCurrentWeek ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <EmptyState
+                            title="Aucun planning pour cette semaine"
+                            message="Dupliquez la semaine précédente pour démarrer ou attendez la synchronisation des données."
+                            icon={<CalendarX size={22} />}
+                        />
+                    </div>
+                ) : (
+                    <div className={`flex flex-row gap-6 pb-4 items-stretch flex-1 ${isFocusMode ? 'opacity-90' : 'opacity-100'}`}>
+                    {board.currentData.columnOrder.map((colId) => {
+                        const column = board.currentData.columns[colId];
+                        if (!filtering.shouldShowColumn(column)) return null;
 
-                    const cards = filtering.filterCards(column.cardIds.map((cardId) => board.currentData.cards[cardId]));
+                        const cards = filtering.filterCards(column.cardIds.map((cardId) => board.currentData.cards[cardId]));
 
-                    return (
-                    <BoardColumn
-                        key={column.id}
-                        column={column}
-                        cards={cards}
-                        density={density}
-                        viewMode={viewMode}
-                        draggingCardId={board.draggingCardId}
-                        highlightedCardId={board.highlightedCardId}
-                        selectedCardIds={board.selectedCardIds}
-                        relationships={board.currentData.relationships}
-                        isHeatmapMode={isHeatmapMode}
-                        showRelationships={relationships.showRelationships}
-                        isLinkingMode={relationships.isLinkingMode}
-                        linkSourceId={relationships.linkSourceId}
-                        onLink={(targetId) => relationships.handleLink(targetId, board.draggingCardId)}
-                        onDragOver={board.handleDragOver}
-                        onDrop={board.handleDrop}
-                        onCardDragStart={board.handleDragStart}
-                        onColumnDragStart={board.handleColumnDragStart}
-                        onColumnDrop={board.handleColumnDrop}
-                        onCardClick={handleCardClick}
-                        onInfoClick={(person) => board.setSelectedPerson(person)}
-                        onResize={(expanded) => board.handleColumnResize(column.id, expanded)}
-                        onHeaderClick={() => board.setSelectedColumn(column)}
-                    />
-                    );
-                })}
-                </div>
+                        return (
+                        <BoardColumn
+                            key={column.id}
+                            column={column}
+                            cards={cards}
+                            density={density}
+                            viewMode={viewMode}
+                            draggingCardId={board.draggingCardId}
+                            highlightedCardId={board.highlightedCardId}
+                            selectedCardIds={board.selectedCardIds}
+                            relationships={board.currentData.relationships}
+                            isHeatmapMode={isHeatmapMode}
+                            showRelationships={relationships.showRelationships}
+                            isLinkingMode={relationships.isLinkingMode}
+                            linkSourceId={relationships.linkSourceId}
+                            onLink={(targetId) => relationships.handleLink(targetId, board.draggingCardId)}
+                            onDragOver={board.handleDragOver}
+                            onDrop={board.handleDrop}
+                            onCardDragStart={board.handleDragStart}
+                            onColumnDragStart={board.handleColumnDragStart}
+                            onColumnDrop={board.handleColumnDrop}
+                            onCardClick={handleCardClick}
+                            onInfoClick={(person) => board.setSelectedPerson(person)}
+                            onResize={(expanded) => board.handleColumnResize(column.id, expanded)}
+                            onHeaderClick={() => board.setSelectedColumn(column)}
+                        />
+                        );
+                    })}
+                    </div>
+                )}
             </div>
         </main>
       )}

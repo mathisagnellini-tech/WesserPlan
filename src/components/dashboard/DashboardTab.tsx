@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Users } from 'lucide-react';
 import { DashboardHeader, translations } from './DashboardHeader';
 import { CompactWeatherWidget } from './WeatherWidget';
 import { ActivityFeed } from './ActivityFeed';
@@ -17,19 +17,17 @@ import { usePreferencesStore } from '@/stores/preferencesStore';
 import { reporter } from '@/lib/observability';
 import { computeIsoWeek } from '@/lib/isoWeek';
 import { parseTeamName, deptCodeForName, deptCodeForCoords } from '@/lib/teamName';
-import { selectKpis } from '@/lib/dashboardKpis';
 import type {
-  CampaignMetricsDto,
-  ClusterAnalyticsResponseDto,
-  GetDashboardWeeklyPerformanceResponseDto,
-  TeamListItemDto,
-} from '@/types/api';
+  DashboardTeamDto,
+  GetDashboardDataResponseDto,
+} from '@/types/plan';
 
-// Backend rows (loose typing for forward-compat). Note: `color` and `logo`
-// are intentionally NOT consumed from the backend — they're rendered into
-// HTML/attribute contexts and must come from the canonical ORGANIZATIONS
-// constant (see XSS audit + canonical org assets work).
-interface BackendTeamRow extends TeamListItemDto {
+// Loose extension over the bundle DTO. The backend's typed `DashboardTeamDto`
+// only carries identifiers + aggregates; the page bundle may opportunistically
+// surface extra fields (coordinates, leader name, housing/car) that aren't
+// pinned in the schema but the map happily renders when present. Mirrors the
+// resilience of the previous per-row mapper.
+interface BackendTeamRow extends DashboardTeamDto {
   latitude?: number;
   longitude?: number;
   lat?: number;
@@ -42,19 +40,6 @@ interface BackendTeamRow extends TeamListItemDto {
   housingAddress?: string;
   car?: string;
   licensePlate?: string;
-  // Backend `GetTeamsForWeek` accepts a campaignId query param but the
-  // typed DTO doesn't expose the row-level campaign. Read whichever shape
-  // the backend actually returns so we can client-side filter as a safety
-  // net when the backend ignores the param.
-  campaignId?: string | number;
-  campaign_id?: string | number;
-  CampaignId?: string | number;
-}
-
-function rowCampaignId(row: BackendTeamRow): string | undefined {
-  const raw = row.campaignId ?? row.campaign_id ?? row.CampaignId;
-  if (raw === undefined || raw === null) return undefined;
-  return String(raw);
 }
 
 function pickFirstNumber(...vals: Array<number | undefined>): number | undefined {
@@ -81,24 +66,12 @@ function deriveCoordsForOrg(orgKey: string, index: number): [number, number] {
   return [cap.lat, cap.lng];
 }
 
-function mapTeamsResponseToTeamData(
-  rows: unknown,
-  selectedCampaignId: string | null,
-): TeamData[] {
+function mapTeamsResponseToTeamData(rows: DashboardTeamDto[] | undefined): TeamData[] {
   if (!Array.isArray(rows)) return [];
   const result: TeamData[] = [];
   rows.forEach((raw, idx) => {
     if (!raw || typeof raw !== 'object') return;
     const row = raw as BackendTeamRow;
-
-    // Defence in depth: backend should already filter by campaignId, but
-    // if a row exposes its own campaign and it doesn't match, drop it.
-    // Rows without any campaign field are passed through (we trust the
-    // backend filter in that case).
-    if (selectedCampaignId) {
-      const rowCampaign = rowCampaignId(row);
-      if (rowCampaign !== undefined && rowCampaign !== selectedCampaignId) return;
-    }
 
     const rawName = pickFirstString(row.teamName) ?? '';
     const parsed = parseTeamName(rawName);
@@ -161,101 +134,53 @@ const DashboardTab: React.FC = () => {
   const [week, setWeek] = useState(() => computeIsoWeek(now));
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
-  // Latest successful refresh timestamps per dataset. Used by the header to
-  // surface a "Mis à jour il y a Xmin" hint.
+  // One bundle response feeds every widget on this page. Loading / error
+  // state collapses to a single transition rather than four parallel ones.
+  const [bundle, setBundle] = useState<GetDashboardDataResponseDto | null>(null);
+  const [bundleError, setBundleError] = useState<Error | null>(null);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const hasLoadedOnce = useRef(false);
+  const bundleCtrl = useRef<AbortController | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Campaigns — used for header filter. Failures keep the list empty.
-  const [campaigns, setCampaigns] = useState<CampaignMetricsDto[]>([]);
-  useEffect(() => {
+  const fetchBundle = useCallback(() => {
+    bundleCtrl.current?.abort();
     const ctrl = new AbortController();
-    dashboardService
-      .getCampaigns(year)
-      .then((res) => {
-        if (ctrl.signal.aborted) return;
-        setCampaigns(res?.data ?? []);
-      })
-      .catch((err) => {
-        if (ctrl.signal.aborted) return;
-        reporter.warn('getCampaigns failed', err, { source: 'DashboardTab' });
-        setCampaigns([]);
-      });
-    return () => ctrl.abort();
-  }, [year]);
+    bundleCtrl.current = ctrl;
+    if (!hasLoadedOnce.current) setIsLoading(true);
+    setBundleError(null);
 
-  // Weekly performance for the KPI bar.
-  const [weeklyPerf, setWeeklyPerf] =
-    useState<GetDashboardWeeklyPerformanceResponseDto | null>(null);
-  const [kpisError, setKpisError] = useState<Error | null>(null);
-  const weeklyPerfCtrl = useRef<AbortController | null>(null);
-
-  const fetchWeeklyPerf = useCallback(() => {
-    weeklyPerfCtrl.current?.abort();
-    const ctrl = new AbortController();
-    weeklyPerfCtrl.current = ctrl;
-    setKpisError(null);
     return dashboardService
-      .getWeeklyPerformance(12, selectedCampaignId ?? undefined, year)
+      .getDashboardData(week, year, selectedCampaignId ?? undefined)
       .then((res) => {
         if (ctrl.signal.aborted) return;
-        setWeeklyPerf(res);
+        setBundle(res);
         setLastUpdated(Date.now());
       })
       .catch((err) => {
         if (ctrl.signal.aborted) return;
-        setWeeklyPerf(null);
-        setKpisError(err instanceof Error ? err : new Error(String(err)));
-        reporter.error('getWeeklyPerformance failed', err, { source: 'DashboardTab' });
-      });
-  }, [selectedCampaignId, year]);
-
-  useEffect(() => {
-    fetchWeeklyPerf();
-    return () => weeklyPerfCtrl.current?.abort();
-  }, [fetchWeeklyPerf]);
-
-  // Teams for the selected (week, year, campaign) tuple.
-  const [teams, setTeams] = useState<TeamData[]>([]);
-  const [teamsLoading, setTeamsLoading] = useState(true);
-  const [teamsError, setTeamsError] = useState<Error | null>(null);
-  const hasLoadedTeamsOnce = useRef(false);
-  const teamsCtrl = useRef<AbortController | null>(null);
-
-  const fetchTeams = useCallback(() => {
-    teamsCtrl.current?.abort();
-    const ctrl = new AbortController();
-    teamsCtrl.current = ctrl;
-    if (!hasLoadedTeamsOnce.current) setTeamsLoading(true);
-    setTeamsError(null);
-
-    return dashboardService
-      .getTeamsForWeek(week, year, selectedCampaignId ?? undefined)
-      .then((data) => {
-        if (ctrl.signal.aborted) return;
-        try {
-          setTeams(mapTeamsResponseToTeamData(data, selectedCampaignId));
-          setLastUpdated(Date.now());
-        } catch (err) {
-          reporter.warn('mapTeamsResponseToTeamData failed', err, { source: 'DashboardTab' });
-          setTeams([]);
-        }
-      })
-      .catch((err) => {
-        if (ctrl.signal.aborted) return;
-        setTeamsError(err instanceof Error ? err : new Error(String(err)));
-        reporter.error('getTeamsForWeek failed', err, { source: 'DashboardTab' });
+        setBundle(null);
+        setBundleError(err instanceof Error ? err : new Error(String(err)));
+        reporter.error('getDashboardData failed', err, { source: 'DashboardTab' });
       })
       .finally(() => {
         if (ctrl.signal.aborted) return;
-        setTeamsLoading(false);
-        hasLoadedTeamsOnce.current = true;
+        setIsLoading(false);
+        hasLoadedOnce.current = true;
       });
   }, [week, year, selectedCampaignId]);
 
   useEffect(() => {
-    fetchTeams();
-    return () => teamsCtrl.current?.abort();
-  }, [fetchTeams]);
+    fetchBundle();
+    return () => bundleCtrl.current?.abort();
+  }, [fetchBundle]);
+
+  const teams = useMemo(
+    () => mapTeamsResponseToTeamData(bundle?.teams),
+    [bundle],
+  );
+  const campaigns = bundle?.campaigns ?? [];
+  const kpis = bundle?.kpis ?? null;
 
   // Weather: dept derived from the first available team's coords.
   const weatherDeptCode = useMemo(() => {
@@ -268,40 +193,31 @@ const DashboardTab: React.FC = () => {
   const { data: weatherData, isLoading: weatherLoading } =
     useDepartmentWeather(weatherDeptCode);
 
-  // Cluster analytics — used to derive Active Fundraisers from tenure buckets.
-  const [clusterAnalytics, setClusterAnalytics] =
-    useState<ClusterAnalyticsResponseDto | null>(null);
-  useEffect(() => {
-    const ctrl = new AbortController();
-    dashboardService
-      .getClusterAnalytics(12, selectedCampaignId ?? undefined, year)
-      .then((res) => {
-        if (ctrl.signal.aborted) return;
-        setClusterAnalytics(res);
-      })
-      .catch((err) => {
-        if (ctrl.signal.aborted) return;
-        reporter.warn('getClusterAnalytics failed', err, { source: 'DashboardTab' });
-        setClusterAnalytics(null);
-      });
-    return () => ctrl.abort();
-  }, [selectedCampaignId, year]);
-
-  const kpis = useMemo(
-    () => selectKpis(weeklyPerf?.data, clusterAnalytics, week, year),
-    [weeklyPerf, clusterAnalytics, week, year],
-  );
-
   const [isRefreshing, setIsRefreshing] = useState(false);
   const refreshAll = useCallback(() => {
     setIsRefreshing(true);
-    Promise.allSettled([fetchWeeklyPerf(), fetchTeams()]).finally(() => {
+    Promise.allSettled([fetchBundle()]).finally(() => {
       setIsRefreshing(false);
     });
-  }, [fetchWeeklyPerf, fetchTeams]);
+  }, [fetchBundle]);
+
+  const kpiItems = kpis
+    ? [
+        { key: 'donors', label: 'Donateurs recrutés', value: kpis.donorsRecruited, hero: true },
+        { key: 'fundraisers', label: 'Fundraisers actifs', value: kpis.activeFundraisers, hero: false },
+        { key: 'teams', label: 'Équipes actives', value: kpis.activeTeams, hero: false },
+        {
+          key: 'productivity',
+          label: 'Productivité',
+          value: kpis.productivity.toFixed(1),
+          hint: 'donateurs / FR / jour',
+          hero: false,
+        },
+      ]
+    : [];
 
   return (
-    <section className="animate-fade-in h-auto lg:h-[calc(100vh-100px)] flex flex-col">
+    <section className="app-surface animate-fade-in h-auto lg:h-[calc(100vh-100px)] flex flex-col">
       <DashboardHeader
         lang={lang}
         t={t}
@@ -317,17 +233,26 @@ const DashboardTab: React.FC = () => {
         lastUpdated={lastUpdated}
       />
 
-      {kpisError ? (
+      {bundleError ? (
         <div className="mb-4 glass-card px-4 py-3">
           <ErrorState
-            title="Impossible de charger les KPI"
-            error={kpisError}
-            onRetry={fetchWeeklyPerf}
+            title="Impossible de charger le tableau de bord"
+            error={bundleError}
+            onRetry={fetchBundle}
           />
         </div>
-      ) : !weeklyPerf ? (
-        <div className="mb-4 glass-card px-4 py-3">
-          <LoadingState label="Chargement des indicateurs…" />
+      ) : !bundle ? (
+        <div className="mb-4 grid grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="kpi-card h-[92px] animate-pulse"
+              aria-hidden="true"
+            >
+              <div className="h-2.5 w-24 rounded bg-slate-200/70 dark:bg-slate-700/60 mb-3" />
+              <div className="h-7 w-16 rounded bg-slate-200/70 dark:bg-slate-700/60" />
+            </div>
+          ))}
         </div>
       ) : !kpis ? (
         <div className="mb-4">
@@ -339,22 +264,35 @@ const DashboardTab: React.FC = () => {
       ) : (
         <div className="mb-4">
           {kpis.isFallback && (
-            <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
-              Affichage de la dernière semaine complète disponible (S{kpis.week}/{kpis.year})
+            <p className="eyebrow mb-2 italic">
+              Affichage de la dernière semaine complète disponible · S{kpis.resolvedWeek}/{kpis.resolvedYear}
             </p>
           )}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { label: 'Donateurs recrutés', value: kpis.donorsRecruited },
-              { label: 'Fundraisers actifs', value: kpis.activeFundraisers },
-              { label: 'Équipes actives', value: kpis.activeTeams },
-              { label: 'Productivité', value: `${kpis.productivity.toFixed(1)}` },
-            ].map(({ label, value }) => (
-              <div key={label} className="glass-card px-4 py-3">
-                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-                  {label}
-                </p>
-                <p className="text-xl font-black text-[var(--text-primary)]">{value}</p>
+          <div className="grid grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-3">
+            {kpiItems.map(({ key, label, value, hint, hero }) => (
+              <div
+                key={key}
+                className={`kpi-card ${hero ? 'kpi-card--hero md:row-span-1' : ''}`}
+              >
+                <div className="relative z-10 flex flex-col h-full justify-between gap-2">
+                  <p className="eyebrow">{label}</p>
+                  <div className="flex items-end justify-between gap-3">
+                    <p
+                      className={`num text-[var(--text-primary)] leading-none ${
+                        hero
+                          ? 'display text-[44px] md:text-[56px]'
+                          : 'text-[26px] md:text-[30px] font-semibold tracking-tight'
+                      }`}
+                    >
+                      {value}
+                    </p>
+                    {hint && (
+                      <p className="eyebrow text-right text-[10px] leading-tight max-w-[8ch] -mb-0.5">
+                        {hint}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -363,14 +301,14 @@ const DashboardTab: React.FC = () => {
 
       <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 min-h-0">
         <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6">
-          <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm h-[50vh] md:h-[60vh] lg:h-auto lg:flex-grow bg-white dark:bg-[var(--bg-card-solid)]">
-            {teamsLoading ? (
+          <div className="relative rounded-2xl md:rounded-[28px] overflow-hidden border border-[var(--border-subtle)] shadow-sm h-[50vh] md:h-[60vh] lg:h-auto lg:flex-grow bg-white dark:bg-[var(--bg-card-solid)]">
+            {isLoading ? (
               <LoadingState fullHeight label="Chargement des équipes…" />
-            ) : teamsError ? (
+            ) : bundleError ? (
               <ErrorState
                 title="Impossible de charger les équipes"
-                error={teamsError}
-                onRetry={fetchTeams}
+                error={bundleError}
+                onRetry={fetchBundle}
                 fullHeight
               />
             ) : teams.length === 0 ? (
@@ -384,16 +322,23 @@ const DashboardTab: React.FC = () => {
               <FranceMap teams={teams} />
             )}
 
-            <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-white/90 dark:bg-[var(--bg-card-solid)]/90 backdrop-blur-md px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-lg border border-[var(--border-subtle)] z-[400]">
-              <h2 className="text-[10px] md:text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-0.5">
-                Vue d'ensemble
-              </h2>
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <MapPin size={14} className="text-orange-600 md:hidden" />
-                <MapPin size={18} className="text-orange-600 hidden md:block" />
-                <h3 className="font-black text-[var(--text-primary)] text-sm md:text-lg">
-                  Deploiement National
+            <div className="map-overlay-card absolute top-3 left-3 md:top-6 md:left-6 px-3.5 py-2.5 md:px-5 md:py-3.5 rounded-xl md:rounded-2xl z-[400] flex items-center gap-3 md:gap-4">
+              <div className="hidden md:flex h-10 w-10 rounded-xl items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25">
+                <MapPin size={18} strokeWidth={2.2} />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className="eyebrow leading-none">Déploiement national</p>
+                <h3 className="display text-[var(--text-primary)] text-base md:text-xl leading-tight">
+                  Vue d’ensemble France
                 </h3>
+              </div>
+              <div className="hidden md:flex flex-col items-end pl-3 ml-1 border-l border-[var(--border-subtle)]">
+                <span className="num text-[var(--text-primary)] text-lg font-semibold leading-none">
+                  {teams.length}
+                </span>
+                <span className="eyebrow flex items-center gap-1 mt-1 leading-none">
+                  <Users size={10} strokeWidth={2.4} /> équipes
+                </span>
               </div>
             </div>
           </div>
@@ -405,14 +350,21 @@ const DashboardTab: React.FC = () => {
               <div className="glass-card p-4 flex items-center justify-center h-full">
                 <LoadingState />
               </div>
+            ) : !weatherData ? (
+              <div className="glass-card p-4 flex items-center justify-center h-full">
+                <EmptyState
+                  title="Météo indisponible"
+                  message="Réessayez plus tard."
+                />
+              </div>
             ) : (
               <CompactWeatherWidget
-                avgTemp={weatherData?.current.temperature ?? 14}
-                condition={weatherData?.current.condition ?? '...'}
-                walkingScore={weatherData?.current.walkingScore ?? 'Bonne'}
-                hourlyTemperatures={weatherData?.hourly.temperature}
-                hourlyTimes={weatherData?.hourly.time}
-                dailyTempMax={weatherData?.daily.tempMax}
+                avgTemp={weatherData.current.temperature}
+                condition={weatherData.current.condition}
+                walkingScore={weatherData.current.walkingScore}
+                hourlyTemperatures={weatherData.hourly.temperature}
+                hourlyTimes={weatherData.hourly.time}
+                dailyTempMax={weatherData.daily.tempMax}
               />
             )}
           </div>

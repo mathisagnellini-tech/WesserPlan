@@ -218,3 +218,80 @@ export interface PaginationDto {
   totalRecords: number;
   totalPages: number;
 }
+
+// ── Donors / Partner overview (Plan API) ──
+
+export interface PartnerKpisDto {
+  totalPARecruited: number;
+  avgMonthlyDonation: number;
+  avgDonorAge: number;
+}
+
+export interface MonthlyPADto {
+  month: string;
+  count: number;
+}
+
+export interface PeriodBreakdownDto {
+  period: string;
+  count: number;
+  avgMonthlyDonation: number;
+}
+
+export interface RegionSummaryDto {
+  regionCode: string;
+  regionName: string;
+  count: number;
+  avgMonthlyDonation: number;
+}
+
+export interface AgeDistributionDto {
+  bucket: string;
+  count: number;
+}
+
+export interface GetPartnerOverviewResponseDto {
+  kpis: PartnerKpisDto;
+  monthlyPA: MonthlyPADto[];
+  periodBreakdown: PeriodBreakdownDto[];
+  regionSummary: RegionSummaryDto[];
+  ageDistribution: AgeDistributionDto[];
+}
+
+export interface DonorPerDepartmentDto {
+  deptCode: string;
+  deptName: string;
+  signupCount: number;
+  avgMonthlyDonation: number;
+  avgAge: number;
+}
+
+export interface DonorHourlyConversionDto {
+  hour: number;
+  signups: number;
+  percent: number;
+}
+
+// ── Deployment ──
+
+export interface CityMarkerDto {
+  cityName: string;
+  inseeCode?: string;
+  lat: number;
+  lng: number;
+  signupCount: number;
+  teamCount?: number;
+}
+
+export interface RegionDetailDto {
+  regionCode: string;
+  regionName: string;
+  signupCount: number;
+  cityCount: number;
+  teamCount: number;
+}
+
+export interface DeploymentCitiesResponseDto {
+  cityMarkers: CityMarkerDto[];
+  regions: RegionDetailDto[];
+}

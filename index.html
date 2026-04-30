@@ -14,7 +14,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <!-- Leaflet Draw -->
@@ -42,6 +42,8 @@
         --radius-sm: 12px;
         --input-bg: #ffffff;
         --input-border: #e2e8f0;
+        --font-sans: 'Geist', 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        --font-display: 'Instrument Serif', 'Geist', 'Inter', serif;
         color-scheme: light;
       }
 
@@ -103,16 +105,16 @@
         opacity: 0.5;
       }
 
-      /* Blob 2: Purple, Bottom Left */
+      /* Blob 2: Warm neutral, Bottom Left (replaces previous purple AI-gradient) */
       body::after {
         content: ''; position: fixed; width: 700px; height: 700px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(147, 51, 234, 0.12), transparent 70%);
+        background: radial-gradient(circle, rgba(255, 91, 43, 0.06), transparent 70%);
         bottom: -20%; left: -10%; z-index: -1; pointer-events: none;
-        filter: blur(100px); opacity: 0.8;
+        filter: blur(100px); opacity: 0.7;
         animation: blob-float-2 30s infinite ease-in-out reverse;
       }
       .dark body::after {
-        background: radial-gradient(circle, rgba(147, 51, 234, 0.06), transparent 70%);
+        background: radial-gradient(circle, rgba(255, 91, 43, 0.04), transparent 70%);
         opacity: 0.4;
       }
 
@@ -271,6 +273,14 @@
       .dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.18) !important; }
       .dark .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.10) !important; }
       .dark .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.16) !important; }
+      .dark .bg-sky-50 { background-color: rgba(14, 165, 233, 0.12) !important; }
+      .dark .bg-sky-100 { background-color: rgba(14, 165, 233, 0.18) !important; }
+      .dark .bg-pink-50 { background-color: rgba(236, 72, 153, 0.12) !important; }
+      .dark .bg-pink-100 { background-color: rgba(236, 72, 153, 0.18) !important; }
+      .dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.12) !important; }
+      .dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.18) !important; }
+      .dark .bg-violet-50 { background-color: rgba(139, 92, 246, 0.12) !important; }
+      .dark .bg-violet-100 { background-color: rgba(139, 92, 246, 0.18) !important; }
       .dark .bg-slate-50 { background-color: rgba(30, 33, 48, 0.6) !important; }
       .dark .bg-slate-100 { background-color: rgba(30, 33, 48, 0.8) !important; }
       .dark .bg-gray-50 { background-color: rgba(30, 33, 48, 0.6) !important; }
@@ -296,6 +306,10 @@
       .dark .border-amber-100, .dark .border-amber-200 { border-color: rgba(245, 158, 11, 0.2) !important; }
       .dark .border-orange-100, .dark .border-orange-200 { border-color: rgba(255, 91, 43, 0.2) !important; }
       .dark .border-yellow-100, .dark .border-yellow-200 { border-color: rgba(234, 179, 8, 0.2) !important; }
+      .dark .border-sky-100, .dark .border-sky-200 { border-color: rgba(14, 165, 233, 0.25) !important; }
+      .dark .border-pink-100, .dark .border-pink-200 { border-color: rgba(236, 72, 153, 0.25) !important; }
+      .dark .border-rose-100, .dark .border-rose-200 { border-color: rgba(244, 63, 94, 0.25) !important; }
+      .dark .border-violet-100, .dark .border-violet-200 { border-color: rgba(139, 92, 246, 0.25) !important; }
       .dark .border-slate-50 { border-color: rgba(255, 255, 255, 0.05) !important; }
       .dark .border-slate-100 { border-color: rgba(255, 255, 255, 0.08) !important; }
       .dark .border-slate-200 { border-color: rgba(255, 255, 255, 0.1) !important; }
@@ -409,6 +423,292 @@
       /* Global focus-visible ring for keyboard accessibility */
       :focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
       button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+
+      /* ========================================
+         App surface (typography + KPI primitives shared by Dashboard + Operations)
+         ======================================== */
+      .app-surface {
+        font-family: var(--font-sans);
+        font-feature-settings: 'ss01', 'cv11';
+      }
+      .app-surface .num { font-variant-numeric: tabular-nums; }
+      .app-surface .display {
+        font-family: var(--font-display);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+      }
+      .app-surface .eyebrow {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: var(--text-muted);
+        text-transform: none;
+      }
+
+      /* KPI card: layered surface, varied radius, real hover + press */
+      .kpi-card {
+        position: relative;
+        border-radius: 18px;
+        padding: 18px 20px;
+        background: var(--bg-card-solid);
+        border: 1px solid var(--border-subtle);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02), 0 8px 24px -16px rgba(15, 23, 42, 0.08);
+        transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                    border-color 200ms ease;
+        overflow: hidden;
+      }
+      .kpi-card::before {
+        content: '';
+        position: absolute; inset: 0;
+        background-image:
+          radial-gradient(120% 60% at 100% 0%, rgba(255, 91, 43, 0.05), transparent 60%),
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.045 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        opacity: 0.65;
+        pointer-events: none;
+      }
+      .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02), 0 18px 40px -20px rgba(255, 91, 43, 0.18);
+        border-color: rgba(255, 91, 43, 0.28);
+      }
+      .kpi-card:active { transform: translateY(0) scale(0.997); }
+      .dark .kpi-card {
+        background: var(--bg-card-solid);
+        border-color: var(--border-subtle);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 12px 30px -18px rgba(0,0,0,0.6);
+      }
+      .dark .kpi-card::before { opacity: 0.4; }
+      .dark .kpi-card:hover {
+        border-color: rgba(255, 91, 43, 0.35);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 18px 40px -20px rgba(255, 91, 43, 0.25);
+      }
+      .kpi-card--hero { border-radius: 22px; }
+
+      /* Map overlay — softer card with consistent hue shadow */
+      .map-overlay-card {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow: 0 12px 30px -12px rgba(255, 91, 43, 0.18);
+        backdrop-filter: blur(14px) saturate(180%);
+        -webkit-backdrop-filter: blur(14px) saturate(180%);
+      }
+      .dark .map-overlay-card {
+        background: rgba(30, 33, 48, 0.88);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      /* Command-palette / search input that lives inside a modal — needs to stay
+         transparent even in dark mode (global `.dark input` rule would otherwise
+         paint a solid `--input-bg` rectangle through it) and must NOT show the
+         global focus-visible outline (the modal frame + icon tile already give it
+         plenty of presence). */
+      .cmd-input,
+      .cmd-input:focus,
+      .cmd-input:focus-visible,
+      .dark .cmd-input {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        border-width: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
+        outline-offset: 0 !important;
+      }
+
+      /* Modal shell (operations + future) — layered hue-tinted shadow, tighter radius */
+      .modal-shell {
+        background: var(--bg-card-solid);
+        border: 1px solid var(--border-subtle);
+        border-radius: 22px;
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.6) inset,
+          0 24px 60px -24px rgba(15, 23, 42, 0.35),
+          0 8px 24px -16px rgba(255, 91, 43, 0.18);
+        overflow: hidden;
+      }
+      .dark .modal-shell {
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.04) inset,
+          0 24px 60px -24px rgba(0, 0, 0, 0.7),
+          0 8px 24px -16px rgba(255, 91, 43, 0.12);
+      }
+      /* Soft accent strip at the top of a modal — replaces flat slate banners */
+      .modal-accent-strip {
+        background:
+          radial-gradient(120% 80% at 100% 0%, rgba(255, 91, 43, 0.18), transparent 60%),
+          linear-gradient(180deg, rgba(255, 91, 43, 0.05), transparent);
+      }
+      .dark .modal-accent-strip {
+        background:
+          radial-gradient(120% 80% at 100% 0%, rgba(255, 91, 43, 0.22), transparent 60%),
+          linear-gradient(180deg, rgba(255, 91, 43, 0.08), transparent);
+      }
+
+      /* Form field label — sentence case, low emphasis, tracked tight */
+      .field-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .field-input {
+        width: 100%;
+        padding: 9px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        color: var(--text-primary);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        font-variant-numeric: tabular-nums;
+      }
+      .field-input::placeholder { color: var(--text-muted); font-weight: 400; }
+      .field-input:hover { border-color: rgba(255, 91, 43, 0.3); }
+      .field-input:focus {
+        outline: none;
+        border-color: rgba(255, 91, 43, 0.55);
+        box-shadow: 0 0 0 3px rgba(255, 91, 43, 0.15);
+      }
+      .field-input.is-error {
+        border-color: rgba(239, 68, 68, 0.55);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+      }
+      .field-error {
+        margin-top: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #dc2626;
+      }
+      .dark .field-error { color: #fca5a5; }
+
+      /* Step indicator — used in multi-step modals */
+      .stepper {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-muted);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.005em;
+      }
+      .stepper .dot {
+        width: 6px; height: 6px; border-radius: 999px;
+        background: var(--border-subtle);
+      }
+      .stepper .dot[data-active="true"] {
+        background: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(255, 91, 43, 0.18);
+      }
+
+      /* Primary / secondary / ghost buttons used across modals */
+      .btn-primary {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        color: #fff;
+        background: var(--accent-primary);
+        border-radius: 12px;
+        box-shadow: 0 8px 20px -10px rgba(255, 91, 43, 0.7);
+        transition: background 160ms ease, transform 100ms ease, box-shadow 160ms ease;
+      }
+      .btn-primary:hover { background: var(--accent-secondary); }
+      .btn-primary:active { transform: translateY(1px); }
+      .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+      .btn-secondary {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        color: var(--text-secondary);
+        background: var(--bg-card-solid);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        transition: border-color 160ms ease, color 160ms ease, transform 100ms ease;
+      }
+      .btn-secondary:hover { border-color: rgba(255, 91, 43, 0.35); color: var(--text-primary); }
+      .btn-secondary:active { transform: translateY(1px); }
+      .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+      .btn-ghost {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        border-radius: 10px;
+        transition: background 160ms ease, color 160ms ease, transform 100ms ease;
+      }
+      .btn-ghost:hover { background: rgba(255, 91, 43, 0.08); color: var(--text-primary); }
+      .btn-ghost:active { transform: translateY(1px); }
+
+      /* Segmented control */
+      .seg {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px;
+        gap: 2px;
+        background: var(--bg-card-solid);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02), 0 8px 24px -16px rgba(15, 23, 42, 0.06);
+      }
+      .seg button {
+        padding: 7px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        color: var(--text-secondary);
+        display: inline-flex; align-items: center; gap: 6px;
+        transition: background 160ms ease, color 160ms ease, transform 100ms ease;
+      }
+      .seg button:hover { color: var(--text-primary); }
+      .seg button:active { transform: translateY(1px); }
+      .seg button[data-active="true"] {
+        background: rgba(255, 91, 43, 0.08);
+        color: #c2410c;
+        box-shadow: inset 0 0 0 1px rgba(255, 91, 43, 0.18);
+      }
+      .dark .seg button[data-active="true"] {
+        background: rgba(255, 91, 43, 0.16);
+        color: #fdba74;
+        box-shadow: inset 0 0 0 1px rgba(255, 91, 43, 0.28);
+      }
+
+      /* Inline action chip (e.g. SmartMatcher state) */
+      .chip-soft {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        background: rgba(255, 91, 43, 0.07);
+        border: 1px solid rgba(255, 91, 43, 0.18);
+        color: #9a3412;
+      }
+      .dark .chip-soft {
+        background: rgba(255, 91, 43, 0.14);
+        border-color: rgba(255, 91, 43, 0.28);
+        color: #fdba74;
+      }
+
+      /* Live dot for "updated X min ago" */
+      .live-dot {
+        width: 6px; height: 6px; border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+        animation: live-pulse 2.4s ease-out infinite;
+        display: inline-block;
+      }
+      @keyframes live-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+        70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+      }
     </style>
 </head>
 <body class="min-h-screen">

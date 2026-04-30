@@ -17,11 +17,12 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import type { ChartData, ChartOptions } from 'chart.js';
 import type { MapMetric } from '@/components/wplan/metricsConfig';
 import type L from 'leaflet';
-import { dashboardService } from '@/services/dashboardService';
+import { wplanService } from '@/services/wplanService';
+import type { GetWplanDataResponseDto, WplanByDepartmentDto } from '@/types/plan';
 import { reporter } from '@/lib/observability';
 import { hashCode } from '@/lib/wplanHash';
-import { buildNationalKpis, type NationalKpis } from '@/lib/nationalKpis';
 import { useThemeStore } from '@/stores/themeStore';
+import { computeIsoWeek } from '@/lib/isoWeek';
 
 ChartJS.register(
     CategoryScale,
@@ -43,26 +44,101 @@ interface WplanFilters {
     departments: Set<string>;
 }
 
-// Re-export so consumers don't have to change import paths.
-export type { NationalKpis } from '@/lib/nationalKpis';
+/**
+ * Display-shaped national KPIs derived from the Wplan page bundle.
+ * Mirrors the previous `NationalKpis` interface so consumers (ChartPanel,
+ * SwotMatrix) continue to read the same fields. The values now come from
+ * the single `/Plan/Wplan/Get` bundle response rather than a separate
+ * weekly-performance call + client-side aggregation.
+ */
+export interface NationalKpis {
+    weeklyDonors: number[];
+    weekLabels: string[];
+    activeFundraisers: number;
+    activeTeams: number;
+    productivity: number;
+    avgMonthlyDonation: number;
+    avgDonorAge: number;
+    /** Cohort-style retention proxy (0..100). Empty until backend covers it. */
+    retentionByWeek: number[];
+    weeklyVolume: number[];
+}
+
+const EMPTY_KPIS: NationalKpis = {
+    weeklyDonors: [],
+    weekLabels: [],
+    activeFundraisers: 0,
+    activeTeams: 0,
+    productivity: 0,
+    avgMonthlyDonation: 0,
+    avgDonorAge: 0,
+    retentionByWeek: [],
+    weeklyVolume: [],
+};
+
+function bundleToNationalKpis(bundle: GetWplanDataResponseDto): NationalKpis {
+    const series = [...bundle.weeklySeries].sort((a, b) => a.week - b.week);
+    return {
+        weeklyDonors: series.map((w) => w.signups ?? 0),
+        weekLabels: series.map((w) => `S${w.week}`),
+        weeklyVolume: series.map((w) => Math.round((w.signups ?? 0) * (w.avgDonation ?? 0))),
+        activeFundraisers: bundle.national.activeFundraisers ?? 0,
+        // Bundle does not yet expose activeTeams / productivity / retention
+        // — keep zeros so downstream consumers fall back to editorial copy.
+        activeTeams: 0,
+        productivity: 0,
+        avgMonthlyDonation: bundle.national.avgMonthlyDonation ?? 0,
+        avgDonorAge: bundle.national.avgDonorAge ?? 0,
+        retentionByWeek: [],
+    };
+}
 
 /**
- * Strategy note (Phase 3 — Option B):
- *   The map renders 9 metrics by region/department. The backend exposes national
- *   weekly aggregates (donorsRecruited, productivity, activeFundraisers, …) but
- *   does NOT yet expose region- or department-level breakdowns for any of them.
+ * Per-field "is this real backend data?" flags. The wplan map renders many
+ * derived figures that are only partially covered by the backend today, so
+ * a single boolean would either over- or under-state honesty. Each field
+ * tracks its own provenance:
+ *
+ *   - `signatures` / `avgDonation` / `avgAge` flip to `true` once the wplan
+ *     bundle returns a `byDepartment` row for the active geography.
+ *   - `communes`, `contacts`, `retention`, `revenue` stay `false` until
+ *     dedicated bundle fields exist (commune-level signups, contact counts,
+ *     retention curves per geo, per-dept revenue beyond the national overview).
+ */
+export interface IsRealFlags {
+    signatures: boolean;
+    avgDonation: boolean;
+    avgAge: boolean;
+    communes: boolean;
+    contacts: boolean;
+    retention: boolean;
+    revenue: boolean;
+}
+
+const ALL_FAKE_FLAGS: IsRealFlags = {
+    signatures: false,
+    avgDonation: false,
+    avgAge: false,
+    communes: false,
+    contacts: false,
+    retention: false,
+    revenue: false,
+};
+
+/**
+ * Strategy note:
+ *   The map renders 9 metrics by region/department. The wplan bundle now
+ *   covers per-département signups + avg donation + avg age; everything else
+ *   (income, density, politics, unemployment, urbanity) remains static or
+ *   external-data-driven.
  *
  *   To avoid silently faking real-looking data:
- *   - Real backend KPIs are loaded once on mount via `getWeeklyPerformance` and
- *     surfaced as `nationalKpis` (consumed by ChartPanel for retention chart and
- *     by SwotMatrix for threshold-based hints).
- *   - Region/department coloring still uses a deterministic hash because there
- *     is no per-geo endpoint. This is documented in `METRICS_BACKEND_MAP` below.
- *   - The bar chart "Top 10 Départements" is now scaled to real national signups
- *     (so the X-axis reflects real volumes proportionally) instead of pure rand().
- *
- *   Real per-department data will require new backend endpoints — see TODOs
- *   in METRICS_BACKEND_MAP.
+ *   - National figures and per-dept rows ride on the bundle.
+ *   - Region coloring still uses a deterministic hash because there is no
+ *     per-region endpoint (regions are aggregated from departments).
+ *   - The bar chart "Top 10 Départements" uses real per-dept signups when
+ *     the dept appears in `byDepartment`, otherwise falls back to a
+ *     hash-derived value scaled to the national total.
  */
 export const METRICS_BACKEND_MAP: Record<MapMetric, 'static' | 'backend'> = {
     density: 'static',
@@ -102,29 +178,49 @@ export function useWplanData() {
     const isDark = useThemeStore((s) => s.isDark);
 
     // ── Real backend data ─────────────────────────────────────────────
-    const [nationalKpis, setNationalKpis] = useState<NationalKpis | null>(null);
+    const [bundle, setBundle] = useState<GetWplanDataResponseDto | null>(null);
     const [kpisLoading, setKpisLoading] = useState(true);
     const [kpisError, setKpisError] = useState<string | null>(null);
 
-    const fetchNationalKpis = React.useCallback(async () => {
+    const nationalKpis = useMemo<NationalKpis | null>(
+        () => (bundle ? bundleToNationalKpis(bundle) : null),
+        [bundle],
+    );
+
+    // Per-department donor data (signups, avg donation, avg age). Mapped
+    // by `deptCode` so the per-geo lookup is O(1). Null when the bundle has
+    // not yet returned (or returned an empty `byDepartment`).
+    const perDeptDonors = useMemo<Map<string, WplanByDepartmentDto> | null>(() => {
+        if (!bundle?.byDepartment?.length) return null;
+        const map = new Map<string, WplanByDepartmentDto>();
+        bundle.byDepartment.forEach((row) => {
+            if (row?.deptCode) map.set(String(row.deptCode), row);
+        });
+        return map;
+    }, [bundle]);
+
+    const fetchBundle = React.useCallback(async () => {
         setKpisLoading(true);
         setKpisError(null);
         try {
-            const resp = await dashboardService.getWeeklyPerformance(12);
-            setNationalKpis(buildNationalKpis(resp.data || []));
+            const now = new Date();
+            const week = computeIsoWeek(now);
+            const year = now.getFullYear();
+            const resp = await wplanService.getWplanData(week, year);
+            setBundle(resp);
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Erreur de chargement';
-            reporter.error('wplan getWeeklyPerformance failed', err, { source: 'useWplanData' });
+            reporter.error('wplan getWplanData failed', err, { source: 'useWplanData' });
             setKpisError(msg);
-            setNationalKpis(null);
+            setBundle(null);
         } finally {
             setKpisLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchNationalKpis();
-    }, [fetchNationalKpis]);
+        fetchBundle();
+    }, [fetchBundle]);
 
     // GeoJSON — abortable + reporter-wired + retryable.
     useEffect(() => {
@@ -181,18 +277,30 @@ export function useWplanData() {
     }, []);
 
     /**
-     * Department signatures: deterministic per-code, scaled to real national totals.
-     * Once the per-dept endpoint exists, swap this for a backend lookup.
+     * Department signatures: prefers the real `byDepartment` row from the
+     * wplan bundle when the backend covers this code, otherwise falls back
+     * to a deterministic hash scaled by national totals. Returns whether
+     * the value is real so callers can flip per-field `isReal` flags.
      */
-    const getDepartmentSignatures = React.useCallback((deptCode: string): number => {
-        const baseHash = (hashCode(deptCode) % 81) + 20;
-        if (realWeeklySignaturesTotal > 0) {
-            const avgPerDept = realWeeklySignaturesTotal / 95;
-            const spread = ((hashCode(deptCode) % 200) - 50) / 100;
-            return Math.max(1, Math.round(avgPerDept * (1 + spread)));
-        }
-        return baseHash;
-    }, [realWeeklySignaturesTotal]);
+    const getDepartmentSignatures = React.useCallback(
+        (deptCode: string): { value: number; isReal: boolean } => {
+            const real = perDeptDonors?.get(deptCode);
+            if (real && typeof real.signupCount === 'number') {
+                return { value: real.signupCount, isReal: true };
+            }
+            const baseHash = (hashCode(deptCode) % 81) + 20;
+            if (realWeeklySignaturesTotal > 0) {
+                const avgPerDept = realWeeklySignaturesTotal / 95;
+                const spread = ((hashCode(deptCode) % 200) - 50) / 100;
+                return {
+                    value: Math.max(1, Math.round(avgPerDept * (1 + spread))),
+                    isReal: false,
+                };
+            }
+            return { value: baseHash, isReal: false };
+        },
+        [perDeptDonors, realWeeklySignaturesTotal],
+    );
 
     const generateDataForItem = React.useCallback((item: GeoJSON.Feature | null) => {
         if (!item) {
@@ -200,7 +308,7 @@ export function useWplanData() {
                 const totalSigs = nationalKpis.weeklyDonors.reduce((a, b) => a + b, 0);
                 const lastWeek = nationalKpis.weeklyDonors[nationalKpis.weeklyDonors.length - 1];
                 // Contacts is a proxy: ~20 contacts per signature is the field heuristic.
-                // Once /Dashboard/contacts endpoint exists, replace with real value.
+                // Once a contacts field appears in the bundle, replace with real value.
                 const contacts = lastWeek * 20;
                 const conversion = contacts > 0 ? parseFloat(((lastWeek / contacts) * 100).toFixed(1)) : 0;
                 return {
@@ -209,31 +317,72 @@ export function useWplanData() {
                     conversion,
                     retention: nationalKpis.retentionByWeek.slice(-3).length === 3 ? nationalKpis.retentionByWeek.slice(-3) : [92, 86, 78],
                     revenue: Math.round(totalSigs * (nationalKpis.avgMonthlyDonation || 25)),
-                    isReal: true,
+                    avgDonation: nationalKpis.avgMonthlyDonation,
+                    avgAge: nationalKpis.avgDonorAge,
+                    isReal: {
+                        signatures: true,
+                        // Avg donation comes from the national bundle, so it's
+                        // backend-derived at the national level.
+                        avgDonation: true,
+                        // Same for age — backend-derived national figure.
+                        avgAge: true,
+                        communes: false,
+                        // Contacts is a 20× heuristic on top of real signatures — proxy.
+                        contacts: false,
+                        // Retention curve is not yet in the bundle.
+                        retention: nationalKpis.retentionByWeek.length > 0,
+                        revenue: true,
+                    },
                 };
             }
-            return { signatures: 0, contacts: 0, conversion: 0, retention: [0, 0, 0], revenue: 0, isReal: false };
+            return {
+                signatures: 0,
+                contacts: 0,
+                conversion: 0,
+                retention: [0, 0, 0],
+                revenue: 0,
+                avgDonation: 0,
+                avgAge: 0,
+                isReal: ALL_FAKE_FLAGS,
+            };
         }
         const props = (item.properties ?? {}) as { code?: string; nom?: string };
         const code = props.code ?? props.nom ?? '';
-        const signatures = getDepartmentSignatures(String(code));
-        const contactsRatio = 18 + (hashCode(String(code)) % 6);
+        const codeStr = String(code);
+        const sigsResult = getDepartmentSignatures(codeStr);
+        const signatures = sigsResult.value;
+        const contactsRatio = 18 + (hashCode(codeStr) % 6);
         const contacts = signatures * contactsRatio;
         const retention = [
-            88 + (hashCode(String(code) + 'r1') % 8),
-            80 + (hashCode(String(code) + 'r2') % 8),
-            72 + (hashCode(String(code) + 'r3') % 8),
+            88 + (hashCode(codeStr + 'r1') % 8),
+            80 + (hashCode(codeStr + 'r2') % 8),
+            72 + (hashCode(codeStr + 'r3') % 8),
         ];
-        const revenue = 19000 + (hashCode(String(code) + 'rev') % 19000);
+        const revenue = 19000 + (hashCode(codeStr + 'rev') % 19000);
+
+        const realRow = perDeptDonors?.get(codeStr);
+        const avgDonation = realRow?.avgMonthlyDonation ?? 25;
+        const avgAge = realRow?.avgAge ?? 42;
+
         return {
             signatures,
             contacts,
             conversion: parseFloat(((signatures / contacts) * 100).toFixed(1)),
             retention,
             revenue,
-            isReal: false,
+            avgDonation,
+            avgAge,
+            isReal: {
+                signatures: sigsResult.isReal,
+                avgDonation: !!realRow,
+                avgAge: !!realRow,
+                communes: false,
+                contacts: false,
+                retention: false,
+                revenue: false,
+            } satisfies IsRealFlags,
         };
-    }, [nationalKpis, getDepartmentSignatures]);
+    }, [nationalKpis, getDepartmentSignatures, perDeptDonors]);
 
     const data = useMemo(() => {
         const france = generateDataForItem(null);
@@ -406,7 +555,7 @@ export function useWplanData() {
             const deptsData = deptsForRegion
                 .map((d) => {
                     const dp = (d.properties ?? {}) as { nom?: string; code?: string };
-                    return { name: dp.nom ?? '', sigs: getDepartmentSignatures(dp.code ?? '') };
+                    return { name: dp.nom ?? '', sigs: getDepartmentSignatures(dp.code ?? '').value };
                 })
                 .sort((a, b) => b.sigs - a.sigs)
                 .slice(0, 5);
@@ -416,7 +565,7 @@ export function useWplanData() {
             const allDepts = (departmentGeoJSON.features as GeoJSON.Feature[])
                 .map((f) => {
                     const dp = (f.properties ?? {}) as { nom?: string; code?: string };
-                    return { name: dp.nom ?? '', code: dp.code ?? '', sigs: getDepartmentSignatures(dp.code ?? '') };
+                    return { name: dp.nom ?? '', code: dp.code ?? '', sigs: getDepartmentSignatures(dp.code ?? '').value };
                 })
                 .sort((a, b) => b.sigs - a.sigs)
                 .slice(0, 10);
@@ -472,6 +621,10 @@ export function useWplanData() {
         setComparisonItem(null);
     };
 
+    // Suppress "value declared but never read" — `EMPTY_KPIS` is a documented
+    // shape; keep it referenced so removing it requires explicit intent.
+    void EMPTY_KPIS;
+
     return {
         regionGeoJSON,
         departmentGeoJSON,
@@ -496,7 +649,7 @@ export function useWplanData() {
         nationalKpis,
         kpisLoading,
         kpisError,
-        refetchKpis: fetchNationalKpis,
+        refetchKpis: fetchBundle,
         setSelectedItem,
         setComparisonItem,
         setShowEvents,

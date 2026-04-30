@@ -27,6 +27,7 @@ const WplanTab: React.FC = () => {
         filters,
         chartTitle,
         chartConfig,
+        data,
         selectedRegionName,
         selectedDeptCode,
         regionOptions,
@@ -68,7 +69,7 @@ const WplanTab: React.FC = () => {
         useDepartmentWeather(selectedDeptCode || undefined);
 
     return (
-        <section>
+        <section className="app-surface">
             <DataLibraryModal
                 isOpen={isDataLibraryOpen}
                 onClose={() => setIsDataLibraryOpen(false)}
@@ -150,10 +151,15 @@ const WplanTab: React.FC = () => {
                     weatherLoading={weatherLoading}
                     weatherError={weatherError}
                     selectedDeptCode={selectedDeptCode}
+                    isRealFlags={data.selected.isReal}
                 />
             </div>
 
-            <SwotMatrix regionName={selectedRegionName} nationalKpis={nationalKpis} />
+            <SwotMatrix
+                regionName={selectedRegionName}
+                nationalKpis={nationalKpis}
+                isRealFlags={data.selected.isReal}
+            />
         </section>
     );
 };

@@ -74,64 +74,83 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+      className="app-surface fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <h2 id={titleId} className="sr-only">Palette de commandes</h2>
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col animate-in zoom-in-95 duration-200"
+        className="modal-shell w-full max-w-2xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-          <Search className="w-5 h-5 text-slate-400 mr-3" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border-subtle)]">
+          <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25 shrink-0">
+            <Search size={16} strokeWidth={2.2} />
+          </div>
           <input
             ref={inputRef}
-            className="flex-1 !bg-transparent !border-none outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-lg font-medium"
-            placeholder="Tapez une commande..."
+            className="cmd-input flex-1 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-[15px] font-medium tracking-tight"
+            placeholder="Tapez une commande…"
             value={query}
             onChange={e => {
                 setQuery(e.target.value);
                 setSelectedIndex(0);
             }}
           />
-          <div className="text-xs font-bold text-slate-400 dark:text-slate-400 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded px-1.5 py-0.5">ESC</div>
+          <kbd className="num text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 border border-[var(--border-subtle)] rounded-md px-2 py-1 tracking-tight">
+            ESC
+          </kbd>
         </div>
 
-        <div className="max-h-[300px] overflow-y-auto p-2">
+        <div className="flex-1 overflow-y-auto p-2">
             {filteredActions.length === 0 ? (
-                <div className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 text-sm">Aucune commande trouvée.</div>
+                <div className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 text-[13px] tracking-tight">
+                    Aucune commande trouvée.
+                </div>
             ) : (
-                filteredActions.map((action, index) => (
-                    <button
-                        key={action.id}
-                        onClick={() => { action.perform(); onClose(); }}
-                        className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-colors ${
-                            index === selectedIndex ? 'bg-orange-600 text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <action.icon size={18} className={index === selectedIndex ? 'text-white' : 'text-slate-400 dark:text-slate-500'} />
-                            <span className="font-medium">{action.label}</span>
-                        </div>
-                        {action.shortcut && (
-                            <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${
-                                index === selectedIndex ? 'bg-orange-500 text-orange-100' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700'
-                            }`}>
-                                {action.shortcut}
-                            </span>
-                        )}
-                    </button>
-                ))
+                filteredActions.map((action, index) => {
+                    const active = index === selectedIndex;
+                    return (
+                        <button
+                            key={action.id}
+                            onClick={() => { action.perform(); onClose(); }}
+                            className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition active:translate-y-[1px] ${
+                                active
+                                    ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-200 ring-1 ring-orange-100 dark:ring-orange-500/25'
+                                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={`h-7 w-7 rounded-lg flex items-center justify-center transition-colors ${
+                                    active
+                                        ? 'bg-orange-100/70 text-orange-700 dark:bg-orange-500/25 dark:text-orange-200'
+                                        : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                }`}>
+                                    <action.icon size={14} strokeWidth={2.2} />
+                                </div>
+                                <span className="text-[14px] font-medium tracking-tight">{action.label}</span>
+                            </div>
+                            {action.shortcut && (
+                                <kbd className={`num text-[10px] font-medium px-1.5 py-0.5 rounded-md tracking-tight ${
+                                    active
+                                        ? 'bg-orange-100/70 text-orange-700 dark:bg-orange-500/25 dark:text-orange-200'
+                                        : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-[var(--border-subtle)]'
+                                }`}>
+                                    {action.shortcut}
+                                </kbd>
+                            )}
+                        </button>
+                    );
+                })
             )}
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-2 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center text-[10px] text-slate-400 font-medium">
-            <span>Command Center v1.0</span>
-            <div className="flex gap-2">
-                <span>↑↓ pour naviguer</span>
-                <span>↵ pour valider</span>
+        <div className="bg-slate-50/60 dark:bg-slate-800/40 px-4 py-2 border-t border-[var(--border-subtle)] flex justify-between items-center">
+            <span className="eyebrow leading-none">Command center</span>
+            <div className="flex gap-3 eyebrow leading-none">
+                <span>↑↓ naviguer</span>
+                <span>↵ valider</span>
             </div>
         </div>
       </div>

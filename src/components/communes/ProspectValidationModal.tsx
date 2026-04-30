@@ -50,31 +50,30 @@ export const ProspectValidationModal: React.FC<{
 
     return createPortal(
         <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            className="app-surface fixed inset-0 z-[9999] flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
         >
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} aria-hidden="true" />
+            <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity" onClick={onClose} aria-hidden="true" />
             <div
                 ref={dialogRef}
-                className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-fade-in overflow-hidden"
+                className="modal-shell relative w-full max-w-2xl flex flex-col max-h-[90vh] animate-fade-in"
             >
-                <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
-                    <div>
-                        <h2 id={titleId} className="text-xl font-black text-[var(--text-primary)] flex items-center gap-2">
-                            <Send className="text-orange-600" size={24} />
-                            Validation de la Prospection
-                        </h2>
-                        <p className="text-sm text-[var(--text-secondary)]">Récapitulatif de votre demande de zone</p>
+                <div className="modal-accent-strip px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25">
+                            <Send size={16} strokeWidth={2.2} />
+                        </div>
+                        <div className="min-w-0">
+                            <h2 id={titleId} className="display text-[var(--text-primary)] text-xl tracking-tight leading-tight">
+                                Validation de la prospection
+                            </h2>
+                            <p className="eyebrow leading-none mt-1">récapitulatif de votre demande de zone</p>
+                        </div>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label="Fermer"
-                        className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"
-                    >
-                        <X size={20} />
+                    <button type="button" onClick={onClose} aria-label="Fermer" className="btn-ghost !p-2 shrink-0">
+                        <X size={16} strokeWidth={2.2} />
                     </button>
                 </div>
 
@@ -109,24 +108,30 @@ export const ProspectValidationModal: React.FC<{
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-orange-50 dark:bg-orange-900/30 p-4 rounded-xl border border-orange-100 dark:border-orange-500/20 text-center">
-                            <span className="block text-2xl font-black text-orange-700 dark:text-orange-400">{stats.count}</span>
-                            <span className="text-xs font-bold text-orange-700 dark:text-orange-400 uppercase">Communes</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="kpi-card !p-4 relative text-center">
+                            <div className="relative z-10">
+                                <span className="num display block text-orange-700 dark:text-orange-300 text-[24px] tracking-tight leading-none">{stats.count}</span>
+                                <span className="eyebrow leading-none mt-2 block">communes</span>
+                            </div>
                         </div>
-                        <div className="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20 text-center">
-                            <span className="block text-2xl font-black text-emerald-700 dark:text-emerald-400">{(stats.pop / 1000).toFixed(1)}k</span>
-                            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase">Habitants</span>
+                        <div className="kpi-card !p-4 relative text-center">
+                            <div className="relative z-10">
+                                <span className="num display block text-emerald-700 dark:text-emerald-300 text-[24px] tracking-tight leading-none">{(stats.pop / 1000).toFixed(1)}k</span>
+                                <span className="eyebrow leading-none mt-2 block">habitants</span>
+                            </div>
                         </div>
-                        <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-100 dark:border-purple-500/20 text-center">
-                            <span className="block text-2xl font-black text-purple-700 dark:text-purple-400">{stats.zones}</span>
-                            <span className="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase">Zones Estimées</span>
+                        <div className="kpi-card !p-4 relative text-center">
+                            <div className="relative z-10">
+                                <span className="num display block text-orange-700 dark:text-orange-300 text-[24px] tracking-tight leading-none">{stats.zones}</span>
+                                <span className="eyebrow leading-none mt-2 block">zones estimées</span>
+                            </div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor={`${titleId}-zone`} className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1.5">Nom de la zone</label>
+                            <label htmlFor={`${titleId}-zone`} className="field-label">Nom de la zone</label>
                             <input
                                 id={`${titleId}-zone`}
                                 ref={initialFocusRef}
@@ -136,16 +141,14 @@ export const ProspectValidationModal: React.FC<{
                                 placeholder={`Zone ${communes[0]?.properties.nom ?? ''}`}
                                 aria-invalid={!!nameError}
                                 aria-describedby={nameError ? `${titleId}-zone-err` : undefined}
-                                className={`w-full px-3 py-2.5 text-sm rounded-lg border bg-[var(--input-bg)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 ${
-                                    nameError ? 'border-red-500 focus:ring-red-500/30' : 'border-[var(--border-subtle)] focus:ring-orange-500/30'
-                                }`}
+                                className={`field-input ${nameError ? 'is-error' : ''}`}
                             />
                             {nameError && (
-                                <p id={`${titleId}-zone-err`} className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">{nameError}</p>
+                                <p id={`${titleId}-zone-err`} className="field-error">{nameError}</p>
                             )}
                         </div>
                         <div>
-                            <span className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1.5">Organisation</span>
+                            <span className="field-label">Organisation</span>
                             <div className="flex gap-1.5 flex-wrap" role="radiogroup" aria-label="Organisation">
                                 {ORG_LIST.map((org) => (
                                     <button
@@ -154,10 +157,10 @@ export const ProspectValidationModal: React.FC<{
                                         role="radio"
                                         aria-checked={selectedOrg === org}
                                         onClick={() => setSelectedOrg(org)}
-                                        className={`flex-1 min-w-[60px] py-2 rounded-lg text-xs font-bold uppercase transition-all border ${
+                                        className={`flex-1 min-w-[60px] py-2 rounded-lg text-[12px] font-medium tracking-tight transition active:translate-y-[1px] border ${
                                             selectedOrg === org
-                                                ? 'bg-orange-600 text-white border-orange-600'
-                                                : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
+                                                ? 'bg-orange-600 text-white border-orange-600 shadow-[0_8px_20px_-10px_rgba(255,91,43,0.7)]'
+                                                : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30'
                                         }`}
                                     >
                                         {orgShortName(org)}
@@ -167,47 +170,36 @@ export const ProspectValidationModal: React.FC<{
                         </div>
                     </div>
 
-                    <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
-                        <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={20} />
+                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/25 rounded-xl p-4 flex items-start gap-3">
+                        <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={16} strokeWidth={2.2} />
                         <div>
-                            <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm uppercase mb-1">Actions automatiques</h4>
-                            <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
-                                En validant : une <b>zone sera créée</b>, les communes seront <b>assignées à {orgShortName(selectedOrg)}</b>, et leur statut passera en <b>"En cours"</b>.
+                            <h4 className="text-[13px] font-medium text-amber-900 dark:text-amber-200 tracking-tight mb-1">Actions automatiques</h4>
+                            <p className="text-[12px] text-amber-800/85 dark:text-amber-200/85 leading-relaxed tracking-tight">
+                                En validant : une <b>zone sera créée</b>, les communes seront <b>assignées à {orgShortName(selectedOrg)}</b>, et leur statut passera en <b>« En cours »</b>.
                             </p>
                         </div>
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-[var(--text-primary)] mb-2 text-sm flex items-center gap-2">
-                            <ListIcon size={16} /> Liste des communes ciblées
+                        <h4 className="eyebrow leading-none mb-2 flex items-center gap-1.5">
+                            <ListIcon size={11} strokeWidth={2.4} className="text-orange-500" /> Communes ciblées
                         </h4>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-[var(--border-subtle)] max-h-48 overflow-y-auto p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="bg-slate-50/60 dark:bg-slate-800/40 rounded-xl border border-[var(--border-subtle)] max-h-48 overflow-y-auto p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {communes.map((c) => (
-                                <div key={c.properties.code} className="bg-white dark:bg-[var(--bg-card-solid)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] shadow-sm flex justify-between items-center text-xs">
-                                    <span className="font-bold text-[var(--text-primary)]">{c.properties.nom}</span>
-                                    <span className="text-[var(--text-muted)]">{c.properties.population.toLocaleString()} hab.</span>
+                                <div key={c.properties.code} className="bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-1.5 rounded-md border border-[var(--border-subtle)] shadow-sm flex justify-between items-center text-[12px] tracking-tight">
+                                    <span className="font-medium text-[var(--text-primary)]">{c.properties.nom}</span>
+                                    <span className="num text-[var(--text-muted)]">{c.properties.population.toLocaleString('fr-FR')} hab.</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-[var(--border-subtle)] flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-5 py-2.5 text-[var(--text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-sm transition-colors"
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleConfirm}
-                        disabled={isSubmitting}
-                        className="px-6 py-2.5 bg-orange-600 text-white hover:bg-orange-700 rounded-xl font-bold text-sm shadow-lg shadow-orange-200 dark:shadow-orange-900/50 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                        {isSubmitting ? 'Création...' : 'Confirmer & Créer la Zone'}
+                <div className="p-4 bg-slate-50/60 dark:bg-slate-800/40 border-t border-[var(--border-subtle)] flex justify-end gap-3">
+                    <button type="button" onClick={onClose} className="btn-secondary">Annuler</button>
+                    <button type="button" onClick={handleConfirm} disabled={isSubmitting} className="btn-primary">
+                        {isSubmitting ? <Loader2 size={14} className="animate-spin" strokeWidth={2.2} /> : <Send size={14} strokeWidth={2.2} />}
+                        {isSubmitting ? 'Création…' : 'Confirmer &amp; créer la zone'}
                     </button>
                 </div>
             </div>

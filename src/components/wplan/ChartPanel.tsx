@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { Radar, TrendingUp, Shuffle, Info } from 'lucide-react';
+import { Radar, TrendingUp, Shuffle } from 'lucide-react';
 import { Bar, Line, Radar as RadarChart, Scatter } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import type { NationalKpis } from '@/hooks/useWplanData';
+import type { NationalKpis, IsRealFlags } from '@/hooks/useWplanData';
 import type { WeatherData } from '@/services/weatherService';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
-import { Tooltip } from '@/components/ui/Tooltip';
+import { DataSourceBadge } from '@/components/wplan/DataSourceBadge';
 import { useThemeStore } from '@/stores/themeStore';
 
 interface ChartPanelProps {
@@ -28,6 +28,13 @@ interface ChartPanelProps {
     weatherLoading?: boolean;
     weatherError?: Error | string | null;
     selectedDeptCode?: string | null;
+    /**
+     * Per-field flags describing which data points come from the backend
+     * vs. are synthesised. The "Top Départements" badge drops once
+     * `signatures` is real; other widgets keep their badges until their
+     * respective fields are real too.
+     */
+    isRealFlags?: IsRealFlags;
 }
 
 const ChartPanel: React.FC<ChartPanelProps> = ({
@@ -42,7 +49,9 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
     weatherLoading,
     weatherError,
     selectedDeptCode,
+    isRealFlags,
 }) => {
+    const signaturesIsReal = isRealFlags?.signatures ?? false;
     const isDark = useThemeStore((s) => s.isDark);
 
     const textSecondary = useMemo(() => {
@@ -241,20 +250,19 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
     })();
 
     return (
-        <div className="space-y-6">
-            <div className="glass-card p-4">
-                <div className="flex justify-between items-center mb-2 gap-2">
-                    <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
+        <div className="space-y-5">
+            <div className="glass-card p-5">
+                <div className="flex justify-between items-center mb-3 gap-2">
+                    <h3 className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight flex items-center gap-2 flex-wrap">
                         {chartTitle}
-                        <Tooltip
-                            content="Le classement par département / commune est généré localement (hash déterministe pondéré par les KPI nationaux réels). Endpoint per-département à venir."
-                        >
-                            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                                <Info size={10} /> Estimé
-                            </span>
-                        </Tooltip>
+                        {!signaturesIsReal && (
+                            <DataSourceBadge
+                                variant="synthetic"
+                                title="Le classement par département / commune est généré localement (hash déterministe pondéré par les KPI nationaux réels). Endpoint per-département à venir."
+                            />
+                        )}
                     </h3>
-                    {isComparing && <Radar size={16} className="text-orange-500" />}
+                    {isComparing && <Radar size={15} strokeWidth={2.2} className="text-orange-500" />}
                 </div>
                 <div className="h-[200px]">
                     {chartConfig.type === 'radar' ? (
@@ -271,33 +279,30 @@ const ChartPanel: React.FC<ChartPanelProps> = ({
                 </div>
             </div>
 
-            {/* Retention chart — real backend data when API up */}
-            <div className="glass-card p-4">
-                <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                        <TrendingUp size={16} className="text-orange-500" />
-                        Rétention 12 dernières semaines
+            {/* Retention */}
+            <div className="glass-card p-5">
+                <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+                        <TrendingUp size={15} strokeWidth={2.2} className="text-orange-500" />
+                        Rétention sur les <span className="num">12</span> dernières semaines
                     </h3>
                 </div>
                 <div className="h-[220px]">{retentionContent}</div>
             </div>
 
-            {/* Correlation chart — pluie vs signatures, departement sélectionné */}
-            <div className="glass-card p-4">
+            {/* Correlation */}
+            <div className="glass-card p-5">
                 <div className="flex justify-between items-start mb-1 gap-2">
-                    <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
-                        <Shuffle size={16} className="text-orange-500" />
-                        Corrélation Pluie × Signatures
-                        <span
-                            className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                    <h3 className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight flex items-center gap-2 flex-wrap">
+                        <Shuffle size={15} strokeWidth={2.2} className="text-orange-500" />
+                        Corrélation pluie × signatures
+                        <DataSourceBadge
+                            variant="synthetic"
                             title="L'axe Y (signatures) est un proxy calculé à partir des KPI nationaux pondéré par département. À remplacer par /Dashboard/daily-by-department dès disponible."
-                        >
-                            <Info size={10} />
-                            Données estimées
-                        </span>
+                        />
                     </h3>
                 </div>
-                <p className="text-[11px] text-[var(--text-muted)] mb-2 leading-snug">
+                <p className="text-[11px] text-[var(--text-muted)] mb-3 leading-snug tracking-tight">
                     Précipitations réelles (Open-Meteo) × signatures (proxy par département — endpoint{' '}
                     <code className="font-mono">/Dashboard/daily-by-department</code> à venir).
                 </p>

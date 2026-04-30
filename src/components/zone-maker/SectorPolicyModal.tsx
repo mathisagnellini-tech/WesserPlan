@@ -15,75 +15,123 @@ const SectorPolicyModal: React.FC<SectorPolicyModalProps> = ({ selectedNGO, data
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const { dialogRef } = useDialogA11y({ isOpen: true, onClose, initialFocusRef: closeRef });
+
+  const totalPop = data.clusters.reduce((sum, c) => sum + c.totalPopulation, 0);
+
+  // Tier color tokens are intentional — emerald/orange/violet map to 1S/2S/3S
+  // duration tiers and read as a deliberate scale. Kept desaturated.
+  const tiers = [
+    {
+      key: '1S',
+      label: 'Semaine standard',
+      tone: 'bg-emerald-50 text-emerald-800 ring-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/25',
+      badge: 'bg-emerald-600',
+      range: `${MIN_1W.toLocaleString('fr-FR')} – ${MAX_1W.toLocaleString('fr-FR')} hab.`,
+    },
+    {
+      key: '2S',
+      label: 'Semaine double',
+      tone: 'bg-orange-50 text-orange-800 ring-orange-100 dark:bg-orange-500/10 dark:text-orange-200 dark:ring-orange-500/25',
+      badge: 'bg-orange-600',
+      range: `${MIN_2W.toLocaleString('fr-FR')} – ${MAX_2W.toLocaleString('fr-FR')} hab.`,
+    },
+    {
+      key: '3S',
+      label: 'Semaine triple',
+      tone: 'bg-violet-50 text-violet-800 ring-violet-100 dark:bg-violet-500/10 dark:text-violet-200 dark:ring-violet-500/25',
+      badge: 'bg-violet-600',
+      range: `${MIN_3W.toLocaleString('fr-FR')} – ${MAX_3W.toLocaleString('fr-FR')} hab.`,
+    },
+  ];
+
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div ref={dialogRef} className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col animate-in zoom-in duration-300">
-        <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <div className="p-4 bg-slate-900 dark:bg-slate-700 text-white rounded-[1.5rem] shadow-xl"><Info size={28} strokeWidth={2.5} /></div>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="app-surface fixed inset-0 bg-slate-950/55 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300"
+    >
+      <div ref={dialogRef} className="modal-shell w-full max-w-2xl flex flex-col animate-in zoom-in duration-300">
+        <div className="modal-accent-strip p-6 border-b border-[var(--border-subtle)] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25">
+              <Info size={18} strokeWidth={2.2} />
+            </div>
             <div>
-              <h3 id={titleId} className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Information Plan</h3>
-              <p className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">{selectedNGO} &bull; R&eacute;glementation &amp; Chiffres</p>
+              <h3 id={titleId} className="display text-slate-900 dark:text-white text-2xl tracking-tight leading-tight">
+                Information du plan
+              </h3>
+              <p className="eyebrow leading-none mt-1">{selectedNGO} · règles &amp; chiffres</p>
             </div>
           </div>
-          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fermer" className="p-4 bg-white dark:bg-[var(--bg-card-solid)] hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-[1.5rem] transition-all"><X size={24} /></button>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fermer" className="btn-ghost !p-2">
+            <X size={16} strokeWidth={2.2} />
+          </button>
         </div>
 
-        <div className="p-10 space-y-10 overflow-y-auto max-h-[70vh]">
-          {/* STATISTIQUES ACTUELLES */}
-          <div className="space-y-6">
-            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-1 flex items-center gap-3"><BarChart3 size={16} /> État actuel du déploiement</h4>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-8 space-y-2">
-                <div className="text-slate-400 dark:text-slate-300 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Target size={14} /> Zones créées</div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{data.clusters.length}</div>
+        <div className="p-7 space-y-7 overflow-y-auto max-h-[70vh]">
+          {/* Stats actuelles */}
+          <div className="space-y-4">
+            <h4 className="eyebrow leading-none flex items-center gap-1.5 px-1">
+              <BarChart3 size={11} strokeWidth={2.4} className="text-slate-400" /> État actuel du déploiement
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="kpi-card !p-5 relative">
+                <div className="relative z-10">
+                  <div className="eyebrow leading-none flex items-center gap-1.5">
+                    <Target size={11} strokeWidth={2.4} /> Zones créées
+                  </div>
+                  <div className="num display text-slate-900 dark:text-white text-[32px] tracking-tight leading-none mt-2">
+                    {data.clusters.length}
+                  </div>
+                </div>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-8 space-y-2">
-                <div className="text-slate-400 dark:text-slate-300 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users size={14} /> Population totale</div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">
-                  {(data.clusters.reduce((sum, c) => sum + c.totalPopulation, 0) / 1000).toFixed(1)}k
+              <div className="kpi-card !p-5 relative">
+                <div className="relative z-10">
+                  <div className="eyebrow leading-none flex items-center gap-1.5">
+                    <Users size={11} strokeWidth={2.4} /> Population totale
+                  </div>
+                  <div className="num display text-slate-900 dark:text-white text-[32px] tracking-tight leading-none mt-2">
+                    {(totalPop / 1000).toFixed(1)}<span className="text-[20px] font-medium ml-0.5">k</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* RÈGLES DE DIMENSIONNEMENT */}
-          <div className="space-y-6">
-            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-1 flex items-center gap-3"><Clock size={16} /> Règles de dimensionnement</h4>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-6 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-black text-sm">1S</div>
-                  <span className="text-emerald-900 dark:text-emerald-200 font-black text-sm">Semaine (Standard)</span>
+          {/* Règles de dimensionnement */}
+          <div className="space-y-4">
+            <h4 className="eyebrow leading-none flex items-center gap-1.5 px-1">
+              <Clock size={11} strokeWidth={2.4} className="text-slate-400" /> Règles de dimensionnement
+            </h4>
+            <div className="space-y-2">
+              {tiers.map(tier => (
+                <div
+                  key={tier.key}
+                  className={`flex items-center justify-between p-4 ring-1 rounded-xl ${tier.tone}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`num w-9 h-9 ${tier.badge} text-white rounded-lg flex items-center justify-center text-[12px] font-medium tracking-tight`}>
+                      {tier.key}
+                    </div>
+                    <span className="text-[13px] font-medium tracking-tight">{tier.label}</span>
+                  </div>
+                  <span className="num text-[12px] font-medium tracking-tight">{tier.range}</span>
                 </div>
-                <span className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">{MIN_1W.toLocaleString()} - {MAX_1W.toLocaleString()} hab.</span>
-              </div>
-              <div className="flex items-center justify-between p-6 bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-orange-600 text-white rounded-xl flex items-center justify-center font-black text-sm">2S</div>
-                  <span className="text-orange-900 dark:text-orange-200 font-black text-sm">Semaine (Double)</span>
-                </div>
-                <span className="text-orange-700 dark:text-orange-300 font-bold text-xs">{MIN_2W.toLocaleString()} - {MAX_2W.toLocaleString()} hab.</span>
-              </div>
-              <div className="flex items-center justify-between p-6 bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-sm">3S</div>
-                  <span className="text-purple-900 dark:text-purple-200 font-black text-sm">Semaine (Triple)</span>
-                </div>
-                <span className="text-purple-700 dark:text-purple-300 font-bold text-xs">{MIN_3W.toLocaleString()} - {MAX_3W.toLocaleString()} hab.</span>
-              </div>
+              ))}
             </div>
-            <div className="p-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-[1.5rem] flex gap-4">
-              <AlertCircle className="text-amber-600 shrink-0" size={20} />
-              <p className="text-xs text-amber-800 dark:text-amber-200 font-medium leading-relaxed">
-                Une zone sous les <span className="font-black">{MIN_1W.toLocaleString()} habitants</span> est considérée comme "Insuffisante". Utilisez le mode <span className="font-black text-orange-600 dark:text-orange-300">ZONE BONUS</span> pour absorbé des communes orphelines sans impacter la durée de votre planning.
+            <div className="p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/25 rounded-xl flex gap-3 items-start">
+              <AlertCircle className="text-amber-600 dark:text-amber-300 shrink-0 mt-0.5" size={16} strokeWidth={2.2} />
+              <p className="text-[12px] text-amber-800 dark:text-amber-200 leading-relaxed tracking-tight">
+                Une zone sous les <span className="num font-medium">{MIN_1W.toLocaleString('fr-FR')} habitants</span> est considérée comme « insuffisante ». Utilisez le mode{' '}
+                <span className="font-medium text-orange-700 dark:text-orange-300">Zone bonus</span> pour absorber des communes orphelines sans impacter la durée du planning.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-          <button type="button" onClick={onClose} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 dark:shadow-slate-900">Compris</button>
+        <div className="p-5 border-t border-[var(--border-subtle)] bg-slate-50/60 dark:bg-slate-800/40">
+          <button type="button" onClick={onClose} className="btn-primary w-full">Compris</button>
         </div>
       </div>
     </div>,

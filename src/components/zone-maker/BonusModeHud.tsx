@@ -11,23 +11,29 @@ interface BonusModeHudProps {
 
 const BonusModeHud: React.FC<BonusModeHudProps> = ({ selectedCluster, bonusSelectionCount, onCancel, onNext }) => {
   return (
-    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[900] w-full max-w-2xl px-8 pointer-events-none">
-      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl rounded-full p-4 pointer-events-auto flex items-center justify-between border border-orange-200 dark:border-orange-800 ring-4 ring-orange-600/10 animate-in slide-in-from-top duration-500">
-        <div className="flex items-center gap-4 ml-2">
-          <div className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-100 dark:shadow-orange-900/30">
-            <Pencil size={18} className="animate-pulse" />
+    <div className="app-surface fixed top-20 left-1/2 -translate-x-1/2 z-[900] w-full max-w-2xl px-6 pointer-events-none">
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-[0_24px_60px_-24px_rgba(15,23,42,0.35),0_8px_24px_-16px_rgba(255,91,43,0.25)] rounded-2xl p-3 pointer-events-auto flex items-center justify-between border border-orange-200 dark:border-orange-500/30 ring-2 ring-orange-500/10 animate-in slide-in-from-top duration-400">
+        <div className="flex items-center gap-3 ml-1">
+          <div className="w-9 h-9 bg-orange-600 text-white rounded-xl flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(255,91,43,0.7)]">
+            <Pencil size={15} strokeWidth={2.2} className="animate-pulse" />
           </div>
-          <div className="space-y-0.5">
-            <div className="text-slate-900 dark:text-white font-black text-sm tracking-tight leading-none uppercase">Mode Zone Bonus : {selectedCluster?.code}</div>
-            <p className="text-orange-600 text-[9px] font-black uppercase tracking-widest">{bonusSelectionCount} commune(s) sélectionnée(s) (durée conservée)</p>
+          <div className="leading-tight">
+            <div className="text-[13px] font-medium text-slate-900 dark:text-white tracking-tight">
+              Mode zone bonus <span className="num text-slate-400">·</span> {selectedCluster?.code}
+            </div>
+            <p className="num text-orange-600 dark:text-orange-300 text-[11px] tracking-tight mt-0.5">
+              {bonusSelectionCount} commune{bonusSelectionCount > 1 ? 's' : ''} sélectionnée{bonusSelectionCount > 1 ? 's' : ''} (durée conservée)
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 mr-1">
-          <button onClick={onCancel} className="px-5 py-2.5 text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full text-[10px] font-black uppercase tracking-wider transition-all">Annuler</button>
+          <button onClick={onCancel} className="btn-ghost !text-[12px]">
+            Annuler
+          </button>
           <button
             onClick={onNext}
             disabled={bonusSelectionCount === 0}
-            className="px-6 py-2.5 bg-orange-600 text-white rounded-full text-[10px] font-black uppercase tracking-wider disabled:opacity-30 transition-all shadow-xl active:scale-95"
+            className="btn-primary !text-[12px] !px-4 !py-2"
           >
             Suivant
           </button>

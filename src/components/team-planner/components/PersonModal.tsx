@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MapPin, Mail, Phone, Calendar, Heart, TrendingDown, Star, PhoneCall, CheckCircle, Play } from 'lucide-react';
+import { X, MapPin, Mail, Phone, Calendar, Heart, TrendingDown, PhoneCall, Play } from 'lucide-react';
 import { Person } from '../types';
 import { Tag } from './Tag';
 
@@ -12,167 +12,181 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
   if (!person) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-3xl rounded-xl shadow-2xl border border-slate-200 dark:border-gray-700 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="app-surface fixed inset-0 bg-slate-950/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="modal-shell w-full max-w-3xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
 
-        {/* Header Modal */}
-        <div className="p-6 border-b border-slate-200 dark:border-gray-700 flex justify-between items-start bg-slate-50 dark:bg-[#252525]">
-          <div className="flex gap-5 items-center">
-            {/* Photo de profil large */}
-            <div className="h-20 w-20 rounded-full border-4 border-[#333] shadow-xl overflow-hidden flex-shrink-0">
-                <img 
-                    src={person.photoUrl} 
-                    alt={person.name} 
-                    className="w-full h-full object-cover"
-                />
+        {/* Header */}
+        <div className="modal-accent-strip p-6 border-b border-[var(--border-subtle)] flex justify-between items-start">
+          <div className="flex gap-5 items-center min-w-0">
+            <div className="h-20 w-20 rounded-2xl shadow-lg overflow-hidden flex-shrink-0 ring-2 ring-white dark:ring-slate-700">
+                <img src={person.photoUrl} alt={person.name} className="w-full h-full object-cover" />
             </div>
-            
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{person.name}</h2>
-              <div className="flex items-center gap-4 text-sm">
-                  <span className="text-orange-700 dark:text-orange-400 flex items-center gap-1 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
-                    <MapPin size={12} /> {person.origin}
+
+            <div className="min-w-0">
+              <h2 className="display text-[28px] text-slate-900 dark:text-white leading-tight tracking-tight mb-1">{person.name}</h2>
+              <div className="flex items-center gap-2 text-[13px] tracking-tight">
+                  <span className="num inline-flex items-center gap-1 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/15 px-2 py-0.5 rounded-md ring-1 ring-orange-100 dark:ring-orange-500/25">
+                    <MapPin size={11} strokeWidth={2.4} /> {person.origin}
                   </span>
-                  <span className="text-slate-500 dark:text-gray-400">{person.age} ans</span>
+                  <span className="num text-slate-500 dark:text-slate-400">{person.age} ans</span>
               </div>
               <div className="flex flex-wrap mt-2.5">
                 {person.tags.map((tag, i) => <Tag key={i} label={tag} />)}
               </div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white p-2 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <X size={24} />
+          <button onClick={onClose} aria-label="Fermer" className="btn-ghost !p-2">
+            <X size={18} strokeWidth={2.2} />
           </button>
         </div>
 
-        {/* Content Scrollable */}
-        <div className="p-6 overflow-y-auto space-y-6 text-slate-700 dark:text-gray-300 custom-scrollbar flex-1">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column: Bio & Video */}
-              <div className="lg:col-span-2 space-y-6">
-                 
-                 {/* Bio Section */}
-                 <div className="bg-slate-50 dark:bg-[#252525] p-5 rounded-xl border border-slate-200 dark:border-white/5 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-5">
-                        <Star size={100} />
-                    </div>
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">À propos</h3>
-                    <p className="text-gray-200 leading-relaxed text-sm">
-                        {person.bio || "Aucune description disponible pour ce collaborateur."}
+        {/* Content */}
+        <div className="p-6 overflow-y-auto space-y-6 text-slate-700 dark:text-slate-300 custom-scrollbar-light flex-1">
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {/* Left */}
+              <div className="lg:col-span-2 space-y-5">
+
+                 {/* Bio */}
+                 <div className="bg-white dark:bg-[var(--bg-card-solid)] p-5 rounded-2xl border border-[var(--border-subtle)] shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)]">
+                    <h3 className="eyebrow leading-none mb-3">À propos</h3>
+                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-[13px] tracking-tight">
+                        {person.bio || 'Aucune description disponible pour ce collaborateur.'}
                     </p>
                  </div>
 
-                 {/* Video Presentation Placeholder */}
-                 <div className="bg-slate-50 dark:bg-[#252525] p-5 rounded-xl border border-slate-200 dark:border-white/5">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Vidéo de présentation</h3>
-                    <div className="w-full h-48 bg-gray-900 rounded-lg overflow-hidden relative group cursor-pointer border border-white/10">
-                        {/* Blurred Background */}
-                        <img 
-                            src={person.photoUrl} 
-                            alt="Video thumbnail" 
-                            className="w-full h-full object-cover blur-md opacity-40 scale-110 group-hover:scale-100 transition-transform duration-700" 
+                 {/* Video */}
+                 <div className="bg-white dark:bg-[var(--bg-card-solid)] p-5 rounded-2xl border border-[var(--border-subtle)] shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)]">
+                    <h3 className="eyebrow leading-none mb-3">Vidéo de présentation</h3>
+                    <div className="w-full h-48 bg-slate-900 rounded-xl overflow-hidden relative group cursor-pointer">
+                        <img
+                            src={person.photoUrl}
+                            alt="Aperçu vidéo"
+                            className="w-full h-full object-cover blur-md opacity-40 scale-110 group-hover:scale-100 transition-transform duration-700"
                         />
-                        {/* Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:bg-orange-600 group-hover:border-orange-500 transition-all shadow-xl">
-                                <Play size={24} className="text-white ml-1 fill-white" />
+                            <div className="w-12 h-12 bg-white/15 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:bg-orange-600 group-hover:border-orange-400 transition-all shadow-xl">
+                                <Play size={20} className="text-white ml-0.5 fill-white" />
                             </div>
                         </div>
-                        <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 rounded text-[10px] text-white font-medium">
+                        <div className="num absolute bottom-3 left-3 px-2 py-0.5 bg-black/55 rounded text-[10px] text-white font-medium tracking-tight">
                             01:24
                         </div>
                     </div>
                  </div>
 
-                 {/* Tracking History */}
-                 <div className="bg-slate-50 dark:bg-[#252525] rounded-xl border border-slate-200 dark:border-white/5 p-5">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                         <PhoneCall size={14} className="text-purple-400"/> Historique CRM
+                 {/* CRM history */}
+                 <div className="bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl border border-[var(--border-subtle)] shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)] p-5">
+                    <h3 className="eyebrow leading-none mb-4 flex items-center gap-1.5">
+                         <PhoneCall size={11} strokeWidth={2.4} className="text-orange-500" /> Historique CRM
                     </h3>
                     {person.trackingHistory && person.trackingHistory.length > 0 ? (
                         <div className="space-y-4">
                             {person.trackingHistory.map((entry, idx) => (
-                                <div key={idx} className="flex gap-4 items-start relative">
+                                <div key={idx} className="flex gap-3 items-start relative">
                                     {idx !== person.trackingHistory.length - 1 && (
-                                        <div className="absolute left-[19px] top-8 bottom-[-16px] w-px bg-gray-700"></div>
+                                        <div className="absolute left-[15px] top-8 bottom-[-16px] w-px bg-slate-100 dark:bg-slate-700" />
                                     )}
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-[#1e1e1e] z-10 
-                                        ${entry.type === 'call' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-700 text-gray-400'}`}>
-                                        {entry.type === 'call' ? <PhoneCall size={16} /> : <Calendar size={16} />}
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ring-1 z-10 ${
+                                        entry.type === 'call'
+                                            ? 'bg-orange-50 text-orange-600 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-300 dark:ring-orange-500/25'
+                                            : 'bg-slate-100 text-slate-500 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-300 dark:ring-slate-600/40'
+                                    }`}>
+                                        {entry.type === 'call' ? <PhoneCall size={13} strokeWidth={2.2} /> : <Calendar size={13} strokeWidth={2.2} />}
                                     </div>
-                                    <div className="flex-1 pt-1">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-sm font-bold text-white">{entry.date}</span>
-                                            <span className="text-xs text-gray-500 bg-black/20 px-2 py-0.5 rounded-full">{entry.author}</span>
+                                    <div className="flex-1 pt-1 min-w-0">
+                                        <div className="flex justify-between items-center mb-0.5 gap-2">
+                                            <span className="num text-[12px] font-medium text-slate-900 dark:text-white tracking-tight">{entry.date}</span>
+                                            <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-tight">
+                                                {entry.author}
+                                            </span>
                                         </div>
-                                        <p className="text-sm text-gray-400 leading-relaxed">{entry.summary}</p>
+                                        <p className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed tracking-tight">
+                                            {entry.summary}
+                                        </p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-4 text-gray-500 flex flex-col items-center">
-                            <p className="text-sm">Aucun historique récent.</p>
-                        </div>
+                        <p className="text-[12px] text-slate-400 dark:text-slate-500 italic text-center tracking-tight py-2">
+                            Aucun historique récent.
+                        </p>
                     )}
                  </div>
 
               </div>
 
-              {/* Right Column: KPIs & Contact */}
-              <div className="space-y-4">
-                 
-                 {/* Contact Card */}
-                 <div className="bg-slate-100 dark:bg-[#2a2a2a] p-4 rounded-xl border border-slate-200 dark:border-white/5 space-y-3">
+              {/* Right column */}
+              <div className="space-y-3">
+
+                 {/* Contact */}
+                 <div className="bg-white dark:bg-[var(--bg-card-solid)] p-4 rounded-2xl border border-[var(--border-subtle)] shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)] space-y-3">
                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-orange-500/20 text-orange-400 rounded-lg">
-                            <Mail size={18} />
+                        <div className="p-2 bg-orange-50 text-orange-600 rounded-lg ring-1 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-300 dark:ring-orange-500/25">
+                            <Mail size={15} strokeWidth={2.2} />
                         </div>
                         <div className="overflow-hidden">
-                            <div className="text-[10px] text-gray-500 uppercase font-bold">Email</div>
-                            <div className="text-white font-medium text-sm truncate" title={person.email}>{person.email}</div>
+                            <div className="eyebrow leading-none">Email</div>
+                            <div className="text-slate-900 dark:text-white text-[13px] font-medium truncate tracking-tight mt-0.5" title={person.email}>
+                                {person.email}
+                            </div>
                         </div>
                      </div>
-                     <div className="h-px bg-white/5"></div>
+                     <div className="h-px bg-[var(--border-subtle)]" />
                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-500/20 text-green-400 rounded-lg">
-                            <Phone size={18} />
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/25">
+                            <Phone size={15} strokeWidth={2.2} />
                         </div>
                         <div>
-                            <div className="text-[10px] text-gray-500 uppercase font-bold">Téléphone</div>
-                            <div className="text-white font-medium text-sm">{person.phone}</div>
+                            <div className="eyebrow leading-none">Téléphone</div>
+                            <div className="num text-slate-900 dark:text-white text-[13px] font-medium tracking-tight mt-0.5">
+                                {person.phone}
+                            </div>
                         </div>
                      </div>
                  </div>
 
-                 {/* KPIs Grid */}
+                 {/* KPIs */}
                  <div className="grid grid-cols-1 gap-3">
-                    <div className="bg-slate-50 dark:bg-[#252525] p-4 rounded-xl border border-slate-200 dark:border-white/5 flex justify-between items-center">
-                        <div>
-                            <div className="text-gray-400 text-[10px] uppercase font-bold mb-1">Qualité</div>
-                            <div className="text-2xl font-bold text-white">{person.qualityScore}/100</div>
-                        </div>
-                        <div className="h-10 w-10 rounded-full border-4 border-green-500/30 flex items-center justify-center">
-                            <span className="text-xs font-bold text-green-400">A</span>
+                    <div className="kpi-card !p-4 relative">
+                        <div className="relative z-10 flex justify-between items-center">
+                            <div>
+                                <div className="eyebrow leading-none">Qualité</div>
+                                <div className="num display text-slate-900 dark:text-white text-[28px] leading-none tracking-tight mt-1.5">
+                                    {person.qualityScore}<span className="text-slate-400 text-[16px] font-medium">/100</span>
+                                </div>
+                            </div>
+                            <div className="h-9 w-9 rounded-full ring-2 ring-emerald-200 dark:ring-emerald-500/30 flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 num text-[12px] font-semibold tracking-tight">
+                                A
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-slate-50 dark:bg-[#252525] p-4 rounded-xl border border-slate-200 dark:border-white/5 flex justify-between items-center">
-                        <div>
-                            <div className="text-gray-400 text-[10px] uppercase font-bold mb-1">Donateurs</div>
-                            <div className="text-2xl font-bold text-white">{person.regularDonors}</div>
+                    <div className="kpi-card !p-4 relative">
+                        <div className="relative z-10 flex justify-between items-center">
+                            <div>
+                                <div className="eyebrow leading-none">Donateurs</div>
+                                <div className="num display text-slate-900 dark:text-white text-[28px] leading-none tracking-tight mt-1.5">
+                                    {person.regularDonors}
+                                </div>
+                            </div>
+                            <Heart size={20} strokeWidth={2.2} className="text-rose-400 dark:text-rose-300" />
                         </div>
-                        <Heart size={24} className="text-pink-500 opacity-50" />
                     </div>
-                    <div className="bg-slate-50 dark:bg-[#252525] p-4 rounded-xl border border-slate-200 dark:border-white/5 flex justify-between items-center">
-                        <div>
-                            <div className="text-gray-400 text-[10px] uppercase font-bold mb-1">Attrition</div>
-                            <div className="text-2xl font-bold text-white">{person.attritionRate}%</div>
+                    <div className="kpi-card !p-4 relative">
+                        <div className="relative z-10 flex justify-between items-center">
+                            <div>
+                                <div className="eyebrow leading-none">Attrition</div>
+                                <div className="num display text-slate-900 dark:text-white text-[28px] leading-none tracking-tight mt-1.5">
+                                    {person.attritionRate}<span className="text-slate-400 text-[16px] font-medium">%</span>
+                                </div>
+                            </div>
+                            <TrendingDown
+                                size={20}
+                                strokeWidth={2.2}
+                                className={person.attritionRate < 5 ? 'text-emerald-500' : 'text-red-500'}
+                            />
                         </div>
-                        <TrendingDown size={24} className={`${person.attritionRate < 5 ? 'text-green-500' : 'text-red-500'} opacity-50`} />
                     </div>
                  </div>
 
@@ -181,11 +195,11 @@ export const PersonModal: React.FC<PersonModalProps> = ({ person, onClose }) => 
 
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-[#252525] flex justify-end gap-3">
-            <button onClick={onClose} className="px-4 py-2 rounded-md bg-transparent hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 transition border border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500 text-sm">Fermer</button>
-            <button className="px-4 py-2 rounded-md bg-orange-600 hover:bg-orange-500 text-white font-medium transition shadow-lg shadow-orange-900/20 text-sm flex items-center gap-2">
-                <Phone size={14} /> Contacter
+        {/* Footer */}
+        <div className="p-4 border-t border-[var(--border-subtle)] bg-slate-50/60 dark:bg-slate-800/40 flex justify-end gap-3">
+            <button onClick={onClose} className="btn-secondary">Fermer</button>
+            <button className="btn-primary num">
+                <Phone size={14} strokeWidth={2.2} /> Contacter
             </button>
         </div>
       </div>

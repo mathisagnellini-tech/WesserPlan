@@ -26,7 +26,6 @@ export const TARGET_POPULATION = 8000;
 export const DEPT_CODE = '25';
 
 export const DEFAULT_MAX_POP_FILTER = 200000;
-export const RAW_CSV_DATA = "nom,code_insee,c2,c3,c4,c5,population\n";
 
 export const MIN_1W = 7500;
 export const MAX_1W = 12500;

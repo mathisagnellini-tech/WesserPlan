@@ -5,7 +5,6 @@ import { useThemeStore } from '@/stores/themeStore';
 import { escapeHtml, safeColor } from '@/lib/htmlEscape';
 import type { TeamData } from '@/mocks/dashboardMocks';
 
-export { generateTeamsData } from '@/mocks/dashboardMocks';
 export type { TeamData, GlobalWeather } from '@/mocks/dashboardMocks';
 
 // Render the visual content inside a pin/popup head. When a logo asset is

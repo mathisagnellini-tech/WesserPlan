@@ -23,8 +23,10 @@ import { reporter } from '@/lib/observability';
 
 const SettingsCard: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
     <div className="glass-card p-6">
-        <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-3">
-            <Icon className="text-[var(--highlight-text)]" />
+        <h3 className="display text-[var(--text-primary)] text-lg leading-tight tracking-tight mb-4 flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25">
+                <Icon size={15} strokeWidth={2.2} />
+            </div>
             {title}
         </h3>
         <div className="space-y-4">
@@ -45,7 +47,7 @@ const Toggle: React.FC<{ label: string; enabled: boolean; setEnabled: (enabled: 
     const id = `toggle-${slugify(label)}`;
     return (
         <label htmlFor={id} className="flex items-center justify-between cursor-pointer group">
-            <span className="text-sm text-[var(--text-secondary)]">{label}</span>
+            <span className="text-[13px] text-[var(--text-secondary)] tracking-tight">{label}</span>
             <div className="relative">
                 <input
                     id={id}
@@ -67,11 +69,11 @@ const Toast: React.FC<{ message: string }> = ({ message }) => (
     <div
         role="status"
         aria-live="polite"
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-fade-in"
+        className="app-surface fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-fade-in"
     >
-        <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700">
-            <Check size={18} className="text-orange-400" />
-            <span className="font-medium text-sm">{message}</span>
+        <div className="bg-slate-900 text-white px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 border border-slate-700">
+            <Check size={15} strokeWidth={2.4} className="text-orange-400" />
+            <span className="text-[13px] font-medium tracking-tight">{message}</span>
         </div>
     </div>
 );
@@ -142,15 +144,17 @@ const SettingsTab: React.FC = () => {
     };
 
     return (
-        <section className="animate-fade-in">
-            <header className="mb-4 md:mb-8 mt-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">Paramètres</h2>
-                <p className="text-sm md:text-lg text-[var(--text-secondary)] mt-1 font-medium">Gérez votre profil, vos préférences et les données de l'application.</p>
+        <section className="app-surface animate-fade-in">
+            <header className="mb-5 md:mb-7 mt-2">
+                <h2 className="display text-[var(--text-primary)] text-[34px] md:text-[40px] leading-none tracking-tight">Paramètres</h2>
+                <p className="text-[13px] text-[var(--text-secondary)] mt-2 tracking-tight">
+                    Gérez votre profil, vos préférences et les données de l'application.
+                </p>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-8">
-                    <SettingsCard title="Profil Utilisateur" icon={User}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                    <SettingsCard title="Profil utilisateur" icon={User}>
                         <div className="flex items-center gap-4">
                             <div
                                 className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-white dark:border-slate-700 shadow-md"
@@ -164,30 +168,25 @@ const SettingsTab: React.FC = () => {
                                         type="button"
                                         aria-disabled="true"
                                         onClick={(e) => e.preventDefault()}
-                                        className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-4 py-2 rounded-lg cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
+                                        className="btn-secondary !text-[12px] !cursor-not-allowed opacity-60"
                                     >
                                         Changer d'avatar
                                     </button>
                                 </Tooltip>
-                                <p className="text-xs text-[var(--text-secondary)] mt-1">Bientôt disponible.</p>
+                                <p className="eyebrow leading-none mt-2">bientôt disponible</p>
                             </div>
                         </div>
 
                         <div
                             id={profileHintId}
-                            className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-sm text-blue-900 dark:text-blue-300"
+                            className="flex items-start gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/25 text-[12px] text-sky-900 dark:text-sky-200 tracking-tight leading-relaxed"
                         >
-                            <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                            <Info size={14} strokeWidth={2.2} className="mt-0.5 shrink-0" aria-hidden="true" />
                             <span>{PROFILE_SYNC_HINT}</span>
                         </div>
 
                         <div>
-                            <label
-                                htmlFor={nameId}
-                                className="block text-sm font-medium text-[var(--text-secondary)] mb-1"
-                            >
-                                Nom complet
-                            </label>
+                            <label htmlFor={nameId} className="field-label">Nom complet</label>
                             <input
                                 id={nameId}
                                 type="text"
@@ -195,16 +194,11 @@ const SettingsTab: React.FC = () => {
                                 readOnly
                                 aria-readonly="true"
                                 aria-describedby={profileHintId}
-                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50"
+                                className="field-input cursor-not-allowed opacity-80"
                             />
                         </div>
                         <div>
-                            <label
-                                htmlFor={emailId}
-                                className="block text-sm font-medium text-[var(--text-secondary)] mb-1"
-                            >
-                                Adresse e-mail
-                            </label>
+                            <label htmlFor={emailId} className="field-label">Adresse e-mail</label>
                             <input
                                 id={emailId}
                                 type="email"
@@ -212,7 +206,7 @@ const SettingsTab: React.FC = () => {
                                 readOnly
                                 aria-readonly="true"
                                 aria-describedby={profileHintId}
-                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-lg p-2.5 cursor-not-allowed opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50"
+                                className="field-input cursor-not-allowed opacity-80"
                             />
                         </div>
                         {isAuthenticated && (
@@ -220,16 +214,16 @@ const SettingsTab: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={logout}
-                                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
+                                    className="btn-secondary !text-[12px] !text-red-600 dark:!text-red-300 !bg-red-50 dark:!bg-red-500/10 !border-red-100 dark:!border-red-500/25 hover:!border-red-200 dark:hover:!border-red-500/40"
                                 >
-                                    <LogOut size={16} aria-hidden="true" /> Déconnexion
+                                    <LogOut size={14} strokeWidth={2.2} aria-hidden="true" /> Déconnexion
                                 </button>
                             </div>
                         )}
                     </SettingsCard>
 
-                    <SettingsCard title="Gestion des Données" icon={Database}>
-                        <p className="text-sm text-[var(--text-secondary)]">
+                    <SettingsCard title="Gestion des données" icon={Database}>
+                        <p className="text-[13px] text-[var(--text-secondary)] tracking-tight leading-relaxed">
                             Vide les préférences et données mises en cache dans votre navigateur (thème, langue, notifications, etc.).
                             Les données serveur ne sont pas affectées.
                         </p>
@@ -237,49 +231,44 @@ const SettingsTab: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setConfirmClearOpen(true)}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-500/10 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/20 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
+                                className="btn-secondary !text-[12px] !text-red-700 dark:!text-red-300 !bg-red-50 dark:!bg-red-500/10 !border-red-100 dark:!border-red-500/25 hover:!border-red-200 dark:hover:!border-red-500/40"
                             >
-                                <Trash2 size={16} aria-hidden="true" /> Vider le cache local
+                                <Trash2 size={14} strokeWidth={2.2} aria-hidden="true" /> Vider le cache local
                             </button>
                         </div>
                     </SettingsCard>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-6">
                     <SettingsCard title="Préférences" icon={Palette}>
                         <div>
-                            <span id="theme-label" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                                Thème de l'application
-                            </span>
+                            <span id="theme-label" className="field-label">Thème de l'application</span>
                             <div className="flex gap-2" role="group" aria-labelledby="theme-label">
                                 <button
                                     type="button"
                                     onClick={() => setTheme('light')}
                                     aria-pressed={!isDark}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)] ${!isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border text-[13px] font-medium tracking-tight transition active:translate-y-[1px] ${!isDark ? 'border-orange-200 bg-orange-50 text-orange-700 ring-1 ring-orange-100 dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-200 dark:ring-orange-500/25' : 'border-[var(--border-subtle)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-orange-200 dark:hover:border-orange-500/30'}`}
                                 >
-                                    <Sun size={18} aria-hidden="true" /> Clair
+                                    <Sun size={15} strokeWidth={2.2} aria-hidden="true" /> Clair
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setTheme('dark')}
                                     aria-pressed={isDark}
-                                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)] ${isDark ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 shadow-sm' : 'border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-slate-300 dark:hover:border-slate-500'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border text-[13px] font-medium tracking-tight transition active:translate-y-[1px] ${isDark ? 'border-orange-200 bg-orange-50 text-orange-700 ring-1 ring-orange-100 dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-200 dark:ring-orange-500/25' : 'border-[var(--border-subtle)] bg-[var(--input-bg)] text-[var(--text-secondary)] hover:border-orange-200 dark:hover:border-orange-500/30'}`}
                                 >
-                                    <Moon size={18} aria-hidden="true" /> Sombre
+                                    <Moon size={15} strokeWidth={2.2} aria-hidden="true" /> Sombre
                                 </button>
                             </div>
                         </div>
                         <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <label className="block text-sm font-medium text-[var(--text-secondary)]" htmlFor="language-select">Langue</label>
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                    <Clock size={10} aria-hidden="true" /> Bientôt
+                            <div className="flex items-center gap-2 mb-1.5">
+                                <label className="field-label !mb-0" htmlFor="language-select">Langue</label>
+                                <span className="num inline-flex items-center gap-1 text-[10px] font-medium tracking-tight px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-[var(--border-subtle)]">
+                                    <Clock size={9} strokeWidth={2.4} aria-hidden="true" /> bientôt
                                 </span>
                             </div>
-                            {/* i18n is not wired up yet (no react-i18next), so the selector is held
-                                in placeholder mode behind a Tooltip rather than letting users pick a
-                                value that has no UI effect. */}
                             <Tooltip comingSoon content="La traduction de l'interface arrivera prochainement.">
                                 <select
                                     id="language-select"
@@ -290,13 +279,13 @@ const SettingsTab: React.FC = () => {
                                     }}
                                     disabled
                                     aria-disabled="true"
-                                    className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50 transition p-2.5 cursor-not-allowed opacity-60"
+                                    className="field-input cursor-not-allowed opacity-60"
                                 >
                                     <option value="fr">Français</option>
                                     <option value="en">English</option>
                                 </select>
                             </Tooltip>
-                            <p className="text-xs text-[var(--text-muted)] mt-1">
+                            <p className="text-[11px] text-[var(--text-muted)] mt-1.5 tracking-tight">
                                 La traduction de l'interface arrivera prochainement.
                             </p>
                         </div>
@@ -321,17 +310,13 @@ const SettingsTab: React.FC = () => {
                     </SettingsCard>
 
                     <SettingsCard title="Import de données" icon={Upload}>
-                        <p className="text-sm text-[var(--text-secondary)]">
+                        <p className="text-[13px] text-[var(--text-secondary)] tracking-tight leading-relaxed">
                             Importez vos fichiers CSV ou Excel pour mettre à jour les communes, équipes
                             et autres données.
                         </p>
                         <div className="flex justify-start">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/upload')}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[var(--accent-primary)] rounded-lg hover:bg-[var(--accent-primary)]/90 transition shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)]"
-                            >
-                                <Upload size={16} aria-hidden="true" /> Ouvrir l'import
+                            <button type="button" onClick={() => navigate('/upload')} className="btn-primary">
+                                <Upload size={14} strokeWidth={2.2} aria-hidden="true" /> Ouvrir l'import
                             </button>
                         </div>
                     </SettingsCard>

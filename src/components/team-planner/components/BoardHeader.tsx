@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { LayoutGrid, Rows, GitMerge, Grip, BarChart2, User, Briefcase, Cloud, CloudOff, Check, Loader2 } from 'lucide-react';
 import type { ViewMode, ViewDensity } from '../TeamPlannerApp';
@@ -12,7 +11,6 @@ interface BoardHeaderProps {
     onToggleRelationships: () => void;
     searchQuery: string;
     isFocusMode: boolean;
-    // Persistence indicator (optional — falls back to no indicator)
     lastSaved?: Date | null;
     isSaving?: boolean;
     saveError?: Error | null;
@@ -36,29 +34,33 @@ const SaveIndicator: React.FC<{
     saveError?: Error | null;
     onRetry?: () => void;
 }> = ({ lastSaved, isSaving, saveError, onRetry }) => {
-    // Tick every 10s so the relative time updates while the user is idle
     const [, setTick] = useState(0);
     useEffect(() => {
         const id = setInterval(() => setTick((n) => n + 1), 10000);
         return () => clearInterval(id);
     }, []);
 
+    const baseChip =
+        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium tracking-tight border';
+
     if (saveError) {
         return (
             <button
                 onClick={onRetry}
                 title={saveError.message}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                className={`${baseChip} bg-red-50 dark:bg-red-500/15 text-red-700 dark:text-red-300 border-red-100 dark:border-red-500/25 hover:bg-red-100 dark:hover:bg-red-500/20 active:translate-y-[1px] transition`}
             >
-                <CloudOff size={12} /> Erreur — Réessayer
+                <CloudOff size={12} strokeWidth={2.2} /> Erreur — réessayer
             </button>
         );
     }
 
     if (isSaving) {
         return (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
-                <Loader2 size={12} className="animate-spin" /> Enregistrement…
+            <div
+                className={`${baseChip} bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-[var(--border-subtle)] shadow-sm`}
+            >
+                <Loader2 size={12} className="animate-spin" strokeWidth={2.2} /> Enregistrement…
             </div>
         );
     }
@@ -67,16 +69,18 @@ const SaveIndicator: React.FC<{
         return (
             <div
                 title={lastSaved.toLocaleString('fr-FR')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 shadow-sm"
+                className={`${baseChip} bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-[var(--border-subtle)] shadow-sm`}
             >
-                <Check size={12} className="text-emerald-500" /> Enregistré {formatRelativeTime(lastSaved)}
+                <Check size={12} className="text-emerald-500" strokeWidth={2.4} /> Enregistré {formatRelativeTime(lastSaved)}
             </div>
         );
     }
 
     return (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
-            <Cloud size={12} /> Non enregistré
+        <div
+            className={`${baseChip} bg-white/80 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border-[var(--border-subtle)] shadow-sm`}
+        >
+            <Cloud size={12} strokeWidth={2.2} /> Non enregistré
         </div>
     );
 };
@@ -99,78 +103,69 @@ export const BoardHeader: React.FC<BoardHeaderProps> = ({
         <div className="mb-4 z-10 sticky left-0 px-2 w-[calc(100vw-48px)]">
             {/* Title */}
             <div className={`transition-opacity duration-500 ${isFocusMode ? 'opacity-40 blur-[1px]' : 'opacity-100'}`}>
-                <h2 className="text-slate-900 dark:text-white font-black text-3xl tracking-tight">Team Planner</h2>
-                <span className="text-slate-500 text-sm font-medium mt-1">
-                    {searchQuery ? `Recherche: "${searchQuery}"` : (
-                    <>
-                        {viewMode === 'performance' && "Performance commerciale et objectifs."}
-                        {viewMode === 'identity' && "Profils, âges et origines géographiques."}
-                        {viewMode === 'hr' && "Contrats, disponibilités et permis."}
-                    </>
+                <h2 className="display text-slate-900 dark:text-white text-[34px] leading-none tracking-tight">
+                    Team planner
+                </h2>
+                <span className="block text-slate-500 dark:text-slate-400 text-[13px] tracking-tight mt-1">
+                    {searchQuery ? (
+                        <>Recherche : <span className="text-slate-700 dark:text-slate-200">« {searchQuery} »</span></>
+                    ) : (
+                        <>
+                            {viewMode === 'performance' && 'Performance commerciale et objectifs.'}
+                            {viewMode === 'identity' && 'Profils, âges et origines géographiques.'}
+                            {viewMode === 'hr' && 'Contrats, disponibilités et permis.'}
+                        </>
                     )}
                 </span>
             </div>
 
-            {/* Board toolbar — single unified bar */}
+            {/* Toolbar */}
             <div className="flex items-center gap-2 mt-3 flex-wrap">
                 {/* View mode */}
-                <div className="flex bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-200/50 dark:border-slate-700/50 p-1 gap-0.5 shadow-sm">
-                    <button
-                        onClick={() => onViewModeChange('performance')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'performance' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                    >
-                        <BarChart2 size={12} /> Perf
+                <div className="seg">
+                    <button onClick={() => onViewModeChange('performance')} data-active={viewMode === 'performance'}>
+                        <BarChart2 size={13} strokeWidth={2.2} /> Perf
                     </button>
-                    <button
-                        onClick={() => onViewModeChange('identity')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'identity' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                    >
-                        <User size={12} /> Profil
+                    <button onClick={() => onViewModeChange('identity')} data-active={viewMode === 'identity'}>
+                        <User size={13} strokeWidth={2.2} /> Profil
                     </button>
-                    <button
-                        onClick={() => onViewModeChange('hr')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'hr' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                    >
-                        <Briefcase size={12} /> RH
+                    <button onClick={() => onViewModeChange('hr')} data-active={viewMode === 'hr'}>
+                        <Briefcase size={13} strokeWidth={2.2} /> RH
                     </button>
                 </div>
 
-                {/* Density + Relations — grouped */}
-                <div className="flex bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-200/50 dark:border-slate-700/50 p-1 gap-0.5 shadow-sm items-center">
+                {/* Density + Relations */}
+                <div className="seg items-center">
                     <button
                         onClick={() => onDensityChange('standard')}
-                        className={`p-1.5 rounded-full transition-all duration-200 ${density === 'standard' ? 'bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white shadow-inner' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                        title="Vue Détaillée"
+                        data-active={density === 'standard'}
+                        title="Vue détaillée"
+                        aria-label="Vue détaillée"
                     >
-                        <LayoutGrid size={14} />
+                        <LayoutGrid size={13} strokeWidth={2.2} />
                     </button>
                     <button
                         onClick={() => onDensityChange('compact')}
-                        className={`p-1.5 rounded-full transition-all duration-200 ${density === 'compact' ? 'bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white shadow-inner' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                        title="Vue Compacte"
+                        data-active={density === 'compact'}
+                        title="Vue compacte"
+                        aria-label="Vue compacte"
                     >
-                        <Rows size={14} />
+                        <Rows size={13} strokeWidth={2.2} />
                     </button>
                     <button
                         onClick={() => onDensityChange('tiny')}
-                        className={`p-1.5 rounded-full transition-all duration-200 ${density === 'tiny' ? 'bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white shadow-inner' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                        title="Vue Ultra Compacte"
+                        data-active={density === 'tiny'}
+                        title="Vue ultra-compacte"
+                        aria-label="Vue ultra-compacte"
                     >
-                        <Grip size={14} />
+                        <Grip size={13} strokeWidth={2.2} />
                     </button>
-                    <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5" />
-                    <button
-                        onClick={onToggleRelationships}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${showRelationships
-                            ? 'bg-orange-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                        }`}
-                    >
-                        <GitMerge size={12} /> Relations
+                    <span className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5" />
+                    <button onClick={onToggleRelationships} data-active={showRelationships}>
+                        <GitMerge size={13} strokeWidth={2.2} /> Relations
                     </button>
                 </div>
 
-                {/* Persistence indicator — pushed right */}
                 <div className="ml-auto">
                     <SaveIndicator
                         lastSaved={lastSaved}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Info, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { METRICS_CONFIG } from '@/components/wplan/metricsConfig';
 import type { MapMetric } from '@/components/wplan/metricsConfig';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { DataSourceBadge } from '@/components/wplan/DataSourceBadge';
 import { METRICS_BACKEND_MAP } from '@/hooks/useWplanData';
 
 interface MapPanelProps {
@@ -36,17 +37,17 @@ const MapPanel: React.FC<MapPanelProps> = ({
 }) => {
     return (
         <div className="lg:col-span-2 glass-card p-4 flex flex-col">
-            <div className="flex flex-col gap-4 mb-3 border-b border-[var(--border-subtle)] pb-3">
-                <div className="flex justify-between items-center">
-                    <h3 className="font-extrabold text-xl sm:text-2xl text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
+            <div className="flex flex-col gap-3 mb-3 border-b border-[var(--border-subtle)] pb-3">
+                <div className="flex justify-between items-center gap-3">
+                    <h3 className="display text-[var(--text-primary)] text-xl sm:text-2xl leading-tight tracking-tight flex items-center gap-2 flex-wrap">
                         {isComparing ? (
                             <>
-                                <span className={selectedItem ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-slate-500'}>
+                                <span className={selectedItem ? 'text-orange-600 dark:text-orange-300' : 'text-slate-400 dark:text-slate-500'}>
                                     {selectedItem ? (
                                         <>
                                             {selectedItem.properties.nom}
                                             {mapLevel === 'departments' && (
-                                                <span className="text-base font-normal ml-1 opacity-75">
+                                                <span className="num text-[14px] font-medium ml-1 opacity-70">
                                                     ({selectedItem.properties.code})
                                                 </span>
                                             )}
@@ -55,15 +56,15 @@ const MapPanel: React.FC<MapPanelProps> = ({
                                         'Sélection 1'
                                     )}
                                 </span>
-                                <span className="text-sm text-[var(--text-muted)] font-bold uppercase bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-                                    VS
+                                <span className="num text-[11px] text-[var(--text-muted)] font-medium tracking-tight bg-slate-50 dark:bg-slate-800 border border-[var(--border-subtle)] px-2 py-0.5 rounded-md">
+                                    vs
                                 </span>
-                                <span className={comparisonItem ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-slate-500'}>
+                                <span className={comparisonItem ? 'text-orange-600 dark:text-orange-300' : 'text-slate-400 dark:text-slate-500'}>
                                     {comparisonItem ? (
                                         <>
                                             {comparisonItem.properties.nom}
                                             {mapLevel === 'departments' && (
-                                                <span className="text-base font-normal ml-1 opacity-75">
+                                                <span className="num text-[14px] font-medium ml-1 opacity-70">
                                                     ({comparisonItem.properties.code})
                                                 </span>
                                             )}
@@ -75,12 +76,12 @@ const MapPanel: React.FC<MapPanelProps> = ({
                             </>
                         ) : (
                             <>
-                                <MapPin className="text-orange-600" />
+                                <MapPin className="text-orange-600" size={20} strokeWidth={2.2} />
                                 {selectedItem ? (
                                     <>
                                         {selectedItem.properties.nom}
                                         {mapLevel === 'departments' && (
-                                            <span className="text-xl text-[var(--text-secondary)] font-normal ml-2">
+                                            <span className="num text-base text-[var(--text-secondary)] font-medium ml-2">
                                                 ({selectedItem.properties.code})
                                             </span>
                                         )}
@@ -88,33 +89,28 @@ const MapPanel: React.FC<MapPanelProps> = ({
                                 ) : viewingRegion ? (
                                     viewingRegion.properties.nom
                                 ) : (
-                                    'France Entière'
+                                    'France entière'
                                 )}
                             </>
                         )}
                     </h3>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition h-[32px] border border-transparent">
-                        <span className="text-[var(--text-secondary)] text-xs font-medium px-1">Events</span>
+                    <label className="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-800 border border-[var(--border-subtle)] px-2.5 py-1.5 rounded-lg hover:border-orange-200 dark:hover:border-orange-500/30 transition shrink-0">
+                        <span className="text-[var(--text-secondary)] text-[12px] font-medium tracking-tight">Évènements</span>
                         <input
                             type="checkbox"
                             checked={showEvents}
                             onChange={(e) => onShowEventsChange(e.target.checked)}
-                            className="h-4 w-4 rounded accent-orange-500"
+                            className="h-3.5 w-3.5 rounded accent-orange-600"
                         />
                     </label>
                 </div>
 
-                {/* METRIC SELECTOR — every metric is wrapped in a tooltip
-                    explaining whether it draws on real backend data or
-                    deterministic placeholders, so users never confuse the two. */}
-                <div className="flex flex-wrap gap-2 pb-2">
+                {/* Metric selector */}
+                <div className="flex flex-wrap gap-1.5 pb-1">
                     {Object.entries(METRICS_CONFIG).map(([key, config]) => {
                         const metric = key as MapMetric;
                         const source = METRICS_BACKEND_MAP[metric];
                         const isPlaceholder = source === 'static' || source === 'backend';
-                        // Both sources are currently rendered from a deterministic
-                        // hash. Once a backend endpoint exists, swap METRICS_BACKEND_MAP
-                        // entry to a different value to disable the disclaimer.
                         return (
                             <Tooltip
                                 key={key}
@@ -129,11 +125,11 @@ const MapPanel: React.FC<MapPanelProps> = ({
                                     type="button"
                                     onClick={() => onActiveMetricChange(metric)}
                                     aria-pressed={activeMetric === key}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
+                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium tracking-tight whitespace-nowrap transition active:translate-y-[1px] border
                                     ${
                                         activeMetric === key
-                                            ? 'bg-slate-800 dark:bg-orange-600 text-white border-slate-800 dark:border-orange-600 shadow-md transform scale-105'
-                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600'
+                                            ? 'bg-orange-50 text-orange-700 border-orange-200 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:text-orange-200 dark:border-orange-500/30 dark:ring-orange-500/25'
+                                            : 'bg-white dark:bg-[var(--bg-card-solid)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-200 dark:hover:border-orange-500/30 hover:text-orange-700 dark:hover:text-orange-300'
                                     }`}
                                 >
                                     {config.icon}
@@ -153,28 +149,25 @@ const MapPanel: React.FC<MapPanelProps> = ({
                     </div>
                 )}
 
-                {/* DYNAMIC LEGEND */}
-                <div className="absolute top-4 left-4 bg-white/90 dark:bg-[var(--bg-card-solid)] backdrop-blur-sm p-3 rounded-xl border border-[var(--border-subtle)] shadow-lg z-[500] min-w-[160px]">
-                    <div className="flex items-center justify-between gap-2 mb-2 border-b border-[var(--border-subtle)] pb-1">
-                        <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">
+                {/* Legend */}
+                <div className="map-overlay-card absolute top-4 left-4 p-3 rounded-xl z-[500] min-w-[170px]">
+                    <div className="flex items-center justify-between gap-2 mb-2 border-b border-[var(--border-subtle)] pb-1.5">
+                        <h4 className="text-[12px] font-medium text-[var(--text-primary)] tracking-tight">
                             {METRICS_CONFIG[activeMetric].label}
                         </h4>
-                        <Tooltip
-                            content="Le découpage par région / département est généré localement (hash déterministe) — les chiffres ne sont pas issus d'un endpoint backend pour cette métrique."
-                        >
-                            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                                <Info size={10} /> Estimé
-                            </span>
-                        </Tooltip>
+                        <DataSourceBadge
+                            variant="synthetic"
+                            title="Le découpage par région / département est généré localement (hash déterministe) — les chiffres ne sont pas issus d'un endpoint backend pour cette métrique."
+                        />
                     </div>
                     <div className="flex flex-col gap-1.5">
                         {METRICS_CONFIG[activeMetric].colors.map((color, idx) => (
                             <div key={idx} className="flex items-center gap-2">
                                 <span
-                                    className="w-4 h-4 rounded shadow-sm border border-black/5 dark:border-white/10"
+                                    className="w-3.5 h-3.5 rounded-md ring-1 ring-black/5 dark:ring-white/10"
                                     style={{ backgroundColor: color }}
-                                ></span>
-                                <span className="text-xs text-[var(--text-secondary)] font-medium">
+                                />
+                                <span className="text-[12px] text-[var(--text-secondary)] font-medium tracking-tight">
                                     {METRICS_CONFIG[activeMetric].labels[idx]}
                                 </span>
                             </div>
@@ -183,7 +176,7 @@ const MapPanel: React.FC<MapPanelProps> = ({
                 </div>
 
                 {isComparing && !selectedItem && !comparisonItem && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm font-semibold z-[50] pointer-events-none">
+                    <div className="map-overlay-card absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-[12px] font-medium tracking-tight text-[var(--text-primary)] z-[50] pointer-events-none">
                         Sélectionnez une première zone sur la carte
                     </div>
                 )}

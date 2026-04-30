@@ -248,16 +248,16 @@ export const ActivityFeed: React.FC = () => {
       <AddEventModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddEvent} />
 
       <div className="p-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
-        <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <Activity size={18} className="text-orange-600" /> Activite Recente
+        <h3 className="font-medium text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+          <Activity size={16} strokeWidth={2.2} className="text-orange-600" /> Activité récente
         </h3>
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          aria-label="Ajouter un evenement"
-          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-[var(--text-secondary)] hover:text-orange-600 transition-colors"
+          aria-label="Ajouter un événement"
+          className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-500/15 active:translate-y-[1px] transition-colors"
         >
-          <Plus size={16} />
+          <Plus size={16} strokeWidth={2.2} />
         </button>
       </div>
 
@@ -282,12 +282,17 @@ export const ActivityFeed: React.FC = () => {
             const { time, date } = formatActivityDate(act.occurredAt);
             return (
               <div key={act.id} className="flex gap-3 items-start group animate-fade-in">
-                <div className="flex flex-col items-center gap-1 min-w-[35px]">
-                  <span className="text-[10px] font-bold text-[var(--text-secondary)]">{time}</span>
-                  <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase">{date}</span>
-                  <div className="h-full w-px bg-slate-100 dark:bg-slate-700 group-last:hidden"></div>
+                <div className="flex flex-col items-center gap-1 min-w-[38px]">
+                  <span
+                    className="text-[11px] font-medium text-[var(--text-secondary)]"
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {time}
+                  </span>
+                  <span className="text-[9px] font-medium text-[var(--text-muted)] tracking-tight">{date}</span>
+                  <div className="h-full w-px bg-slate-100 dark:bg-slate-700/60 group-last:hidden"></div>
                 </div>
-                <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] p-2.5 rounded-xl shadow-sm flex-grow hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] p-2.5 rounded-xl shadow-sm flex-grow hover:border-orange-200 dark:hover:border-orange-500/30 hover:shadow-md transition">
                   <div className="flex items-center gap-2 mb-1">
                     <div
                       className={`p-1 rounded-md ${
@@ -302,7 +307,7 @@ export const ActivityFeed: React.FC = () => {
                     >
                       {getIcon(act.type)}
                     </div>
-                    <span className="text-xs font-bold text-[var(--text-primary)]">{act.text}</span>
+                    <span className="text-xs font-medium text-[var(--text-primary)] tracking-tight">{act.text}</span>
                   </div>
                   <p className="text-[10px] text-[var(--text-muted)] pl-8">Par {act.author}</p>
                 </div>

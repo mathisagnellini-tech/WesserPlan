@@ -7,6 +7,8 @@ import { Toast, DocRequiredModal, ContactEditModal, MairieDetailModal, type Toas
 import { ZoneCard } from './ZoneCard';
 import { MairieCard } from './MairieCard';
 import { mairieService } from '@/services/mairieService';
+import { mairiePageService } from '@/services/mairiePageService';
+import type { MairieTeamLeaderDto } from '@/types/plan';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -44,6 +46,10 @@ const tempCommentId = () => {
 export default function MairieTab() {
     const [zones, setZones] = useState<Zone[]>([]);
     const [mairies, setMairies] = useState<Mairie[]>([]);
+    // Team leaders directory from the Mairie page bundle. Used to attach
+    // a leader display name to each zone (read by ZoneCard via mairieService
+    // today; the bundle gives us the canonical list once the backend lands).
+    const [, setTeamLeaders] = useState<MairieTeamLeaderDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
     const [totalCount, setTotalCount] = useState(0);
@@ -68,7 +74,10 @@ export default function MairieTab() {
 
         const loadData = async () => {
             try {
-                const [dbZones, result] = await Promise.all([
+                // Bundle endpoint failure must not block the Supabase-backed
+                // editorial data — `Promise.allSettled` keeps the page usable
+                // when the operational backend is down.
+                const [dbZones, result, leadersBundle] = await Promise.all([
                     mairieService.getZones(),
                     mairieService.getMairies({
                         org: selectedOrgFilter,
@@ -76,11 +85,16 @@ export default function MairieTab() {
                         pageSize: PAGE_SIZE,
                         search: searchQuery || undefined,
                     }),
+                    mairiePageService.getMairieData().catch((err) => {
+                        reporter.warn('Mairie page bundle failed', err, { source: 'MairieTab' });
+                        return null;
+                    }),
                 ]);
                 if (ctrl.signal.aborted) return;
                 setMairies(result.data);
                 setTotalCount(result.total);
                 setZones(dbZones);
+                setTeamLeaders(leadersBundle?.teamLeaders ?? []);
             } catch (err) {
                 if (ctrl.signal.aborted) return;
                 reporter.error('Mairie load failed', err, { source: 'MairieTab' });
@@ -379,80 +393,26 @@ export default function MairieTab() {
         }
     };
 
-    const handleExtendMairie = (mairieId: number) => {
-        setMairies((prevMairies) => {
-            const sourceMairie = prevMairies.find((m) => m.id === mairieId);
-            if (!sourceMairie) return prevMairies;
-            let serieId = sourceMairie.serieId;
-            let updatedMairies = [...prevMairies];
-            if (!serieId) {
-                serieId = `serie-${Date.now()}`;
-                updatedMairies = updatedMairies.map((m) => (m.id === mairieId ? { ...m, serieId } : m));
-            }
-            const seriesMairies = updatedMairies.filter((m) => m.serieId === serieId);
-            const sortedSeries = seriesMairies.sort((a, b) => a.semaineDemandee.localeCompare(b.semaineDemandee));
-            const lastMairie = sortedSeries[sortedSeries.length - 1];
-            const parsed = parseWeekString(lastMairie.semaineDemandee);
-            const nextWeek = parsed
-                ? getCalculatedWeekString(parsed.week, 1, parsed.year)
-                : getCalculatedWeekString(currentWeek, 1, currentYear);
-            const newMairie: Mairie = {
-                ...sourceMairie,
-                id: Date.now(),
-                serieId,
-                semaineDemandee: nextWeek,
-                etapeProgression: 0,
-                statutGeneral: 'À traiter',
-                commentaires: [],
-                dateDemande: new Date(new Date(lastMairie.dateDemande).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            };
-            return [...updatedMairies, newMairie];
-        });
-        showToast('Mission prolongée d\'une semaine — bientôt persistée', 'info');
+    const handleExtendMairie = async (mairieId: number) => {
+        try {
+            await mairieService.extendMairie(mairieId);
+            // Force a refetch so the updated `deployment_week` (and any
+            // derived series view) is reflected from the canonical source.
+            setReloadTrigger((t) => t + 1);
+            showToast("Mission prolongée d'une semaine", 'success');
+        } catch (err) {
+            revertOnFailure('prolongation de la mission')(err);
+        }
     };
 
-    const handleSetMairieDuration = (mairieId: number, targetDuration: number) => {
-        setMairies((prevMairies) => {
-            const sourceMairie = prevMairies.find((m) => m.id === mairieId);
-            if (!sourceMairie) return prevMairies;
-            let serieId = sourceMairie.serieId;
-            let updatedMairies = [...prevMairies];
-            if (!serieId) {
-                serieId = `serie-${Date.now()}`;
-                updatedMairies = updatedMairies.map((m) => (m.id === mairieId ? { ...m, serieId } : m));
-            }
-            const seriesMairies = updatedMairies.filter((m) => m.serieId === serieId).sort((a, b) => a.semaineDemandee.localeCompare(b.semaineDemandee));
-            const currentCount = seriesMairies.length;
-            if (targetDuration > currentCount) {
-                const needed = targetDuration - currentCount;
-                let lastMairie = seriesMairies[seriesMairies.length - 1];
-                for (let i = 0; i < needed; i++) {
-                    const parsed = parseWeekString(lastMairie.semaineDemandee);
-                    const nextWeek = parsed
-                        ? getCalculatedWeekString(parsed.week, 1, parsed.year)
-                        : getCalculatedWeekString(currentWeek, 1, currentYear);
-                    const newMairie: Mairie = {
-                        ...lastMairie,
-                        id: Date.now() + i,
-                        serieId,
-                        semaineDemandee: nextWeek,
-                        etapeProgression: 0,
-                        statutGeneral: 'À traiter',
-                        commentaires: [],
-                        dateDemande: new Date(new Date(lastMairie.dateDemande).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    };
-                    updatedMairies.push(newMairie);
-                    lastMairie = newMairie;
-                }
-                showToast(`Durée ajustée à ${targetDuration} semaines — bientôt persistée`, 'info');
-            } else if (targetDuration < currentCount) {
-                const toRemoveCount = currentCount - targetDuration;
-                const idsToRemove = seriesMairies.slice(-toRemoveCount).map((m) => m.id);
-                updatedMairies = updatedMairies.filter((m) => !idsToRemove.includes(m.id));
-                showToast(`Durée ajustée à ${targetDuration} semaines — bientôt persistée`, 'info');
-            }
-            return updatedMairies;
-        });
+    const handleSetMairieDuration = async (mairieId: number, targetDuration: number) => {
+        try {
+            await mairieService.setMairieDuration(mairieId, targetDuration);
+            setReloadTrigger((t) => t + 1);
+            showToast(`Durée ajustée à ${targetDuration} semaines`, 'success');
+        } catch (err) {
+            revertOnFailure('ajustement de la durée')(err);
+        }
     };
 
     const yearWeeks = weeksInIsoYear(currentYear);
@@ -482,7 +442,7 @@ export default function MairieTab() {
     }
 
     return (
-        <section className="animate-fade-in h-full flex flex-col relative">
+        <section className="app-surface animate-fade-in h-full flex flex-col relative">
             {toastMessage && (
                 <Toast
                     message={toastMessage.message}
@@ -534,50 +494,84 @@ export default function MairieTab() {
                 confirmLabel="Supprimer"
             />
 
-            <header className="mb-4 md:mb-8 flex flex-col gap-4 md:gap-6 flex-shrink-0">
+            <header className="mb-5 md:mb-7 flex flex-col gap-4 md:gap-5 flex-shrink-0">
                 <div className="flex flex-col md:flex-row justify-between md:items-end mt-2 gap-4">
                     <div>
-                        <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Relations Mairie</h2>
-                        <div className="flex items-center gap-3 mt-1 md:mt-2">
-                            <p className="text-sm md:text-xl text-[var(--text-secondary)] font-medium">Suivi des prises de contact et organisation des tournées.</p>
-                            <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
-                                <Database size={10} /> {totalCount.toLocaleString()} mairies
+                        <h2 className="display text-[var(--text-primary)] text-[34px] md:text-[40px] leading-none tracking-tight">
+                            Relations mairie
+                        </h2>
+                        <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                            <p className="text-[13px] text-[var(--text-secondary)] tracking-tight">
+                                Suivi des prises de contact et organisation des tournées.
+                            </p>
+                            <span className="num inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-500/25 tracking-tight">
+                                <Database size={11} strokeWidth={2.4} /> {totalCount.toLocaleString('fr-FR')} mairies
                             </span>
                         </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 md:gap-3 items-center">
-                        <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1 flex items-center shadow-sm mr-4">
-                            <button type="button" onClick={() => setViewMode('list')} aria-pressed={viewMode === 'list'} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Liste">
-                                <ListIcon size={20} />
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <div className="seg">
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('list')}
+                                data-active={viewMode === 'list'}
+                                aria-label="Vue liste"
+                                title="Vue liste"
+                            >
+                                <ListIcon size={14} strokeWidth={2.2} />
                             </button>
-                            <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1"></div>
-                            <button type="button" onClick={() => setViewMode('grid')} aria-pressed={viewMode === 'grid'} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'text-[var(--text-muted)] hover:text-slate-600'}`} title="Vue Grille">
-                                <LayoutGrid size={20} />
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('grid')}
+                                data-active={viewMode === 'grid'}
+                                aria-label="Vue grille"
+                                title="Vue grille"
+                            >
+                                <LayoutGrid size={14} strokeWidth={2.2} />
                             </button>
                         </div>
-                        <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1.5 flex items-center gap-2 shadow-sm mr-2">
-                            <button type="button" onClick={prevWeek} aria-label="Semaine précédente" className="flex items-center gap-2 text-sm font-bold text-orange-600 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 px-4 py-2 rounded-lg transition-colors">
-                                <ChevronLeft size={16} /> Semaine {currentWeek > 1 ? currentWeek - 1 : yearWeeks}
+                        <div className="flex items-center bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl p-1 shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)]">
+                            <button
+                                type="button"
+                                onClick={prevWeek}
+                                aria-label="Semaine précédente"
+                                className="num flex items-center gap-1 text-[12px] font-medium text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 px-2.5 py-1.5 rounded-md tracking-tight transition active:translate-y-[1px]"
+                            >
+                                <ChevronLeft size={14} strokeWidth={2.2} /> S{currentWeek > 1 ? currentWeek - 1 : yearWeeks}
                             </button>
-                            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                            <select aria-label="Semaine" value={currentWeek} onChange={(e) => setCurrentWeek(Number(e.target.value))} className="bg-transparent text-[var(--text-primary)] font-bold text-lg py-1.5 px-3 rounded-lg focus:outline-none cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700">
+                            <select
+                                aria-label="Semaine"
+                                value={currentWeek}
+                                onChange={(e) => setCurrentWeek(Number(e.target.value))}
+                                className="num bg-transparent text-[var(--text-primary)] font-medium text-[14px] py-1 px-2 rounded-md focus:outline-none cursor-pointer tracking-tight hover:bg-slate-50 dark:hover:bg-slate-700"
+                            >
                                 {weeks.map((w) => (<option key={w} value={w}>Semaine {w}</option>))}
                             </select>
-                            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                            <button type="button" onClick={nextWeek} aria-label="Semaine suivante" className="flex items-center gap-2 text-sm font-bold text-orange-600 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 px-4 py-2 rounded-lg transition-colors">
-                                Semaine {currentWeek < yearWeeks ? currentWeek + 1 : 1} <ChevronRight size={16} />
+                            <button
+                                type="button"
+                                onClick={nextWeek}
+                                aria-label="Semaine suivante"
+                                className="num flex items-center gap-1 text-[12px] font-medium text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 px-2.5 py-1.5 rounded-md tracking-tight transition active:translate-y-[1px]"
+                            >
+                                S{currentWeek < yearWeeks ? currentWeek + 1 : 1} <ChevronRight size={14} strokeWidth={2.2} />
                             </button>
                         </div>
-                        <button type="button" onClick={handleAddZone} className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white font-bold text-lg rounded-xl hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200">
-                            <Plus size={24} /> Créer une Zone
+                        <button type="button" onClick={handleAddZone} className="btn-primary !px-3.5 !py-2.5">
+                            <Plus size={15} strokeWidth={2.4} /> Créer une zone
                         </button>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex gap-1 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-[var(--border-subtle)] w-fit" role="radiogroup" aria-label="Filtre par organisation">
-                        <button type="button" role="radio" aria-checked={selectedOrgFilter === 'all'} onClick={() => handleOrgFilterChange('all')} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedOrgFilter === 'all' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 shadow-md' : 'text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}>
-                            TOUTES
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="seg" role="radiogroup" aria-label="Filtre par organisation">
+                        <button
+                            type="button"
+                            role="radio"
+                            aria-checked={selectedOrgFilter === 'all'}
+                            onClick={() => handleOrgFilterChange('all')}
+                            data-active={selectedOrgFilter === 'all'}
+                        >
+                            Toutes
                         </button>
                         {ORG_LIST.map((org) => {
                             const conf = ORGS_CONFIG[org];
@@ -591,9 +585,9 @@ export default function MairieTab() {
                                     key={org}
                                     onClick={() => handleOrgFilterChange(org)}
                                     title={info.name}
-                                    className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all uppercase flex items-center gap-2 ${isActive ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 shadow-md' : `text-[var(--text-secondary)] hover:bg-white dark:hover:bg-slate-700`}`}
+                                    data-active={isActive}
                                 >
-                                    <img src={info.logo} alt="" aria-hidden="true" className="h-4 w-auto rounded-sm bg-white p-px" />
+                                    <img src={info.logo} alt="" aria-hidden="true" className="h-3.5 w-auto rounded-sm bg-white p-px" />
                                     <span>{conf.label}</span>
                                 </button>
                             );
@@ -603,11 +597,11 @@ export default function MairieTab() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => handleSearch(e.target.value)}
-                        placeholder="Rechercher une commune..."
+                        placeholder="Rechercher une commune…"
                         aria-label="Rechercher une commune"
-                        className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card-solid)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] w-64 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                        className="field-input !w-64"
                     />
-                    <span className="text-sm text-[var(--text-muted)] font-medium">{totalCount.toLocaleString()} résultats</span>
+                    <span className="num eyebrow leading-none">{totalCount.toLocaleString('fr-FR')} résultats</span>
                 </div>
             </header>
 
@@ -648,9 +642,10 @@ export default function MairieTab() {
             )}
 
             {unassignedMairies.length > 0 && (
-                <div className="mt-auto bg-slate-100 dark:bg-slate-800 rounded-3xl p-8 border-t border-[var(--border-subtle)]">
-                    <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-3">
-                        <ListIcon size={28} /> Communes Non Assignées ({unassignedMairies.length})
+                <div className="mt-auto bg-slate-100/60 dark:bg-slate-800/40 rounded-3xl p-7 border border-[var(--border-subtle)]">
+                    <h3 className="display text-[var(--text-primary)] text-xl tracking-tight leading-tight mb-5 flex items-center gap-2">
+                        <ListIcon size={18} strokeWidth={2.2} className="text-orange-500" />
+                        Communes non assignées <span className="num text-[var(--text-muted)] font-medium">({unassignedMairies.length})</span>
                     </h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         {unassignedMairies.map((m) => {
@@ -692,25 +687,25 @@ export default function MairieTab() {
             )}
 
             {totalPages > 1 && (
-                <nav aria-label="Pagination" className="flex items-center justify-center gap-3 mt-8 mb-4">
+                <nav aria-label="Pagination" className="flex items-center justify-center gap-3 mt-7 mb-4">
                     <button
                         type="button"
                         onClick={() => setPage((p) => Math.max(0, p - 1))}
                         disabled={page === 0}
-                        className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="btn-secondary !px-3 !py-2 !text-[12px]"
                     >
-                        <ChevronLeft size={16} /> Précédent
+                        <ChevronLeft size={14} strokeWidth={2.2} /> Précédent
                     </button>
-                    <span aria-current="page" className="text-sm font-bold text-[var(--text-primary)]">
+                    <span aria-current="page" className="num text-[12px] font-medium text-[var(--text-primary)] tracking-tight">
                         Page {page + 1} / {totalPages}
                     </span>
                     <button
                         type="button"
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page >= totalPages - 1}
-                        className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="btn-secondary !px-3 !py-2 !text-[12px]"
                     >
-                        Suivant <ChevronRight size={16} />
+                        Suivant <ChevronRight size={14} strokeWidth={2.2} />
                     </button>
                 </nav>
             )}

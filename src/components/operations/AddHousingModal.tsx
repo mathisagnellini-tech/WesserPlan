@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, MapPin, Upload, Loader2, CheckCircle2, Save, AlertCircle } from 'lucide-react';
+import { X, MapPin, Upload, Loader2, CheckCircle2, Save, AlertCircle, ScanLine } from 'lucide-react';
 import type { Housing } from './types';
 import { getWeekNumberLabel } from './helpers';
 import { housingsService } from '@/services/housingsService';
@@ -203,10 +203,12 @@ export const AddHousingModal: React.FC<{
         scanTimersRef.current.push(t1);
     };
 
+    const fieldClass = (hasError?: string) => `field-input ${hasError ? 'is-error' : ''}`;
+
     return createPortal(
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in">
+        <div className="app-surface fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in">
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
                 aria-hidden="true"
             />
@@ -216,167 +218,211 @@ export const AddHousingModal: React.FC<{
                 aria-modal="true"
                 aria-labelledby={titleId}
                 tabIndex={-1}
-                className="relative bg-white dark:bg-[var(--bg-card-solid)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] outline-none"
+                className="modal-shell relative w-full max-w-lg flex flex-col max-h-[90vh] outline-none"
             >
-                <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
-                    <h3 id={titleId} className="font-bold text-lg text-[var(--text-primary)]">
-                        {mode === 'manual' ? 'Saisie Manuelle' : 'Scanner un document'}
-                    </h3>
+                {/* Header with subtle accent strip */}
+                <div className="modal-accent-strip px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25 shrink-0">
+                            {mode === 'manual' ? <Save size={16} strokeWidth={2.2} /> : <ScanLine size={16} strokeWidth={2.2} />}
+                        </div>
+                        <div className="min-w-0">
+                            <h3 id={titleId} className="display text-[var(--text-primary)] text-lg leading-none">
+                                {mode === 'manual' ? 'Nouveau logement' : 'Scanner un reçu'}
+                            </h3>
+                            <p className="eyebrow mt-1 leading-none">
+                                {mode === 'manual' ? 'saisie manuelle' : 'extraction automatique'}
+                            </p>
+                        </div>
+                    </div>
                     <button
                         ref={closeRef}
                         type="button"
                         onClick={onClose}
                         aria-label="Fermer"
+                        className="btn-ghost !p-2"
                     >
-                        <X className="text-[var(--text-muted)] hover:text-slate-600 dark:hover:text-slate-300" />
+                        <X size={16} strokeWidth={2.2} />
                     </button>
                 </div>
+
                 <div className="p-6 overflow-y-auto">
                     {mode === 'scan' && (
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <div className="flex flex-col items-center justify-center py-4 text-center">
                             {scanStatus === 'idle' && (
                                 <Tooltip comingSoon content="Le scan de reçu par IA est en cours d'intégration. Saisissez les informations manuellement pour le moment.">
                                     <button
                                         type="button"
                                         onClick={handleScanFile}
-                                        className="w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                                        className="w-full h-44 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition border border-dashed border-[var(--border-subtle)] bg-slate-50/60 dark:bg-slate-800/40 hover:border-orange-300 hover:bg-orange-50/60 dark:hover:bg-orange-500/10 active:translate-y-[1px]"
                                     >
-                                        <Upload size={48} className="text-[var(--text-muted)] mb-4" />
-                                        <p className="font-medium text-[var(--text-secondary)]">Cliquez pour uploader le reçu</p>
-                                        <p className="text-xs text-[var(--text-muted)] mt-1">PDF, JPG, PNG acceptés</p>
+                                        <div className="h-12 w-12 rounded-2xl bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] flex items-center justify-center mb-3 shadow-sm">
+                                            <Upload size={18} strokeWidth={2.2} className="text-orange-600" />
+                                        </div>
+                                        <p className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight">
+                                            Cliquez pour téléverser un reçu
+                                        </p>
+                                        <p className="eyebrow mt-1">PDF, JPG, PNG</p>
                                     </button>
                                 </Tooltip>
                             )}
                             {scanStatus === 'scanning' && (
                                 <div className="py-12">
-                                    <Loader2 size={48} className="text-purple-600 animate-spin mb-4 mx-auto" />
-                                    <p className="font-bold text-[var(--text-primary)]">Analyse du document...</p>
-                                    <p className="text-sm text-[var(--text-secondary)]">Extraction des données via IA</p>
+                                    <Loader2 size={36} className="text-orange-600 animate-spin mb-4 mx-auto" strokeWidth={2.2} />
+                                    <p className="text-[15px] font-medium text-[var(--text-primary)] tracking-tight">Analyse du document…</p>
+                                    <p className="text-xs text-[var(--text-muted)] mt-1">extraction des données</p>
                                 </div>
                             )}
                             {scanStatus === 'done' && (
-                                <div className="py-12 text-green-600">
-                                    <CheckCircle2 size={48} className="mx-auto mb-4" />
-                                    <p className="font-bold">Analyse terminée !</p>
+                                <div className="py-12">
+                                    <CheckCircle2 size={36} className="mx-auto mb-4 text-emerald-600" strokeWidth={2.2} />
+                                    <p className="text-[15px] font-medium text-[var(--text-primary)] tracking-tight">Analyse terminée</p>
                                 </div>
                             )}
-                            <button type="button" onClick={() => setMode('manual')} className="mt-6 text-orange-600 text-sm hover:underline font-medium">Passer à la saisie manuelle</button>
+                            <button
+                                type="button"
+                                onClick={() => setMode('manual')}
+                                className="mt-6 text-[13px] text-orange-600 dark:text-orange-300 hover:underline tracking-tight"
+                            >
+                                Passer à la saisie manuelle
+                            </button>
                         </div>
                     )}
+
                     {mode === 'manual' && (
                         <form onSubmit={handleManualSubmit} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Nom du Logement</label>
-                                    <input
-                                        type="text"
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.name ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
-                                        placeholder="Ex: Gîte des Lilas"
-                                        value={formData.name || ''}
-                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                        autoFocus
-                                    />
-                                    {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
-                                </div>
+                            <div>
+                                <label className="field-label">Nom du logement</label>
+                                <input
+                                    type="text"
+                                    className={fieldClass(errors.name)}
+                                    placeholder="Ex : Gîte des Lilas"
+                                    value={formData.name || ''}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    autoFocus
+                                />
+                                {errors.name && <p className="field-error">{errors.name}</p>}
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Adresse complète</label>
+                                <label className="field-label">Adresse complète</label>
                                 <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
+                                    <MapPin
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                                        size={14}
+                                        strokeWidth={2.2}
+                                    />
                                     <input
                                         type="text"
-                                        className={`w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.address ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
-                                        placeholder="Ex: 12 Rue de la Paix, 75000 Paris"
+                                        className={`${fieldClass(errors.address)} pl-9`}
+                                        placeholder="12 Rue de la Paix, 75000 Paris"
                                         value={formData.address || ''}
                                         onChange={e => setFormData({ ...formData, address: e.target.value })}
                                     />
                                 </div>
-                                {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+                                {errors.address && <p className="field-error">{errors.address}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Région</label>
+                                    <label className="field-label">Région</label>
                                     <input
                                         type="text"
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.region ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                        className={fieldClass(errors.region)}
                                         placeholder="Nouvelle-Aquitaine"
                                         value={formData.region || ''}
                                         onChange={e => setFormData({ ...formData, region: e.target.value })}
                                     />
-                                    {errors.region && <p className="text-xs text-red-500 mt-1">{errors.region}</p>}
+                                    {errors.region && <p className="field-error">{errors.region}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Département</label>
+                                    <label className="field-label">Département</label>
                                     <input
                                         type="text"
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.dept ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                        className={fieldClass(errors.dept)}
                                         placeholder="33"
                                         value={formData.dept || ''}
                                         onChange={e => setFormData({ ...formData, dept: e.target.value })}
                                     />
-                                    {errors.dept && <p className="text-xs text-red-500 mt-1">{errors.dept}</p>}
+                                    {errors.dept && <p className="field-error">{errors.dept}</p>}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Date début location</label>
+                                    <label className="field-label">Date de début</label>
                                     <input
                                         type="date"
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.date ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                        className={fieldClass(errors.date)}
                                         value={formData.date || ''}
                                         onChange={e => setFormData({ ...formData, date: e.target.value })}
                                     />
-                                    {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
+                                    {errors.date && <p className="field-error">{errors.date}</p>}
                                     {formData.date && !errors.date && (
-                                        <p className="text-xs text-orange-600 font-bold mt-1 text-right">{getWeekNumberLabel(formData.date)}</p>
+                                        <p className="num text-[11px] font-medium text-orange-600 dark:text-orange-300 mt-1.5 text-right tracking-tight">
+                                            {getWeekNumberLabel(formData.date)}
+                                        </p>
                                     )}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Capacité (Pers.)</label>
+                                    <label className="field-label">Capacité</label>
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="number"
-                                            className={`w-16 px-2 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium text-center dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.people ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                            className={`${fieldClass(errors.people)} w-20 text-center`}
                                             value={formData.people || ''}
                                             onChange={e => setFormData({ ...formData, people: +e.target.value })}
                                         />
-                                        <button type="button" onClick={() => setFormData({ ...formData, people: 5 })} className={`px-3 py-2 rounded-lg text-xs font-bold border ${formData.people === 5 ? 'bg-orange-100 dark:bg-orange-500/20 border-orange-200 dark:border-orange-500/20 text-orange-700 dark:text-orange-400' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}>5</button>
-                                        <button type="button" onClick={() => setFormData({ ...formData, people: 10 })} className={`px-3 py-2 rounded-lg text-xs font-bold border ${formData.people === 10 ? 'bg-orange-100 dark:bg-orange-500/20 border-orange-200 dark:border-orange-500/20 text-orange-700 dark:text-orange-400' : 'bg-white dark:bg-[var(--bg-card-solid)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}>10</button>
+                                        <div className="seg flex-shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, people: 5 })}
+                                                data-active={formData.people === 5}
+                                                className="!px-2.5 !py-1.5 num"
+                                            >
+                                                5
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, people: 10 })}
+                                                data-active={formData.people === 10}
+                                                className="!px-2.5 !py-1.5 num"
+                                            >
+                                                10
+                                            </button>
+                                        </div>
                                     </div>
-                                    {errors.people && <p className="text-xs text-red-500 mt-1">{errors.people}</p>}
+                                    {errors.people && <p className="field-error">{errors.people}</p>}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Nuits</label>
+                                    <label className="field-label">Nuits</label>
                                     <input
                                         type="number"
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.nights ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                        className={fieldClass(errors.nights)}
                                         placeholder="5"
                                         value={formData.nights || ''}
                                         onChange={e => setFormData({ ...formData, nights: +e.target.value })}
                                     />
-                                    {errors.nights && <p className="text-xs text-red-500 mt-1">{errors.nights}</p>}
+                                    {errors.nights && <p className="field-error">{errors.nights}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Coût Total (€)</label>
+                                    <label className="field-label">Coût total (€)</label>
                                     <input
                                         type="number"
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)] ${errors.cost ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                        className={fieldClass(errors.cost)}
                                         placeholder="0"
                                         value={formData.cost ?? ''}
                                         onChange={e => setFormData({ ...formData, cost: +e.target.value })}
                                     />
-                                    {errors.cost && <p className="text-xs text-red-500 mt-1">{errors.cost}</p>}
+                                    {errors.cost && <p className="field-error">{errors.cost}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Source</label>
+                                    <label className="field-label">Source</label>
                                     <select
-                                        className="w-full px-3 py-2 border border-[var(--border-subtle)] rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium bg-white dark:bg-[var(--bg-card-solid)]"
+                                        className="field-input"
                                         value={formData.channel || 'Direct'}
                                         onChange={e => setFormData({ ...formData, channel: e.target.value })}
                                     >
@@ -389,9 +435,9 @@ export const AddHousingModal: React.FC<{
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Organisation</label>
+                                <label className="field-label">Organisation</label>
                                 <select
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium bg-white dark:bg-[var(--bg-card-solid)] ${errors.org ? 'border-red-500' : 'border-[var(--border-subtle)]'}`}
+                                    className={fieldClass(errors.org)}
                                     value={formData.org || 'MSF'}
                                     onChange={e => setFormData({ ...formData, org: e.target.value })}
                                 >
@@ -399,26 +445,26 @@ export const AddHousingModal: React.FC<{
                                     <option value="UNICEF">UNICEF</option>
                                     <option value="WWF">WWF</option>
                                 </select>
-                                {errors.org && <p className="text-xs text-red-500 mt-1">{errors.org}</p>}
+                                {errors.org && <p className="field-error">{errors.org}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Nom Contact</label>
+                                    <label className="field-label">Nom du contact</label>
                                     <input
                                         type="text"
-                                        className="w-full px-3 py-2 border border-[var(--border-subtle)] rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)]"
+                                        className="field-input"
                                         placeholder="M. Martin"
                                         value={formData.ownerName || ''}
                                         onChange={e => setFormData({ ...formData, ownerName: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Téléphone</label>
+                                    <label className="field-label">Téléphone</label>
                                     <input
                                         type="tel"
-                                        className="w-full px-3 py-2 border border-[var(--border-subtle)] rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium dark:bg-[var(--bg-card-solid)] dark:text-[var(--text-primary)]"
-                                        placeholder="06..."
+                                        className="field-input"
+                                        placeholder="06 12 34 56 78"
                                         value={formData.owner || ''}
                                         onChange={e => setFormData({ ...formData, owner: e.target.value })}
                                     />
@@ -426,9 +472,12 @@ export const AddHousingModal: React.FC<{
                             </div>
 
                             {submitError && (
-                                <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 text-red-700 dark:text-red-400">
-                                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
-                                    <p className="text-xs font-medium">{submitError}</p>
+                                <div
+                                    role="alert"
+                                    className="flex items-start gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/25 text-red-700 dark:text-red-300"
+                                >
+                                    <AlertCircle size={14} strokeWidth={2.2} className="mt-0.5 flex-shrink-0" />
+                                    <p className="text-xs font-medium tracking-tight">{submitError}</p>
                                 </div>
                             )}
 
@@ -437,19 +486,19 @@ export const AddHousingModal: React.FC<{
                                     type="button"
                                     onClick={onClose}
                                     disabled={isSubmitting}
-                                    className="flex-1 py-3 text-[var(--text-secondary)] font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
+                                    className="btn-secondary flex-1"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="flex-1 py-3 bg-orange-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="btn-primary flex-1"
                                 >
                                     {isSubmitting ? (
-                                        <><Loader2 size={16} className="animate-spin" /> Enregistrement…</>
+                                        <><Loader2 size={14} className="animate-spin" strokeWidth={2.2} /> Enregistrement…</>
                                     ) : (
-                                        <><Save size={16} /> Enregistrer</>
+                                        <><Save size={14} strokeWidth={2.2} /> Enregistrer</>
                                     )}
                                 </button>
                             </div>

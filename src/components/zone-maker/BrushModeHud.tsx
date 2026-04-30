@@ -16,25 +16,38 @@ interface BrushModeHudProps {
 
 const BrushModeHud: React.FC<BrushModeHudProps> = ({ brushStats, onClear, onValidate }) => {
   return (
-    <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[500] w-full max-w-2xl px-8 pointer-events-none">
-      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] border border-white/50 dark:border-slate-700/50 rounded-[2.5rem] p-8 pointer-events-auto ring-1 ring-black/5 flex items-center justify-between animate-in slide-in-from-top-6 duration-600">
-        <div className="flex items-center gap-8">
-          <div className="w-20 h-20 bg-orange-600 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shadow-orange-200 dark:shadow-orange-900/30">
-            <Sparkles size={32} strokeWidth={2.5} />
+    <div className="app-surface absolute top-8 left-1/2 -translate-x-1/2 z-[500] w-full max-w-2xl px-6 pointer-events-none">
+      <div className="modal-shell pointer-events-auto flex items-center justify-between gap-5 p-5 animate-in slide-in-from-top-6 duration-500">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-[0_8px_20px_-10px_rgba(255,91,43,0.7)]">
+            <Sparkles size={20} strokeWidth={2.2} />
           </div>
-          <div className="space-y-1.5">
-            <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
-              {brushStats.pop.toLocaleString()} hab.
+          <div className="leading-tight">
+            <div className="num display text-slate-900 dark:text-white text-[28px] tracking-tight leading-none">
+              {brushStats.pop.toLocaleString('fr-FR')} <span className="text-[18px] font-medium text-slate-400">hab.</span>
             </div>
-            <div className={`text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl inline-block ${brushStats.status.color} bg-slate-50 dark:bg-slate-800 border border-slate-100/50 dark:border-slate-700/50 shadow-sm`}>
-              {brushStats.status.label} &bull; {brushStats.count} communes
+            <div
+              className={`text-[11px] font-medium tracking-tight px-2 py-0.5 rounded-md inline-flex mt-1.5 ${brushStats.status.color} bg-slate-50 dark:bg-slate-800 border border-[var(--border-subtle)]`}
+            >
+              {brushStats.status.label} <span className="opacity-70 mx-1">·</span> <span className="num">{brushStats.count}</span> communes
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-5">
-          <button onClick={onClear} className="p-5 text-slate-300 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-[1.5rem] transition-all" title="Effacer tout"><Eraser size={26} strokeWidth={2.2} /></button>
-          <button onClick={onValidate} disabled={!brushStats.status.valid} className="flex items-center gap-4 px-10 py-6 bg-orange-600 text-white rounded-[1.5rem] text-[14px] font-black uppercase tracking-wider hover:bg-orange-700 disabled:opacity-30 disabled:grayscale transition-all shadow-xl shadow-orange-200 dark:shadow-orange-900/30 active:scale-95">
-            <CheckCircle2 size={20} strokeWidth={2.5} /> Créer Zone
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onClear}
+            aria-label="Effacer la sélection"
+            title="Effacer tout"
+            className="btn-ghost !p-3 hover:!text-red-500 hover:!bg-red-50 dark:hover:!bg-red-500/15"
+          >
+            <Eraser size={18} strokeWidth={2.2} />
+          </button>
+          <button
+            onClick={onValidate}
+            disabled={!brushStats.status.valid}
+            className="btn-primary !px-5 !py-3"
+          >
+            <CheckCircle2 size={15} strokeWidth={2.4} /> Créer la zone
           </button>
         </div>
       </div>

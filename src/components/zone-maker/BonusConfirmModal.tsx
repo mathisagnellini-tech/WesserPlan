@@ -21,55 +21,92 @@ const BonusConfirmModal: React.FC<BonusConfirmModalProps> = ({ selectedCluster, 
   const titleId = useId();
   const confirmRef = useRef<HTMLButtonElement>(null);
   const { dialogRef } = useDialogA11y({ isOpen: true, onClose: onCancel, initialFocusRef: confirmRef });
+
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div ref={dialogRef} className="bg-white dark:bg-[var(--bg-card-solid)] rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in duration-300">
-        <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-orange-600 text-white rounded-2xl shadow-lg shadow-orange-100 dark:shadow-orange-900/30"><Zap size={24} /></div>
-            <h3 id={titleId} className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Confirmation Zone Bonus</h3>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="app-surface fixed inset-0 bg-slate-950/55 backdrop-blur-sm z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300"
+    >
+      <div ref={dialogRef} className="modal-shell w-full max-w-lg flex flex-col animate-in zoom-in duration-300">
+        <div className="modal-accent-strip p-6 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-orange-50 text-orange-600 ring-1 ring-orange-100 dark:bg-orange-500/15 dark:ring-orange-500/25">
+              <Zap size={18} strokeWidth={2.2} />
+            </div>
+            <h3 id={titleId} className="display text-slate-900 dark:text-white text-2xl tracking-tight leading-tight">
+              Confirmer la zone bonus
+            </h3>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest text-center">Les communes ajoutées n'augmenteront pas la durée de la zone cible.</p>
+          <p className="eyebrow leading-none mt-3">Les communes ajoutées n’augmenteront pas la durée de la zone cible.</p>
         </div>
 
-        <div className="p-10 space-y-8 overflow-y-auto max-h-[60vh]">
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 rounded-[2rem] p-8 flex items-center gap-6">
-            <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg">{selectedCluster.code}</div>
-            <div className="space-y-1">
-              <div className="text-emerald-900 dark:text-emerald-200 font-black text-xl leading-none">+{bonusImpacts.addedPop.toLocaleString()} hab.</div>
-              <div className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Travail additionnel absorbé (Total : {selectedCluster.durationWeeks} sem.)</div>
+        <div className="p-7 space-y-6 overflow-y-auto max-h-[60vh]">
+          <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/25 rounded-2xl p-5 flex items-center gap-4">
+            <div className="num w-12 h-12 bg-emerald-600 text-white rounded-xl flex items-center justify-center display text-[18px] tracking-tight">
+              {selectedCluster.code}
+            </div>
+            <div className="leading-tight">
+              <div className="num display text-emerald-900 dark:text-emerald-200 text-[22px] tracking-tight leading-none">
+                +{bonusImpacts.addedPop.toLocaleString('fr-FR')} hab.
+              </div>
+              <div className="num text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5 tracking-tight">
+                Travail additionnel absorbé · total {selectedCluster.durationWeeks} sem.
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-center -my-4 relative z-10">
-            <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 rounded-full p-3 shadow-md"><ArrowRight className="text-slate-400 dark:text-slate-500" size={20} /></div>
+          <div className="flex justify-center -my-3 relative z-10">
+            <div className="bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-full p-2 shadow-md">
+              <ArrowRight className="text-slate-400 dark:text-slate-500" size={15} strokeWidth={2.2} />
+            </div>
           </div>
 
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-2">Détails des transferts</h4>
+          <div className="space-y-3">
+            <h4 className="eyebrow leading-none px-1">Détails des transferts</h4>
             {bonusImpacts.sources.length > 0 ? bonusImpacts.sources.map((src, i) => (
-              <div key={i} className={`border rounded-[2rem] p-8 flex items-center justify-between transition-all ${src.isLow ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 ring-2 ring-red-100 dark:ring-red-900/50 shadow-sm' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'}`}>
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg ${src.isLow ? 'bg-red-600 text-white' : 'bg-slate-700 dark:bg-slate-200 text-white dark:text-slate-900'}`}>{src.code}</div>
-                  <div className="space-y-0.5">
-                    <div className={`font-black text-lg leading-none ${src.isLow ? 'text-red-900 dark:text-red-200' : 'text-slate-900 dark:text-white'}`}>-{src.lostPop.toLocaleString()} hab.</div>
-                    <div className={`text-[9px] font-bold uppercase tracking-wider ${src.isLow ? 'text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
-                      {src.communes.length} commune(s) transférée(s)
+              <div
+                key={i}
+                className={`border rounded-2xl p-5 flex items-center justify-between transition ${
+                  src.isLow
+                    ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/25 ring-1 ring-red-100 dark:ring-red-500/15'
+                    : 'bg-slate-50/60 dark:bg-slate-800/40 border-[var(--border-subtle)]'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`num w-11 h-11 rounded-xl flex items-center justify-center display text-[16px] tracking-tight ${
+                      src.isLow ? 'bg-red-600 text-white' : 'bg-slate-700 dark:bg-slate-200 text-white dark:text-slate-900'
+                    }`}
+                  >
+                    {src.code}
+                  </div>
+                  <div className="leading-tight">
+                    <div className={`num display text-[18px] tracking-tight leading-none ${src.isLow ? 'text-red-900 dark:text-red-200' : 'text-slate-900 dark:text-white'}`}>
+                      −{src.lostPop.toLocaleString('fr-FR')} hab.
+                    </div>
+                    <div className={`num text-[11px] font-medium mt-1.5 tracking-tight ${src.isLow ? 'text-red-600 dark:text-red-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                      {src.communes.length} commune{src.communes.length > 1 ? 's' : ''} transférée{src.communes.length > 1 ? 's' : ''}
                     </div>
                   </div>
                 </div>
               </div>
             )) : (
-              <div className="bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800 rounded-[2rem] p-8 text-center">
-                <p className="text-orange-900 dark:text-orange-200 font-black text-xs uppercase tracking-widest">Uniquement des communes non-assignées</p>
+              <div className="bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/25 rounded-2xl p-5 text-center">
+                <p className="text-[13px] text-orange-900 dark:text-orange-200 font-medium tracking-tight">
+                  Uniquement des communes non-assignées.
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex gap-4">
-          <button type="button" onClick={onCancel} className="flex-1 py-5 bg-white dark:bg-[var(--bg-card-solid)] border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Annuler</button>
-          <button ref={confirmRef} type="button" onClick={onConfirm} className="flex-[2] py-5 bg-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl shadow-orange-100 dark:shadow-orange-900/30 hover:bg-orange-700 transition-all">Confirmer Zone Bonus</button>
+        <div className="p-5 border-t border-[var(--border-subtle)] bg-slate-50/60 dark:bg-slate-800/40 flex gap-3">
+          <button type="button" onClick={onCancel} className="btn-secondary flex-1">Annuler</button>
+          <button ref={confirmRef} type="button" onClick={onConfirm} className="btn-primary flex-[2]">
+            Confirmer la zone bonus
+          </button>
         </div>
       </div>
     </div>,

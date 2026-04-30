@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet-providers';
-import type { Housing } from './types';
-import { MOCK_ZONES } from './helpers';
+import type { Housing, TargetZone } from './types';
 import { useThemeStore } from '@/stores/themeStore';
 import { escapeHtml, safeColor } from '@/lib/htmlEscape';
 import { reporter } from '@/lib/observability';
 
 interface HousingMapProps {
     housings: Housing[];
+    zones: TargetZone[];
     smartZoneId: string;
     onSelectHousing: (h: Housing) => void;
 }
@@ -25,7 +25,7 @@ const MATCH_DOT_COLORS: Record<string, string> = {
 
 type LeafletProvider = (name: string) => L.TileLayer;
 
-export const HousingMap: React.FC<HousingMapProps> = ({ housings, smartZoneId, onSelectHousing }) => {
+export const HousingMap: React.FC<HousingMapProps> = ({ housings, zones, smartZoneId, onSelectHousing }) => {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<L.Map | null>(null);
     const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -74,7 +74,7 @@ export const HousingMap: React.FC<HousingMapProps> = ({ housings, smartZoneId, o
 
         // 1. Draw Target Zone (if selected)
         if (smartZoneId) {
-            const zone = MOCK_ZONES.find(z => z.id === smartZoneId);
+            const zone = zones.find(z => z.id === smartZoneId);
             if (zone) {
                 L.circle([zone.lat, zone.lng], {
                     color: '#3b82f6',
@@ -132,7 +132,7 @@ export const HousingMap: React.FC<HousingMapProps> = ({ housings, smartZoneId, o
             if (mapInstance.current) mapInstance.current.invalidateSize();
         }, 100);
         return () => clearTimeout(sizeTimer);
-    }, [housings, smartZoneId, onSelectHousing]);
+    }, [housings, smartZoneId, zones, onSelectHousing]);
 
     return (
         <div className="h-[600px] w-full rounded-2xl overflow-hidden border border-[var(--border-subtle)] shadow-sm relative animate-fade-in">

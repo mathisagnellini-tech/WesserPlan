@@ -37,7 +37,7 @@ const CommunesTab: React.FC = () => {
     );
 
     return (
-        <section className="min-h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in">
+        <section className="app-surface min-h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in">
             <ProspectValidationModal
                 isOpen={!!validationData || !!validationSuccess}
                 onClose={() => {

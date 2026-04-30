@@ -138,11 +138,11 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                     variant="warning"
                     confirmLabel="Retirer"
                 />
-                <div onClick={onClick} className={`group relative bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer flex flex-col h-[200px] ${theme.glow}`}>
+                <div onClick={onClick} className={`group relative bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-[0_1px_0_rgba(15,23,42,0.02),0_8px_24px_-16px_rgba(15,23,42,0.06)] hover:shadow-[0_18px_40px_-20px_rgba(255,91,43,0.18)] hover:border-orange-200 dark:hover:border-orange-500/30 hover:-translate-y-[2px] transition cursor-pointer flex flex-col h-[200px] ${theme.glow}`}>
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl" style={{ backgroundColor: brandColor }} />
-                    <div className="p-4 flex flex-col gap-1 border-b border-slate-50 dark:border-slate-700 pl-6 bg-slate-50/30 dark:bg-slate-800/20">
+                    <div className="p-4 flex flex-col gap-1 border-b border-[var(--border-subtle)] pl-6 bg-slate-50/30 dark:bg-slate-800/20">
                         <div className="flex justify-between items-start gap-2">
-                            <h4 className="font-bold text-[var(--text-primary)] text-lg leading-tight line-clamp-1 tracking-tight">{mairie.nom}</h4>
+                            <h4 className="display text-[var(--text-primary)] text-[18px] leading-tight tracking-tight line-clamp-1">{mairie.nom}</h4>
                             <Tooltip
                                 comingSoon
                                 content="Étendre la mission sur plusieurs semaines sera persisté dès que la table town_hall_series sera ajoutée."
@@ -152,18 +152,18 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                                 </div>
                             </Tooltip>
                         </div>
-                        <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-wide truncate">
-                            {mairie.departement} - {deptName} • {mairie.region} • {mairie.population.toLocaleString()} hab.
+                        <p className="num text-[11px] text-[var(--text-muted)] tracking-tight truncate font-medium">
+                            {mairie.departement} · {deptName} · {mairie.region} · {mairie.population.toLocaleString('fr-FR')} hab.
                         </p>
                     </div>
                     <div className="p-4 flex-1 flex flex-col gap-3 pl-6">
                         {displayComment ? (
-                            <div className={`mt-auto p-2 rounded text-xs border line-clamp-3 ${favoriteComment ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-500/20 text-yellow-800 dark:text-yellow-300' : 'bg-slate-50 dark:bg-slate-800/50 border-[var(--border-subtle)] text-[var(--text-secondary)] italic'}`}>
-                                {favoriteComment && <Star size={10} className="inline mr-1 -mt-0.5 fill-yellow-500 text-yellow-500" />}
+                            <div className={`mt-auto p-2.5 rounded-lg text-[12px] border tracking-tight line-clamp-3 ${favoriteComment ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/25 text-amber-800 dark:text-amber-200' : 'bg-slate-50 dark:bg-slate-800/50 border-[var(--border-subtle)] text-[var(--text-secondary)] italic'}`}>
+                                {favoriteComment && <Star size={10} className="inline mr-1 -mt-0.5 fill-amber-500 text-amber-500" />}
                                 {formatCommentText(displayComment.texte)}
                             </div>
                         ) : (
-                            <div className="mt-auto text-xs text-slate-500 dark:text-slate-400 italic">Aucune note...</div>
+                            <div className="mt-auto text-[12px] text-slate-500 dark:text-slate-400 italic tracking-tight">Aucune note…</div>
                         )}
                     </div>
                     {onRemove && (
@@ -171,9 +171,9 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                             type="button"
                             onClick={handleRemoveClick}
                             aria-label="Retirer la mairie"
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 bg-white dark:bg-[var(--bg-card-solid)] text-red-400 hover:text-red-600 rounded-full shadow-sm border border-[var(--border-subtle)] transition-all z-20"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 bg-white dark:bg-[var(--bg-card-solid)] text-red-400 hover:text-red-600 rounded-md shadow-sm border border-[var(--border-subtle)] transition active:translate-y-[1px] z-20"
                         >
-                            <X size={14} />
+                            <X size={13} strokeWidth={2.2} />
                         </button>
                     )}
                 </div>
@@ -207,74 +207,76 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                     <X size={20} />
                 </button>
             )}
-            <div className="p-6 flex flex-col h-full gap-6 pl-7">
+            <div className="p-6 flex flex-col h-full gap-5 pl-7">
                 <div className="flex justify-between items-start">
                     <div>
-                        <div className="flex items-center gap-3">
-                            <h4 className={`font-extrabold text-[var(--text-primary)] leading-tight text-3xl tracking-tight ${mairie.statutGeneral === 'Refusé' ? 'line-through text-[var(--text-muted)]' : ''}`}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className={`display text-[var(--text-primary)] leading-tight text-[28px] tracking-tight ${mairie.statutGeneral === 'Refusé' ? 'line-through text-[var(--text-muted)]' : ''}`}>
                                 {mairie.nom}
                             </h4>
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); onClick(); }}
-                                className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-500/10 text-[var(--text-secondary)] hover:text-orange-600 dark:hover:text-orange-400 rounded-full text-xs font-bold transition-colors border border-[var(--border-subtle)] cursor-pointer"
+                                className="flex items-center gap-1 px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-500/15 text-[var(--text-secondary)] hover:text-orange-700 dark:hover:text-orange-300 rounded-md text-[11px] font-medium tracking-tight transition active:translate-y-[1px] border border-[var(--border-subtle)]"
                             >
-                                <Info size={14} /> Information
+                                <Info size={11} strokeWidth={2.4} /> Détails
                             </button>
-                            <div className={`flex items-center gap-2 ml-2 px-3 py-1 rounded-full border ${isOpen ? 'bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/20' : 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20'}`}>
-                                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                                <span className={`text-xs font-bold ${isOpen ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                            <div className={`flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-md border ${isOpen ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/25' : 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/25'}`}>
+                                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                                <span className={`text-[11px] font-medium tracking-tight ${isOpen ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
                                     {isOpen ? 'Mairie ouverte' : 'Mairie fermée'}
                                 </span>
                             </div>
                             {mairie.statutGeneral === 'Refusé' && (
-                                <span className="px-2 py-1 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 text-xs font-bold rounded uppercase">Refusé</span>
+                                <span className="px-2 py-0.5 bg-red-50 dark:bg-red-500/15 text-red-700 dark:text-red-300 text-[11px] font-medium rounded-md tracking-tight border border-red-100 dark:border-red-500/25">
+                                    Refusé
+                                </span>
                             )}
                         </div>
-                        <div className="flex items-center gap-2 mt-1.5">
-                            <p className="text-sm text-[var(--text-secondary)] font-semibold uppercase tracking-wide">
-                                {mairie.departement} - {deptName} • {mairie.region}
-                            </p>
-                            <span className="text-[var(--text-muted)]">•</span>
-                            <p className="text-sm text-[var(--text-secondary)] font-semibold">{mairie.population.toLocaleString()} hab.</p>
+                        <div className="num flex items-center gap-1.5 mt-2 text-[12px] text-[var(--text-secondary)] tracking-tight font-medium flex-wrap">
+                            <span>{mairie.departement} · {deptName}</span>
+                            <span className="text-[var(--text-muted)]">·</span>
+                            <span>{mairie.region}</span>
+                            <span className="text-[var(--text-muted)]">·</span>
+                            <span>{mairie.population.toLocaleString('fr-FR')} hab.</span>
                         </div>
                         {requestedDate && (
-                            <div className="flex items-center gap-3 mt-4">
+                            <div className="flex items-center gap-2 mt-3.5">
                                 <div
-                                    className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-100 dark:bg-slate-800 border border-[var(--border-subtle)] rounded-md text-xs font-bold text-[var(--text-secondary)] cursor-not-allowed"
+                                    className="num flex items-center gap-1.5 px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-[var(--border-subtle)] rounded-md text-[11px] font-medium text-[var(--text-secondary)] cursor-not-allowed tracking-tight"
                                     title="Date de la demande (non modifiable)"
                                 >
-                                    <Lock size={12} /> {requestedDate}
+                                    <Lock size={10} strokeWidth={2.4} /> {requestedDate}
                                 </div>
                             </div>
                         )}
                     </div>
                     <div className="flex flex-col items-end gap-1 w-full md:w-[450px]" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-2 w-full mt-6">
+                        <div className="flex items-center gap-2 w-full mt-5">
                             <button
                                 type="button"
                                 onClick={() => setShowRefusal(true)}
-                                className="px-4 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-200 dark:border-red-500/20 hover:shadow-md hover:shadow-red-200 dark:hover:shadow-red-500/10 flex-shrink-0 flex items-center gap-2 font-bold text-xs"
-                                title="Refus de la mairie"
+                                className="px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-600 hover:text-white rounded-lg transition border border-red-100 dark:border-red-500/25 active:translate-y-[1px] flex-shrink-0 flex items-center gap-1.5 text-[12px] font-medium tracking-tight"
+                                title="Refuser cette mairie"
                             >
                                 Refus
                             </button>
-                            <div className="flex items-center w-full h-8 rounded-lg overflow-hidden border border-[var(--border-subtle)] shadow-sm bg-slate-50 dark:bg-slate-800/50" role="group" aria-label="Étape de progression">
+                            <div className="flex items-center w-full h-8 rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-slate-50 dark:bg-slate-800/50" role="group" aria-label="Étape de progression">
                                 {ETAPES_PROGRESSION.map((step, idx) => {
                                     const isActive = idx === mairie.etapeProgression;
                                     const isCompleted = idx < mairie.etapeProgression;
                                     let bgClass = 'bg-slate-50 dark:bg-slate-800/50 text-[var(--text-muted)]';
-                                    if (isCompleted) bgClass = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400';
-                                    if (isActive) bgClass = 'bg-emerald-600 text-white font-bold shadow-md z-10';
+                                    if (isCompleted) bgClass = 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300';
+                                    if (isActive) bgClass = 'bg-emerald-600 text-white shadow-md z-10';
                                     return (
                                         <button
                                             type="button"
                                             key={idx}
                                             onClick={(e) => handleStepClick(idx, e)}
                                             aria-pressed={isActive}
-                                            className={`flex-1 h-full flex items-center justify-center cursor-pointer transition-all relative ${bgClass} ${idx !== 0 ? 'border-l border-[var(--border-subtle)]' : ''} ${isActive ? 'scale-105 transform' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                            className={`flex-1 h-full flex items-center justify-center cursor-pointer transition relative active:translate-y-[1px] ${bgClass} ${idx !== 0 ? 'border-l border-[var(--border-subtle)]' : ''} ${isActive ? '' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                                         >
-                                            <span className="text-[10px] uppercase tracking-tight truncate px-1 text-center leading-none select-none">{step}</span>
+                                            <span className="text-[11px] font-medium tracking-tight truncate px-1 text-center leading-none select-none">{step}</span>
                                         </button>
                                     );
                                 })}
@@ -284,36 +286,40 @@ export const MairieCard: React.FC<MairieCardProps> = ({
                 </div>
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-4 justify-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex flex-col gap-3">
-                            <div className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 shadow-sm group/btn">
-                                <a href={`tel:${mairie.contact.tel}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                                    <div className="bg-white dark:bg-[var(--bg-card-solid)] p-2 rounded-full shadow-sm">
-                                        <PhoneCall size={20} className="text-green-600" />
+                        <div className="flex flex-col gap-2.5">
+                            <div className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/25 group/btn">
+                                <a href={`tel:${mairie.contact.tel}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                                    <div className="bg-white dark:bg-[var(--bg-card-solid)] p-1.5 rounded-lg ring-1 ring-emerald-100 dark:ring-emerald-500/25">
+                                        <PhoneCall size={15} strokeWidth={2.2} className="text-emerald-600 dark:text-emerald-300" />
                                     </div>
-                                    <span className="text-xl font-bold tracking-wide text-green-700 dark:text-green-400 font-mono">{mairie.contact.tel}</span>
+                                    <span className="num text-[15px] font-medium tracking-tight text-emerald-700 dark:text-emerald-300">
+                                        {mairie.contact.tel}
+                                    </span>
                                 </a>
-                                <div className="flex gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity">
-                                    <button type="button" onClick={(e) => handleEditClick('tel', mairie.contact.tel, e)} aria-label="Modifier le téléphone" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-full text-green-600 hover:bg-green-100 dark:hover:bg-green-500/20 shadow-sm cursor-pointer z-50">
-                                        <Pencil size={14} />
+                                <div className="flex gap-1.5 opacity-0 group-hover/btn:opacity-100 transition-opacity">
+                                    <button type="button" onClick={(e) => handleEditClick('tel', mairie.contact.tel, e)} aria-label="Modifier le téléphone" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-md text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 ring-1 ring-emerald-100 dark:ring-emerald-500/25 cursor-pointer z-50 active:translate-y-[1px] transition">
+                                        <Pencil size={12} strokeWidth={2.2} />
                                     </button>
-                                    <button type="button" onClick={(e) => handleCopy(mairie.contact.tel, e)} aria-label="Copier le téléphone" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-full text-green-600 hover:bg-green-100 dark:hover:bg-green-500/20 shadow-sm cursor-pointer z-50">
-                                        <Copy size={14} />
+                                    <button type="button" onClick={(e) => handleCopy(mairie.contact.tel, e)} aria-label="Copier le téléphone" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-md text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 ring-1 ring-emerald-100 dark:ring-emerald-500/25 cursor-pointer z-50 active:translate-y-[1px] transition">
+                                        <Copy size={12} strokeWidth={2.2} />
                                     </button>
                                 </div>
                             </div>
-                            <div className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 shadow-sm group/btn">
-                                <a href={`mailto:${mairie.contact.email}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity overflow-hidden">
-                                    <div className="bg-white dark:bg-[var(--bg-card-solid)] p-2 rounded-full shadow-sm flex-shrink-0">
-                                        <Mail size={20} className="text-orange-600" />
+                            <div className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/25 group/btn">
+                                <a href={`mailto:${mairie.contact.email}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity overflow-hidden">
+                                    <div className="bg-white dark:bg-[var(--bg-card-solid)] p-1.5 rounded-lg ring-1 ring-orange-100 dark:ring-orange-500/25 flex-shrink-0">
+                                        <Mail size={15} strokeWidth={2.2} className="text-orange-600 dark:text-orange-300" />
                                     </div>
-                                    <span className="text-base font-medium truncate text-orange-700 dark:text-orange-400 font-mono">{mairie.contact.email}</span>
+                                    <span className="text-[13px] font-medium truncate text-orange-700 dark:text-orange-300 tracking-tight">
+                                        {mairie.contact.email}
+                                    </span>
                                 </a>
-                                <div className="flex gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity flex-shrink-0">
-                                    <button type="button" onClick={(e) => handleEditClick('email', mairie.contact.email, e)} aria-label="Modifier l'email" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-full text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-500/20 shadow-sm cursor-pointer z-50">
-                                        <Pencil size={14} />
+                                <div className="flex gap-1.5 opacity-0 group-hover/btn:opacity-100 transition-opacity flex-shrink-0">
+                                    <button type="button" onClick={(e) => handleEditClick('email', mairie.contact.email, e)} aria-label="Modifier l'email" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-md text-orange-600 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-500/25 ring-1 ring-orange-100 dark:ring-orange-500/25 cursor-pointer z-50 active:translate-y-[1px] transition">
+                                        <Pencil size={12} strokeWidth={2.2} />
                                     </button>
-                                    <button type="button" onClick={(e) => handleCopy(mairie.contact.email, e)} aria-label="Copier l'email" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-full text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-500/20 shadow-sm cursor-pointer z-50">
-                                        <Copy size={14} />
+                                    <button type="button" onClick={(e) => handleCopy(mairie.contact.email, e)} aria-label="Copier l'email" className="p-1.5 bg-white dark:bg-[var(--bg-card-solid)] rounded-md text-orange-600 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-500/25 ring-1 ring-orange-100 dark:ring-orange-500/25 cursor-pointer z-50 active:translate-y-[1px] transition">
+                                        <Copy size={12} strokeWidth={2.2} />
                                     </button>
                                 </div>
                             </div>

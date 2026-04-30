@@ -101,23 +101,23 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                     currentValue={editContactState.currentVal}
                 />
             )}
-            <div className={`px-6 py-4 border-b ${theme.border} flex items-center justify-between bg-opacity-50 ${theme.bg}`}>
-                <div className="flex items-center gap-4">
-                    <div className="w-2 h-10 rounded-full" style={{ backgroundColor: brandColor }} />
+            <div className={`px-6 py-4 border-b ${theme.border} flex items-center justify-between gap-3 bg-opacity-50 ${theme.bg}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-1.5 h-9 rounded-full" style={{ backgroundColor: brandColor }} />
                     {viewMode === 'grid' ? (
                         <input
-                            className="font-extrabold text-2xl bg-transparent border-none focus:ring-0 p-0 text-[var(--text-primary)] w-full max-w-[300px]"
+                            className="display text-[22px] tracking-tight bg-transparent border-none focus:ring-0 p-0 text-[var(--text-primary)] w-full max-w-[300px]"
                             value={zone.name}
                             onChange={(e) => onUpdateZone(zone.id, 'name', e.target.value)}
                             aria-label="Nom de la zone"
                         />
                     ) : (
-                        <h3 className="font-extrabold text-2xl text-[var(--text-primary)]">{zone.name}</h3>
+                        <h3 className="display text-[22px] tracking-tight leading-tight text-[var(--text-primary)]">{zone.name}</h3>
                     )}
                 </div>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-card-solid)] px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] shadow-sm">
-                        <User size={20} className="text-[var(--text-muted)]" />
+                <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-card-solid)] px-2.5 py-1.5 rounded-xl border border-[var(--border-subtle)] shadow-sm">
+                        <User size={15} strokeWidth={2.2} className="text-[var(--text-muted)]" />
                         {viewMode === 'grid' ? (
                             <Tooltip
                                 comingSoon
@@ -128,7 +128,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                     onChange={(e) => onUpdateZone(zone.id, 'leader', e.target.value)}
                                     disabled
                                     aria-label="Chef de zone"
-                                    className="text-lg font-bold bg-transparent border-none rounded py-0.5 px-1 focus:ring-0 outline-none cursor-not-allowed text-[var(--text-muted)]"
+                                    className="text-[13px] font-medium tracking-tight bg-transparent border-none rounded py-0.5 px-1 focus:ring-0 outline-none cursor-not-allowed text-[var(--text-muted)]"
                                 >
                                     {LEADERS.map((l) => (
                                         <option key={l} value={l}>{l}</option>
@@ -136,10 +136,10 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                 </select>
                             </Tooltip>
                         ) : (
-                            <span className="text-lg font-bold text-[var(--text-primary)] px-1">{zone.leader}</span>
+                            <span className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight px-1">{zone.leader}</span>
                         )}
                         {viewMode === 'grid' && (
-                            <div className="ml-2 pl-2 border-l border-[var(--border-subtle)]">
+                            <div className="ml-1 pl-2 border-l border-[var(--border-subtle)]">
                                 <ZoneTimeManager
                                     startWeek={zone.startWeek}
                                     duration={zone.defaultDuration}
@@ -150,30 +150,32 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                             </div>
                         )}
                         {viewMode === 'list' && (
-                            <div className="ml-2 pl-2 border-l border-[var(--border-subtle)] flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)]">
-                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Commencé en S{zone.startWeek}</span>
-                                <span className="bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-1 rounded">
-                                    Semaine {Math.max(1, currentNavigationWeek - zone.startWeek + 1)} sur {zone.defaultDuration}
+                            <div className="ml-1 pl-2 border-l border-[var(--border-subtle)] flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)]">
+                                <span className="num bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md tracking-tight">
+                                    Démarré S{zone.startWeek}
+                                </span>
+                                <span className="num bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-md tracking-tight">
+                                    Semaine {Math.max(1, currentNavigationWeek - zone.startWeek + 1)} / {zone.defaultDuration}
                                 </span>
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         {viewMode === 'grid' ? (
                             <select
                                 value={zone.organization}
                                 onChange={(e) => onUpdateZone(zone.id, 'organization', e.target.value)}
                                 aria-label="Organisation de la zone"
-                                className={`text-lg font-bold uppercase bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-lg py-2 px-3 focus:ring-0 outline-none cursor-pointer shadow-sm ${theme.color}`}
+                                className={`text-[13px] font-medium tracking-tight bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl py-1.5 px-2.5 focus:ring-0 outline-none cursor-pointer ${theme.color}`}
                             >
                                 {ORG_LIST.map((org) => (
                                     <option key={org} value={org}>
-                                        {ORGANIZATIONS[org].shortName.toUpperCase()}
+                                        {ORGANIZATIONS[org].shortName}
                                     </option>
                                 ))}
                             </select>
                         ) : (
-                            <div className={`text-lg font-bold uppercase bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-lg py-2 px-3 shadow-sm ${theme.color}`}>
+                            <div className={`text-[13px] font-medium tracking-tight bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl py-1.5 px-2.5 ${theme.color}`}>
                                 {zoneOrg ? ORGANIZATIONS[zoneOrg].shortName : zone.organization}
                             </div>
                         )}
@@ -182,24 +184,24 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                 type="button"
                                 onClick={() => onDeleteZone(zone.id)}
                                 aria-label="Supprimer la zone"
-                                className="ml-2 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors"
+                                className="ml-1 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/15 rounded-lg transition active:translate-y-[1px]"
                             >
-                                <Trash2 size={24} />
+                                <Trash2 size={15} strokeWidth={2.2} />
                             </button>
                         )}
                     </div>
                 </div>
             </div>
-            <div className="p-6 flex flex-col gap-6 bg-slate-50/50 dark:bg-slate-800/30">
+            <div className="p-5 flex flex-col gap-5 bg-slate-50/50 dark:bg-slate-800/30">
                 {viewMode === 'grid' && (
                     <div className="relative max-w-md" ref={searchRef}>
                         <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={20} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" size={15} strokeWidth={2.2} />
                             <input
                                 type="text"
-                                placeholder="Ajouter une commune à cette zone..."
+                                placeholder="Ajouter une commune à cette zone…"
                                 aria-label="Ajouter une commune"
-                                className="w-full pl-11 pr-4 py-3 text-base bg-white dark:bg-[var(--bg-card-solid)] border border-[var(--border-subtle)] rounded-xl shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                className="field-input !pl-9"
                                 value={search}
                                 onChange={(e) => {
                                     setSearch(e.target.value);
@@ -209,7 +211,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                             />
                         </div>
                         {isSearching && search.length > 0 && (
-                            <div role="listbox" className="absolute z-20 w-full mt-2 bg-white dark:bg-[var(--bg-card-solid)] rounded-xl shadow-xl border border-[var(--border-subtle)] overflow-hidden">
+                            <div role="listbox" className="modal-shell absolute z-20 w-full mt-2 overflow-hidden">
                                 {filteredAvailable.length > 0 ? (
                                     filteredAvailable.map((m) => (
                                         <button
@@ -217,19 +219,21 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                             role="option"
                                             aria-selected="false"
                                             key={m.id}
-                                            className="w-full text-left px-4 py-3 hover:bg-orange-50 dark:hover:bg-orange-500/10 cursor-pointer flex justify-between items-center group border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                            className="w-full text-left px-3.5 py-2.5 hover:bg-orange-50 dark:hover:bg-orange-500/10 cursor-pointer flex justify-between items-center group border-b border-[var(--border-subtle)] last:border-0 transition active:translate-y-[1px]"
                                             onClick={() => {
                                                 onAddMairie(zone.id, m.id);
                                                 setSearch('');
                                                 setIsSearching(false);
                                             }}
                                         >
-                                            <span className="text-base font-medium text-[var(--text-primary)]">{m.nom}</span>
-                                            <Plus size={20} className="text-orange-500 dark:text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <span className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight">{m.nom}</span>
+                                            <Plus size={15} strokeWidth={2.2} className="text-orange-500 dark:text-orange-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </button>
                                     ))
                                 ) : (
-                                    <div className="px-4 py-3 text-sm text-[var(--text-muted)] italic">Aucune commune trouvée (ou déjà assignée).</div>
+                                    <div className="px-3.5 py-3 text-[12px] text-[var(--text-muted)] italic tracking-tight">
+                                        Aucune commune trouvée (ou déjà assignée).
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -273,19 +277,25 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                             );
                         })
                     ) : (
-                        <div className="col-span-full py-12 flex flex-col items-center justify-center text-[var(--text-muted)] border-2 border-dashed border-[var(--border-subtle)] rounded-2xl bg-white/50 dark:bg-[var(--bg-card-solid)]/50">
-                            <MapPin size={48} className="mb-4 opacity-30" />
-                            <span className="text-lg font-medium">Cette zone est vide pour la semaine {currentNavigationWeek}.</span>
-                            <span className="text-sm">
-                                Ajoutez des communes via la barre de recherche ci-dessus {viewMode === 'grid' ? '(Vue Grille uniquement)' : ''}.
+                        <div className="col-span-full py-10 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--border-subtle)] rounded-2xl bg-white/50 dark:bg-[var(--bg-card-solid)]/50">
+                            <MapPin size={32} strokeWidth={2.2} className="mb-3 opacity-40" />
+                            <span className="text-[14px] font-medium tracking-tight text-[var(--text-secondary)]">
+                                Cette zone est vide pour la semaine <span className="num">{currentNavigationWeek}</span>.
+                            </span>
+                            <span className="text-[12px] tracking-tight mt-1">
+                                Ajoutez des communes via la barre de recherche ci-dessus{viewMode === 'grid' ? '' : ' (vue grille uniquement)'}.
                             </span>
                         </div>
                     )}
                 </div>
             </div>
-            <div className="px-6 py-3 bg-white dark:bg-[var(--bg-card-solid)] border-t border-[var(--border-subtle)] flex justify-between text-sm font-semibold text-[var(--text-secondary)]">
-                <span>{assignedMairies.length} Mairies à contacter (S{currentNavigationWeek})</span>
-                <span>Total : {assignedMairies.reduce((acc, m) => acc + m.population, 0).toLocaleString()} Habitants</span>
+            <div className="px-6 py-3 bg-white dark:bg-[var(--bg-card-solid)] border-t border-[var(--border-subtle)] flex justify-between text-[12px] font-medium text-[var(--text-secondary)] tracking-tight">
+                <span className="num">
+                    {assignedMairies.length} mairie{assignedMairies.length !== 1 ? 's' : ''} à contacter (S{currentNavigationWeek})
+                </span>
+                <span className="num">
+                    Total · {assignedMairies.reduce((acc, m) => acc + m.population, 0).toLocaleString('fr-FR')} habitants
+                </span>
             </div>
         </div>
     );
